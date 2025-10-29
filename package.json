@@ -1,0 +1,14 @@
+{
+    "shared": [
+        "shared/index.lua",
+        "shared/config.lua"
+    ],
+    "client": [
+        "client/main.lua"
+    ],
+    "server": [
+        "server/classes/core.lua",
+        "server/classes/player.lua",
+        "server/main.lua"
+    ]
+}
