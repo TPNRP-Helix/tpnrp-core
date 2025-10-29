@@ -7,6 +7,7 @@
         "client/main.lua"
     ],
     "server": [
+        "server/services/DAO.lua",
         "server/classes/core.lua",
         "server/classes/player.lua",
         "server/main.lua"

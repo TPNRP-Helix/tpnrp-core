@@ -13,9 +13,6 @@ function SPlayer.new(playerSource, playerLicense)
 
     self.id = -1            -- Player Id in database
     self.displayName = ""   -- Player display name
-    self.level = 0         -- Player level
-    self.money = 0         -- Player money (In-game money)
-    self.tpnCoin = 0       -- Player tpn coin (Pay)
     
     /********************************/
     /*         Initializes          */
@@ -26,9 +23,7 @@ function SPlayer.new(playerSource, playerLicense)
         -- TODO:
     end
 
-    ----------------------------------------------------------------------
-    --- Register Event
-    ----------------------------------------------------------------------
+
     _contructor()
     ---- END ----
     return self
