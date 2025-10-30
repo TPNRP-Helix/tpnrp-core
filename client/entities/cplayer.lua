@@ -33,7 +33,7 @@ function CPlayer.new(playerSource, playerLicense)
     /********************************/
 
     ---Get player coords
-    ---@return Vector3 coords
+    ---@return Vector3 coords Player's coords
     function self:getCoords()
         local ped = self.playerSource:K2_GetPawn()
         if ped then
@@ -44,7 +44,7 @@ function CPlayer.new(playerSource, playerLicense)
     end
 
     ---Get player heading
-    ---@return number heading
+    ---@return number heading Player's heading
     function self:getHeading()
         local ped = self.playerSource:K2_GetPawn()
         if ped then

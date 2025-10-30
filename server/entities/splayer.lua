@@ -32,7 +32,7 @@ function SPlayer.new(playerSource, playerLicense)
     /********************************/
 
     ---Save player
-    ---@return boolean success
+    ---@return boolean success is save success or not
     function self:save()
         if not self.playerData then
             print('[ERROR] SPLAYER.SAVE - playerData is empty!')
@@ -54,7 +54,7 @@ function SPlayer.new(playerSource, playerLicense)
     end
 
     ---Get player coords
-    ---@return Vector3 coords
+    ---@return Vector3 coords Player's coords
     function self:getCoords()
         local ped = self.playerSource:K2_GetPawn()
         if ped then
