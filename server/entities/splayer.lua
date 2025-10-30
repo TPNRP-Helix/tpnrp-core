@@ -21,8 +21,10 @@ function SPlayer.new(playerSource, playerLicense)
 
     ---Contructor function
     local function _contructor()
-        -- TODO: Get player data
-        -- TODO: Get player inventory
+        -- Get player data
+        self.playerData = DAO.getPlayer(self.playerData.citizen_id)
+        -- Get player inventory
+        self.inventories = SInventory.new(self)
     end
 
     /********************************/

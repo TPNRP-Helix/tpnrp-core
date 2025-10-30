@@ -16,28 +16,15 @@ function TPNRPServer.new()
     ---@type table<number, SPlayer>
     self.players = {}       -- Players table
     self.shared = SHARED    -- Bind shared
+    self.useableItems = {}  -- Useable items table
 
     /********************************/
     /*       Source/Identify        */
     /********************************/
 
-    ---Get player source from identifier
-    ---@param identifier any
-    ---@return number source
-    function self:getSource(identifier)
-        -- Check if player is already in the server
-        for _, player in pairs(self.players) do
-            if player.license == identifier then
-                return player.playerSource
-            end
-        end
-        -- Player not found
-        return -1
-    end
-
     ---Get player by source
     ---@param source number player source
-    ---@return SPlayer | nil player
+    ---@return SPlayer | nil player SPlayer entity
     function self:getPlayerBySource(source)
         for _, player in pairs(self.players) do
             if player.playerSource == source then
@@ -50,10 +37,23 @@ function TPNRPServer.new()
 
     ---Get player by license
     ---@param license string player license
-    ---@return SPlayer | nil player
+    ---@return SPlayer | nil player SPlayer entity
     function self:getPlayerByLicense(license)
         for _, player in pairs(self.players) do
             if player.license == license then
+                return player
+            end
+        end
+        -- Player not found
+        return nil
+    end
+
+    ---Get player by citizen id
+    ---@param citizenId string citizen id
+    ---@return SPlayer | nil player SPlayer entity
+    function self:getPlayerByCitizenId(citizenId)
+        for _, player in pairs(self.players) do
+            if player.playerData.citizen_id == citizenId then
                 return player
             end
         end
@@ -70,6 +70,20 @@ function TPNRPServer.new()
     function self:createCitizenId()
         -- CitizenId: ABC12345 (3 characters, 5 numbers)
         return tostring(SHARED.randomStr(3) .. SHARED.randomInt(10000, 99999)):upper()
+    end
+
+    ---Create a new useable item
+    ---@param itemName string item name
+    ---@param callback function callback
+    function self:createUseableItem(itemName, callback)
+        self.useableItems[itemName] = callback
+    end
+
+    ---Check if item can be used
+    ---@param itemName string item name
+    ---@return boolean canUse is this item can use or not
+    function self:canUseItem(itemName)
+        return self.useableItems[itemName] ~= nil
     end
 
     ----------------------------------------------------------------------

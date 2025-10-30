@@ -42,3 +42,17 @@ DAO.saveInventory = function(inventory)
     print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
     return true
 end
+
+---Get player's inventory (type = 'player' | 'stack')
+---@param citizen_id string
+---@param type 'player' | 'stack'
+---@return table<number, SInventoryItem> | nil
+DAO.getPlayerInventory = function(citizen_id, type)
+    if not type then
+        type = 'player'
+    end
+    -- Query inventory items
+    local result = DAO.DB.Select('SELECT * FROM inventories where citizen_id = ? and type = ?', { citizen_id, type })
+    local inventories = result[1] and result[1].Columns:ToTable()
+    return inventories
+end

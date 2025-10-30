@@ -19,7 +19,11 @@ function SInventory.new(player)
 
     ---Contructor function
     local function _contructor()
-        -- TODO: Fetch inventory of user
+        -- Get inventory by citizen_id and type ('player' is default player inventory)
+        local inventories = DAO.getPlayerInventory(self.player.playerData.citizen_id, 'player')
+        if inventories then
+            self.inventories = inventories
+        end
     end
 
     /********************************/

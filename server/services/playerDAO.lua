@@ -1,8 +1,8 @@
 
 ---Get player by citizen id
----@param citizenid string
-DAO.getPlayer = function(citizenid)
-    local result = DAO.DB.Select('SELECT * FROM players where citizenid = ?', { citizenid })
+---@param citizen_id string
+DAO.getPlayer = function(citizen_id)
+    local result = DAO.DB.Select('SELECT * FROM players where citizen_id = ?', { citizen_id })
     local playerData = result[1] and result[1].Columns:ToTable()
 
     -- Validate PlayerData
@@ -57,8 +57,7 @@ DAO.savePlayer = function(player)
             pheading,
             JSON.stringify(playerData.metadata),
         })
-    
-    -- TODO: Save player inventories
-
+    -- TODO: check result value before return
     print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+    return true
 end
