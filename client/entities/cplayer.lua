@@ -1,13 +1,13 @@
----@class SPlayer
+---@class CPlayer
 ---@field playerData PlayerData|nil
 ---@field inventories SInventory|nil
-SPlayer = {}
-SPlayer.__index = SPlayer
+CPlayer = {}
+CPlayer.__index = CPlayer
 
----@return SPlayer
-function SPlayer.new(playerSource, playerLicense)
-    ---@class SPlayer
-    local self = setmetatable({}, SPlayer)
+---@return CPlayer
+function CPlayer.new(playerSource, playerLicense)
+    ---@class CPlayer
+    local self = setmetatable({}, CPlayer)
 
     -- Public
     self.playerSource = playerSource
@@ -21,31 +21,16 @@ function SPlayer.new(playerSource, playerLicense)
 
     ---Contructor function
     local function _contructor()
-        -- TODO: Get player data
-        -- TODO: Get player inventory
+        -- On Update playerData
+        ---@param playerData PlayerData
+        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData)
+            self.playerData = playerData
+        end)
     end
 
     /********************************/
     /*           Player             */
     /********************************/
-
-    ---Save player
-    ---@return boolean success
-    function self:save()
-        if not self.playerData then
-            print('[ERROR] SPLAYER.SAVE - playerData is empty!')
-            return false
-        end
-
-        -- Save player data
-        local isSaved = DAO.savePlayer(self)
-        -- local isInventoriesSaved = self.inventories:save()
-        if not isSaved then
-            print('[ERROR] SPLAYER.SAVE - Failed to save player!')
-        end
-
-        return isSaved
-    end
 
     ---Get player coords
     ---@return Vector3 coords
@@ -69,9 +54,14 @@ function SPlayer.new(playerSource, playerLicense)
         return SHARED.CONFIG.DEFAULT_SPAWN.HEADING
     end
 
+    /********************************/
+    /*          Functions           */
+    /********************************/
+    
+
     _contructor()
     ---- END ----
     return self
 end
 
-return SPlayer
+return CPlayer

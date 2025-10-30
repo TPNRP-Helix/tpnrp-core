@@ -32,6 +32,7 @@ function SInventory.new(player)
         return DAO.saveInventory(self)
     end
 
+
     _contructor()
     ---- END ----
     return self

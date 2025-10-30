@@ -5,12 +5,13 @@
         "shared/items.lua"
     ],
     "client": [
+        "client/entities/core.lua",
         "client/main.lua"
     ],
     "server": [
-        "server/services/DAO.lua",
-        "server/services/DAOPlayer.lua",
-        "server/services/DAOInventory.lua",
+        "server/services/baseDAO.lua",
+        "server/services/playerDAO.lua",
+        "server/services/inventoryDAO.lua",
         "server/classes/core.lua",
         "server/classes/player.lua",
         "server/classes/inventory.lua",
