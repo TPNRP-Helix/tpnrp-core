@@ -10,3 +10,10 @@ RegisterCallback('callbackName', function(source, arg1, arg2)
 end)
 
 **/
+
+SHARED.CONFIG = {
+    DEFAULT_SPAWN = {
+        POSITION = { x = -274.27, y = 6641.01, z = 7.45 },
+        HEADING = 270.0,
+    },
+}

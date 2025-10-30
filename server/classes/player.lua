@@ -1,4 +1,6 @@
 ---@class SPlayer
+---@field playerData PlayerData|nil
+---@field inventories SInventory|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -10,19 +12,62 @@ function SPlayer.new(playerSource, playerLicense)
     -- Public
     self.playerSource = playerSource
     self.license = playerLicense
+    self.playerData = nil
+    self.inventories = nil
 
-    self.id = -1            -- Player Id in database
-    self.displayName = ""   -- Player display name
-    
     /********************************/
     /*         Initializes          */
     /********************************/
-    
+
     ---Contructor function
     local function _contructor()
-        -- TODO:
+        -- TODO: Get player data
+        -- TODO: Get player inventory
     end
 
+    /********************************/
+    /*           Player             */
+    /********************************/
+
+    ---Save player
+    ---@return boolean success
+    function self:save()
+        if not self.playerData then
+            print('[ERROR] SPLAYER.SAVE - playerData is empty!')
+            return false
+        end
+
+        -- Save player data
+        local isSaved = DAO.savePlayer(self)
+        -- local isInventoriesSaved = self.inventories:save()
+        if not isSaved then
+            print('[ERROR] SPLAYER.SAVE - Failed to save player!')
+        end
+
+        return isSaved
+    end
+
+    ---Get player coords
+    ---@return Vector3 coords
+    function self:getCoords()
+        local ped = self.playerSource:K2_GetPawn()
+        if ped then
+            return ped:K2_GetActorLocation()
+        end
+        -- Default coords from config
+        return SHARED.CONFIG.DEFAULT_SPAWN.POSITION
+    end
+
+    ---Get player heading
+    ---@return number heading
+    function self:getHeading()
+        local ped = self.playerSource:K2_GetPawn()
+        if ped then
+            return ped:K2_GetActorRotation().Yaw
+        end
+        -- Default heading from config
+        return SHARED.CONFIG.DEFAULT_SPAWN.HEADING
+    end
 
     _contructor()
     ---- END ----

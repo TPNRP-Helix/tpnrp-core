@@ -1,15 +1,19 @@
 {
     "shared": [
         "shared/index.lua",
-        "shared/config.lua"
+        "shared/config.lua",
+        "shared/items.lua"
     ],
     "client": [
         "client/main.lua"
     ],
     "server": [
         "server/services/DAO.lua",
+        "server/services/DAOPlayer.lua",
+        "server/services/DAOInventory.lua",
         "server/classes/core.lua",
         "server/classes/player.lua",
+        "server/classes/inventory.lua",
         "server/main.lua"
     ]
 }
