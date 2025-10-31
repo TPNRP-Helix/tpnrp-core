@@ -1,7 +1,7 @@
 ---Save inventory
 ---@param inventory SInventory
 ---@return boolean success
-DAO.saveInventory = function(inventory)
+DAO.inventory.save = function(inventory)
     -- Don't execute any query if inventory or player or playerData doesn't exist
     if not inventory or not inventory.player or not inventory.player.playerData then
         print('[ERROR] DAO.saveInventory: Invalid inventory or player data!')
@@ -47,7 +47,7 @@ end
 ---@param citizen_id string
 ---@param type 'player' | 'stack'
 ---@return table<number, SInventoryItem> | nil
-DAO.getPlayerInventory = function(citizen_id, type)
+DAO.inventory.get = function(citizen_id, type)
     if not type then
         type = 'player'
     end

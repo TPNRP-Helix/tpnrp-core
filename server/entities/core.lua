@@ -12,11 +12,28 @@ TPNRPServer.__index = TPNRPServer
 function TPNRPServer.new()
     ---@class TPNRPServer
     local self = setmetatable({}, TPNRPServer)
-    
-    ---@type table<number, SPlayer>
+
     self.players = {}       -- Players table
-    self.shared = SHARED    -- Bind shared
+    self.shared = SHARED    -- Bind shared for other resources to use it via exports
     self.useableItems = {}  -- Useable items table
+
+    /********************************/
+    /*         Initializes          */
+    /********************************/
+
+    ---Contructor function
+    local function _contructor()
+       --- Base-game event
+       RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
+            ---@type SPlayer | nil
+            local player = self:getPlayerBySource(source)
+            if not player then
+                print('[ERROR] TPNRPServer>HEvent:PlayerUnloaded - Player not found!')
+                return
+            end
+            player:logout()
+        end)
+    end
 
     /********************************/
     /*       Source/Identify        */
@@ -40,7 +57,7 @@ function TPNRPServer.new()
     ---@return SPlayer | nil player SPlayer entity
     function self:getPlayerByLicense(license)
         for _, player in pairs(self.players) do
-            if player.license == license then
+            if player.playerData.license == license then
                 return player
             end
         end
@@ -90,7 +107,7 @@ function TPNRPServer.new()
     --- Register Event
     ----------------------------------------------------------------------
 
-
+    _contructor()
     return self
 end
 

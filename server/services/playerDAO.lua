@@ -1,31 +1,35 @@
 
 ---Get player by citizen id
 ---@param citizen_id string
-DAO.getPlayer = function(citizen_id)
+---@return PlayerData | nil
+DAO.player.get = function(citizen_id)
     local result = DAO.DB.Select('SELECT * FROM players where citizen_id = ?', { citizen_id })
     local playerData = result[1] and result[1].Columns:ToTable()
 
     -- Validate PlayerData
     if playerData then
+        playerData.money = JSON.parse(playerData.money)
+        playerData.character_info = JSON.parse(playerData.character_info)
+        playerData.job = JSON.parse(playerData.job)
+        playerData.gang = JSON.parse(playerData.gang)
+        playerData.position = JSON.parse(playerData.position)
+        playerData.metadata = JSON.parse(playerData.metadata)
+        playerData.position = JSON.parse(playerData.position)
+
+        ---@type PlayerData
         return playerData
     end
 
     return nil
 end
 
-DAO.loadPlayer = function(player)
-    -- TODO:
-end
-
-DAO.deletePlayer = function(player)
-    -- TODO:
-end
-
+---Save player
 ---@param player SPlayer
-DAO.savePlayer = function(player)
+---@return boolean success
+DAO.player.save = function(player)
     local playerData = player.playerData
-    local pcoords = player:getCoords()
-    local pheading = player:getHeading()
+    local pCoords = player:getCoords()
+    local pHeading = player:getHeading()
     if not playerData then
         print('[ERROR] DAO.SAVEPLAYER - playerData is empty!')
         return false
@@ -50,14 +54,23 @@ DAO.savePlayer = function(player)
             playerData.license,
             playerData.name,
             JSON.stringify(playerData.money),
-            JSON.stringify(playerData.charinfo),
+            JSON.stringify(playerData.character_info),
             JSON.stringify(playerData.job),
             JSON.stringify(playerData.gang),
-            JSON.stringify(pcoords),
-            pheading,
+            JSON.stringify(pCoords),
+            pHeading,
             JSON.stringify(playerData.metadata),
         })
     -- TODO: check result value before return
     print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
     return true
+end
+
+---Delete player
+---@param player SPlayer
+---@return boolean success
+DAO.player.delete = function(player)
+    -- TODO:
+    print('[ERROR] DAO.player.delete - Not implemented!')
+    return false
 end

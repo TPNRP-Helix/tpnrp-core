@@ -5,13 +5,12 @@ SPlayer = {}
 SPlayer.__index = SPlayer
 
 ---@return SPlayer
-function SPlayer.new(playerSource, playerLicense)
+function SPlayer.new(playerSource)
     ---@class SPlayer
     local self = setmetatable({}, SPlayer)
 
-    -- Public
+    -- Player's fields
     self.playerSource = playerSource
-    self.license = playerLicense
     self.playerData = nil
     self.inventories = nil
 
@@ -40,7 +39,7 @@ function SPlayer.new(playerSource, playerLicense)
         end
 
         -- Save player data
-        local isSaved = DAO.savePlayer(self)
+        local isSaved = DAO.player.save(self)
         local isInventoriesSaved = self.inventories:save()
         if not isSaved then
             print('[ERROR] SPLAYER.SAVE - Failed to save player!')
@@ -82,8 +81,43 @@ function SPlayer.new(playerSource, playerLicense)
     ---**Update playerData**
     --
     ---Sync playerData to client-side
-    function self:UpdatePlayerData()
+    function self:updatePlayerData()
         TriggerClientEvent('TPN:player:updatePlayerData', self.playerSource, self.playerData)
+    end
+
+    ---On Player logged in
+    function self:login()
+        local playerData = DAO.player.get(self.playerData.citizen_id)
+        if not playerData then
+            print('[ERROR] SPLAYER.LOGIN - playerData is empty!')
+            return false
+        end
+        -- Assign playerData
+        self.playerData = playerData
+        playerData.source = self.playerSource
+        -- Get player state
+        local PlayerState = self.playerSource:GetLyraPlayerState()
+        playerData.netId = PlayerState:GetPlayerId()
+        playerData.license = PlayerState:GetHelixUserId()
+        playerData.name = PlayerState:GetPlayerName()
+    end
+
+    ---Logout player
+    function self:logout()
+        -- This will broadcast the event to all other resources in client-side
+        TriggerClientEvent('TPN:client:onPlayerUnloaded', self.playerSource)
+        -- This will broadcast the event to all other resources in server-side
+        TriggerLocalServerEvent('TPN:server:onPlayerUnloaded', self.playerSource)
+
+        -- Wait for 200ms to ensure the player is logged out
+        Wait(200)
+        -- Save player data into database
+        local isSaved = self:save()
+        if not isSaved then
+            print('[ERROR] SPLAYER.LOGOUT - Failed to save player data!')
+        end
+        -- Remove player from players table
+        TPNRPServer.players[self.playerSource] = nil
     end
 
     _contructor()

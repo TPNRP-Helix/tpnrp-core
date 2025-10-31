@@ -20,7 +20,7 @@ function SInventory.new(player)
     ---Contructor function
     local function _contructor()
         -- Get inventory by citizen_id and type ('player' is default player inventory)
-        local inventories = DAO.getPlayerInventory(self.player.playerData.citizen_id, 'player')
+        local inventories = DAO.inventory.get(self.player.playerData.citizen_id, 'player')
         if inventories then
             self.inventories = inventories
         end
@@ -33,7 +33,7 @@ function SInventory.new(player)
     ---Save inventory
     ---@return boolean success
     function self:save()
-        return DAO.saveInventory(self)
+        return DAO.inventory.save(self)
     end
 
 

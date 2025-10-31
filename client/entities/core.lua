@@ -22,6 +22,11 @@ function TPNRPClient.new()
         -- TODO: Bind function
 
         self.player = CPlayer.new()
+
+        -- On Player Unloaded
+        RegisterClientEvent('TPN:client:onPlayerUnloaded', function(source)
+            -- TODO: Logout player
+        end)
     end
 
     /********************************/

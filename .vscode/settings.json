@@ -4,6 +4,7 @@
         "JSON",
         "Database",
         "TriggerClientEvent",
-        "RegisterClientEvent"
+        "RegisterClientEvent",
+        "TriggerLocalServerEvent"
     ]
 }
