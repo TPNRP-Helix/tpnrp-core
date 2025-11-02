@@ -1,14 +1,14 @@
 ---Save inventory
----@param inventory SInventory
+---@param equipment sEquipment
 ---@return boolean success
-DAO.inventory.save = function(inventory)
-    -- Don't execute any query if inventory or player or playerData doesn't exist
-    if not inventory or not inventory.player or not inventory.player.playerData then
+DAO.equipment.save = function(equipment)
+    -- Don't execute any query if equipment or player or playerData doesn't exist
+    if not equipment or not equipment.player or not equipment.player.playerData then
         print('[ERROR] DAO.saveInventory: Invalid inventory or player data!')
         return false
     end
-    local citizen_id = inventory.player.playerData.citizen_id
-    local items = inventory.items
+    local citizen_id = equipment.player.playerData.citizen_id
+    local items = equipment.items
     local formattedItems = {}
     for _, item in pairs(items) do
         local item = SHARED.items[item.name:lower()]
@@ -16,7 +16,6 @@ DAO.inventory.save = function(inventory)
             -- Only format the item if it is in the shared/items.lua
             formattedItems[#formattedItems + 1] = {
                 name = item.name,
-                amount = item.amount,
                 info = item.info,
                 slot = item.slot,
             }
@@ -25,43 +24,38 @@ DAO.inventory.save = function(inventory)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
     local sql = [[
-        INSERT INTO inventories (type, citizen_id, items)
-        VALUES (?, ?, ?)
-        ON CONFLICT(citizen_id, type) DO UPDATE SET
+        INSERT INTO equipments (citizen_id, items)
+        VALUES (?, ?)
+        ON CONFLICT(citizen_id) DO UPDATE SET
             items = excluded.items
     ]]
     local params = {
-        inventory.type,
         citizen_id,
         JSON.stringify(formattedItems),
     }
     local result = DAO.DB.Execute(sql, params)
     if result then
         DAO.DB.Execute('COMMIT;')
-        print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
+        print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
         return true
     end
-    print(('[ERROR] Failed to save inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
+    print(('[ERROR] Failed to save inventory for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end
 
 ---Get player's inventory (type = 'player' | 'stack')
 ---@param citizen_id string
----@param type 'player' | 'stack' | ''
----@return table<number, SInventoryItemType> | nil
-DAO.inventory.get = function(citizen_id, type)
-    if not type then
-        type = 'player'
-    end
-    -- Query inventory items
-    local result = DAO.DB.Select('SELECT * FROM inventories where citizen_id = ? and type = ?', { citizen_id, type })
-    local inventory = result[1] and result[1].Columns:ToTable()
-    if not inventory then
+---@return table<EEquipmentClothType, sEquipmentItemType> | nil
+DAO.equipment.get = function(citizen_id)
+    -- Query equipment items
+    local result = DAO.DB.Select('SELECT * FROM equipments where citizen_id = ?', { citizen_id })
+    local equipment = result[1] and result[1].Columns:ToTable()
+    if not equipment then
         return nil
     end
     -- Format items
-    local items = JSON.parse(inventory.items)
+    local items = JSON.parse(equipment.items)
     local formattedItems = {}
     -- Mapping base item data with the item data from the database
     for _, item in pairs(items) do
@@ -69,7 +63,7 @@ DAO.inventory.get = function(citizen_id, type)
         if item then
             local nextIndex = #formattedItems + 1
             formattedItems[nextIndex] = itemData
-            formattedItems[nextIndex].amount = item.amount
+            formattedItems[nextIndex].amount = 1
             formattedItems[nextIndex].info = item.info
             formattedItems[nextIndex].slot = item.slot
         end

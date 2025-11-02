@@ -1,6 +1,7 @@
 ---@class SPlayer
 ---@field playerData PlayerData|nil
----@field inventories SInventory|nil
+---@field inventory SInventory|nil
+---@field equipment sEquipment|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -12,7 +13,9 @@ function SPlayer.new(playerSource)
     -- Player's fields
     self.playerSource = playerSource
     self.playerData = nil
-    self.inventories = nil
+    -- Player's Stacks
+    self.inventory = nil
+    self.equipment = nil
 
     /********************************/
     /*         Initializes          */
@@ -22,10 +25,14 @@ function SPlayer.new(playerSource)
     local function _contructor()
         -- Get player data
         self.playerData = DAO.getPlayer(self.playerData.citizen_id)
-        -- Get player inventory
-        self.inventories = SInventory.new(self)
+        
+        -- Get player's inventory
+        self.inventory = SInventory.new(self)
         -- Load player's inventory for this player
-        self.inventories:load('player')
+        self.inventory:load('player')
+
+        -- Get player's equipment
+        self.equipment = sEquipment.new(self)
     end
 
     /********************************/
@@ -42,7 +49,8 @@ function SPlayer.new(playerSource)
 
         -- Save player data
         local isSaved = DAO.player.save(self)
-        local isInventoriesSaved = self.inventories:save()
+        local isInventoriesSaved = self.inventory:save()
+        local isEquipmentsSaved = self.equipment:save()
         if not isSaved then
             print('[ERROR] SPLAYER.SAVE - Failed to save player!')
         end
@@ -51,7 +59,11 @@ function SPlayer.new(playerSource)
             print('[ERROR] SPLAYER.SAVE - Failed to save player inventories!')
         end
 
-        return isSaved and isInventoriesSaved
+        if not isEquipmentsSaved then
+            print('[ERROR] SPLAYER.SAVE - Failed to save player equipment!')
+        end
+
+        return isSaved and isInventoriesSaved and isEquipmentsSaved
     end
 
     ---Get player coords

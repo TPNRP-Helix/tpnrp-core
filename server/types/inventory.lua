@@ -8,12 +8,21 @@
 ---@field amount number
 ---@field info table
 ---@field slot number
----@field name string           -- From shared/items.lua
----@field label string          -- From shared/items.lua
----@field weight number         -- From shared/items.lua
----@field type string           -- From shared/items.lua
----@field image string          -- From shared/items.lua
----@field unique boolean        -- From shared/items.lua
----@field useable boolean       -- From shared/items.lua
----@field shouldClose boolean   -- From shared/items.lua
----@field description string    -- From shared/items.lua
+---@field name string           -- [DB]
+---@field label string          -- [DB]
+---@field weight number         -- [DB]
+---@field type string           -- [DB] 'item' | 'weapon' | 'ammo' | 'tool' | 'material' | 'other'
+---@field image string          -- [DB]
+---@field unique boolean        -- [DB] this item is unique for slot. Meaning 1 slot can only have 1 of this item
+---@field useable boolean       -- [DB]
+---@field shouldClose boolean   -- [DB]
+---@field description string    -- [DB]
+
+---@class SInventoryCanAddItemResultType
+---@field status boolean
+---@field message string
+
+---@class SInventoryAddItemResultType
+---@field status boolean
+---@field message string
+---@field slot number
