@@ -5,6 +5,7 @@
         "Database",
         "TriggerClientEvent",
         "RegisterClientEvent",
-        "TriggerLocalServerEvent"
+        "TriggerLocalServerEvent",
+        "GetPlayerPawn"
     ]
 }

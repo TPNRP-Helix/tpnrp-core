@@ -24,6 +24,8 @@ function SPlayer.new(playerSource)
         self.playerData = DAO.getPlayer(self.playerData.citizen_id)
         -- Get player inventory
         self.inventories = SInventory.new(self)
+        -- Load player's inventory for this player
+        self.inventories:load('player')
     end
 
     /********************************/
@@ -53,11 +55,11 @@ function SPlayer.new(playerSource)
     end
 
     ---Get player coords
-    ---@return Vector3 coords Player's coords
+    ---@return vector3 coords Player's coords
     function self:getCoords()
-        local ped = self.playerSource:K2_GetPawn()
+        local ped = GetPlayerPawn(self.playerSource)
         if ped then
-            return ped:K2_GetActorLocation()
+            return GetEntityCoords(ped)
         end
         -- Default coords from config
         return SHARED.CONFIG.DEFAULT_SPAWN.POSITION
@@ -66,9 +68,9 @@ function SPlayer.new(playerSource)
     ---Get player heading
     ---@return number heading
     function self:getHeading()
-        local ped = self.playerSource:K2_GetPawn()
+        local ped = GetPlayerPawn(self.playerSource)
         if ped then
-            return ped:K2_GetActorRotation().Yaw
+            return GetEntityRotation(ped).Yaw
         end
         -- Default heading from config
         return SHARED.CONFIG.DEFAULT_SPAWN.HEADING

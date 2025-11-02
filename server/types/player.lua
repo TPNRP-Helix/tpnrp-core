@@ -12,10 +12,3 @@
 ---@field metadata table
 ---@field netId number|nil
 
-
-
----@class SInventoryItem
----@field name string
----@field amount number
----@field info table
----@field slot number

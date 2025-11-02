@@ -1,0 +1,19 @@
+---@class SInventoryType
+---@field id string
+---@field citizen_id string
+---@field inventories table<number, SInventoryItemType>
+---@field type 'player' | 'stack'
+
+---@class SInventoryItemType
+---@field amount number
+---@field info table
+---@field slot number
+---@field name string           -- From shared/items.lua
+---@field label string          -- From shared/items.lua
+---@field weight number         -- From shared/items.lua
+---@field type string           -- From shared/items.lua
+---@field image string          -- From shared/items.lua
+---@field unique boolean        -- From shared/items.lua
+---@field useable boolean       -- From shared/items.lua
+---@field shouldClose boolean   -- From shared/items.lua
+---@field description string    -- From shared/items.lua
