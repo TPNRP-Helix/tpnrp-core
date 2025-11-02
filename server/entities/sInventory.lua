@@ -291,6 +291,126 @@ function SInventory.new(player)
         return { status = true, message = 'Item added to inventory!', slot = targetSlot }
     end
 
+    ---Remove item from inventory
+    ---@param itemName string item name
+    ---@param amount number item amount
+    ---@param slotNumber number | nil slot number (optional)
+    ---@return {status:boolean, message:string, slot:number} result of removing item
+    function self:removeItem(itemName, amount, slotNumber)
+        -- Validate inputs
+        if not itemName or type(itemName) ~= 'string' then
+            return { status = false, message = 'Invalid item name!', slot = -1 }
+        end
+        if not amount or type(amount) ~= 'number' or amount <= 0 then
+            return { status = false, message = 'Invalid item amount!', slot = -1 }
+        end
+        
+        -- Determine which slot to remove from
+        local targetSlot = nil
+        
+        if slotNumber then
+            -- Slot number provided, validate it
+            if type(slotNumber) ~= 'number' or slotNumber <= 0 then
+                return { status = false, message = 'Invalid slot number!', slot = -1 }
+            end
+            
+            -- Check if item exists at the specified slot
+            local item = self.items[slotNumber]
+            if not item then
+                return { status = false, message = 'No item found at specified slot!', slot = -1 }
+            end
+            
+            -- Verify the item at that slot matches the itemName (case-insensitive)
+            if item.name:lower() ~= itemName:lower() then
+                return { status = false, message = 'Item at specified slot does not match!', slot = -1 }
+            end
+            
+            targetSlot = slotNumber
+        else
+            -- No slot number provided, find the first item matching the name
+            targetSlot = self:findItemSlot(itemName)
+            if not targetSlot then
+                return { status = false, message = 'Item not found in inventory!', slot = -1 }
+            end
+        end
+        
+        -- Get the item at the target slot
+        local item = self.items[targetSlot]
+        if not item then
+            return { status = false, message = 'Item not found at slot!', slot = -1 }
+        end
+        
+        -- Verify the item matches (double-check for safety)
+        if item.name:lower() ~= itemName:lower() then
+            return { status = false, message = 'Item at slot does not match!', slot = -1 }
+        end
+        
+        -- Check if there's enough amount to remove
+        if item.amount < amount then
+            return { status = false, message = 'Not enough items to remove!', slot = -1 }
+        end
+        
+        -- Calculate remaining amount
+        local remainingAmount = item.amount - amount
+        
+        -- If remaining amount is 0 or less, remove the item entirely from the slot
+        if remainingAmount <= 0 then
+            self.items[targetSlot] = nil
+            return { status = true, message = 'Item removed from inventory!', slot = targetSlot }
+        else
+            -- Update the item amount
+            self.items[targetSlot].amount = remainingAmount
+            return { status = true, message = 'Item amount reduced!', slot = targetSlot }
+        end
+    end
+
+    ---Check if inventory has item with the specified amount
+    ---@param itemName string item name
+    ---@param amount number | nil item amount (optional, defaults to 1 if not provided)
+    ---@return {status:boolean, message:string, totalAmount:number} result of checking item
+    function self:hasItem(itemName, amount)
+        -- Validate inputs
+        if not itemName or type(itemName) ~= 'string' then
+            return { status = false, message = 'Invalid item name!', totalAmount = 0 }
+        end
+        
+        -- Default amount to 1 if not provided
+        if not amount then
+            amount = 1
+        elseif type(amount) ~= 'number' or amount <= 0 then
+            return { status = false, message = 'Invalid item amount!', totalAmount = 0 }
+        end
+        
+        -- Convert item name to lowercase for case-insensitive comparison
+        local searchName = itemName:lower()
+        
+        -- Calculate total amount of matching items in inventory
+        local totalAmount = 0
+        
+        -- Iterate through all items in the inventory
+        for _, item in pairs(self.items) do
+            if item.name and item.name:lower() == searchName then
+                -- Found matching item, add its amount to total
+                totalAmount = totalAmount + (item.amount or 0)
+            end
+        end
+        
+        -- Check if total amount meets the required amount
+        if totalAmount >= amount then
+            return { 
+                status = true, 
+                message = string.format('Item found in inventory! (Has: %d, Required: %d)', totalAmount, amount), 
+                totalAmount = totalAmount 
+            }
+        else
+            return { 
+                status = false, 
+                message = string.format('Not enough items in inventory! (Has: %d, Required: %d)', totalAmount, amount), 
+                totalAmount = totalAmount 
+            }
+        end
+    end
+
     _contructor()
     ---- END ----
     return self

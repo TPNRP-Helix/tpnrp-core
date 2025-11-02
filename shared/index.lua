@@ -137,3 +137,118 @@ SHARED.toLower = function(str)
 	if type(str) ~= "string" then return tostring(str) end
 	return string.lower(str)
 end
+
+----------------------------------------------------------------------
+--- String startsWith
+----------------------------------------------------------------------
+---Check string startsWith
+---@param str string haystack
+---@param prefix string needle
+---@return boolean
+SHARED.startsWith = function(str, prefix)
+    if type(str) ~= "string" or type(prefix) ~= "string" then return false end
+    return string.sub(str, 1, #prefix) == prefix
+end
+
+----------------------------------------------------------------------
+--- String endsWith
+----------------------------------------------------------------------
+---Check string endsWith
+---@param str string haystack
+---@param suffix string needle
+---@return boolean
+SHARED.endsWith = function(str, suffix)
+    if type(str) ~= "string" or type(suffix) ~= "string" then return false end
+    return string.sub(str, -#suffix) == suffix
+end
+
+----------------------------------------------------------------------
+--- Contains
+----------------------------------------------------------------------
+---Check if table contains value
+---@param tbl table
+---@param val any
+---@return boolean
+SHARED.contains = function(tbl, val)
+    if type(tbl) ~= "table" then return false end
+    for _, v in ipairs(tbl) do
+      if v == val then
+        return true
+      end
+    end
+    return false
+end
+
+----------------------------------------------------------------------
+--- Get Cloth Item Type By Name
+----------------------------------------------------------------------
+---Get cloth item type by item name
+---@param itemName string
+---@return string | nil
+SHARED.getClothItemTypeByName = function(itemName)
+    if not SHARED.startsWith(itemName, 'cloth_') then
+        return nil
+    end
+    
+    if SHARED.startsWith(itemName, "cloth_head_") then
+        return EEquipmentClothType.Head
+    end
+    if SHARED.startsWith(itemName, "cloth_mask_") then
+        return EEquipmentClothType.Mask
+    end
+    if SHARED.startsWith(itemName, "cloth_hairstyle_") then
+        return EEquipmentClothType.HairStyle
+    end
+    if SHARED.startsWith(itemName, "cloth_torso_") then
+        return EEquipmentClothType.Torso
+    end
+    if SHARED.startsWith(itemName, "cloth_leg_") then
+        return EEquipmentClothType.Leg
+    end
+    if SHARED.startsWith(itemName, "cloth_bag_") then
+        return EEquipmentClothType.Bag
+    end
+    if SHARED.startsWith(itemName, "cloth_shoes_") then
+        return EEquipmentClothType.Shoes
+    end
+    if SHARED.startsWith(itemName, "cloth_accessories_") then
+        return EEquipmentClothType.Accessories
+    end
+    if SHARED.startsWith(itemName, "cloth_undershirts_") then
+        return EEquipmentClothType.Undershirts
+    end
+    if SHARED.startsWith(itemName, "cloth_armor_") then
+        return EEquipmentClothType.Armor
+    end
+    if SHARED.startsWith(itemName, "cloth_decal_") then
+        return EEquipmentClothType.Decal
+    end
+    if SHARED.startsWith(itemName, "cloth_top_") then
+        return EEquipmentClothType.Top
+    end
+    if SHARED.startsWith(itemName, "cloth_hat_") then
+        return EEquipmentClothType.Hat
+    end
+    if SHARED.startsWith(itemName, "cloth_glasses_") then
+        return EEquipmentClothType.Glasses
+    end
+    if SHARED.startsWith(itemName, "cloth_ears_") then
+        return EEquipmentClothType.Ears
+    end
+    if SHARED.startsWith(itemName, "cloth_null1_") then
+        return EEquipmentClothType.Null1
+    end
+    if SHARED.startsWith(itemName, "cloth_null2_") then
+        return EEquipmentClothType.Null2
+    end
+    if SHARED.startsWith(itemName, "cloth_null3_") then
+        return EEquipmentClothType.Null3
+    end
+    if SHARED.startsWith(itemName, "cloth_watch_") then
+        return EEquipmentClothType.Watch
+    end
+    if SHARED.startsWith(itemName, "cloth_bracelets_") then
+        return EEquipmentClothType.Bracelets
+    end
+    
+end

@@ -9,12 +9,18 @@
         "client/main.lua"
     ],
     "server": [
+        "server/types/equipment.lua",
+        "server/types/inventory.lua",
+        "server/types/player.lua",
+        "server/types/game.lua",
         "server/services/baseDAO.lua",
-        "server/services/playerDAO.lua",
+        "server/services/equipmentDAO.lua",
         "server/services/inventoryDAO.lua",
+        "server/services/playerDAO.lua",
+        "server/entities/sEquipment.lua",
+        "server/entities/sInventory.lua",
+        "server/entities/sPlayer.lua",
         "server/classes/core.lua",
-        "server/classes/player.lua",
-        "server/classes/inventory.lua",
         "server/main.lua"
     ]
 }

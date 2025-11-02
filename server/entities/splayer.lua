@@ -82,6 +82,7 @@ function SPlayer.new(playerSource)
     function self:getHeading()
         local ped = GetPlayerPawn(self.playerSource)
         if ped then
+            ---@diagnostic disable-next-line: undefined-field
             return GetEntityRotation(ped).Yaw
         end
         -- Default heading from config
