@@ -16,10 +16,14 @@ TBU
 
 ### Installation
 1. Place the `tpnrp-core` folder inside your server's `resources` directory.
-2. Ensure the resource on server start by adding the following to `server.cfg`:
+2. Ensure the resource on server start by adding the following to `config.json`:
 
-```cfg
-ensure tpnrp-core
+```
+{
+  "packages": [
+      "tpnrp-core"
+  ]
+}
 ```
 
 3. Database:
