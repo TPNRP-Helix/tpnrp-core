@@ -1,4 +1,4 @@
-# InventoryDAO API
+# Inventory API
 
 The InventoryDAO provides database operations for inventory data.
 

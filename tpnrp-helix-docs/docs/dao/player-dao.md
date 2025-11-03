@@ -1,4 +1,4 @@
-# PlayerDAO API
+# Player API
 
 The PlayerDAO provides database operations for player data.
 

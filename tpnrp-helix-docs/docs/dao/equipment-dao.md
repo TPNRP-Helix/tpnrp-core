@@ -1,4 +1,4 @@
-# EquipmentDAO API
+# Equipment API
 
 The EquipmentDAO provides database operations for equipment data.
 
