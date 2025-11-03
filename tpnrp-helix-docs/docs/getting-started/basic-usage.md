@@ -40,13 +40,13 @@ print("Player coords: " .. coords.x .. ", " .. coords.y .. ", " .. coords.z)
 
 ```lua
 -- By source (player ID)
-local player = TPNRPServer:getPlayerBySource(source)
+local player = TPNRP:getPlayerBySource(source)
 
 -- By license
-local player = TPNRPServer:getPlayerByLicense(license)
+local player = TPNRP:getPlayerByLicense(license)
 
 -- By citizen ID
-local player = TPNRPServer:getPlayerByCitizenId(citizenId)
+local player = TPNRP:getPlayerByCitizenId(citizenId)
 ```
 
 ### Client-Side
@@ -57,7 +57,7 @@ The client-side player is automatically managed. Access it through the CPlayer e
 
 ```lua
 -- Server-side example
-local player = TPNRPServer:getPlayerBySource(source)
+local player = TPNRP:getPlayerBySource(source)
 if player and player.playerData then
     -- Access player data
     local citizenId = player.playerData.citizen_id
