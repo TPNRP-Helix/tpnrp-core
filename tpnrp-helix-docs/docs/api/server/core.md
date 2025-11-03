@@ -14,7 +14,7 @@ The `TPNRPServer` is the main server-side instance of TPNRP Core.
 ## Access
 
 ```lua
-local TPNRP = exports['tpnrp-core']:tpnrp-core()
+local TPNRP = exports['tpnrp-core']:core()
 ```
 
 ## Properties

@@ -4,6 +4,6 @@
 TPNRPClient = TPNRPClient.new()
 
 -- Exports for other resources
-exports('tpnrp-core', function()
+exports('core', function()
     return TPNRPClient
 end)

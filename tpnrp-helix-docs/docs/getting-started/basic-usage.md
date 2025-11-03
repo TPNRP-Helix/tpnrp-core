@@ -14,7 +14,7 @@ TPNRP Core can be accessed through exports:
 
 ```lua
 -- Get the TPNRPServer instance
-local TPNRP = exports['tpnrp-core']:tpnrp-core()
+local TPNRP = exports['tpnrp-core']:core()
 
 -- Access server methods
 local player = TPNRP:getPlayerBySource(source)
@@ -27,7 +27,7 @@ end
 
 ```lua
 -- Get the TPNRPClient instance
-local TPNRP = exports['tpnrp-core']:tpnrp-core()
+local TPNRP = exports['tpnrp-core']:core()
 
 -- Access client methods
 local coords = TPNRP:getCoords()

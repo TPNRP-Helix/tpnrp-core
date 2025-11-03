@@ -5,7 +5,7 @@ The `TPNRPClient` is the main client-side instance of TPNRP Core.
 ## Access
 
 ```lua
-local TPNRP = exports['tpnrp-core']:tpnrp-core()
+local TPNRP = exports['tpnrp-core']:core()
 ```
 
 ## Properties
@@ -18,7 +18,7 @@ Returns the TPNRPClient instance.
 
 **Example:**
 ```lua
-local TPNRP = exports['tpnrp-core']:tpnrp-core()
+local TPNRP = exports['tpnrp-core']:core()
 ```
 
 ## Notes
