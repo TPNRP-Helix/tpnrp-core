@@ -6,6 +6,10 @@
         "TriggerClientEvent",
         "RegisterClientEvent",
         "TriggerLocalServerEvent",
-        "GetPlayerPawn"
+        "GetPlayerPawn",
+        "GetEntityCoords",
+        "GetEntityRotation",
+        "Wait",
+        "RegisterServerEvent"
     ]
 }

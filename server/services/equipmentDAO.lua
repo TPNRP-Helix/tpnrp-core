@@ -46,7 +46,7 @@ end
 
 ---Get player's inventory (type = 'player' | 'stack')
 ---@param citizen_id string
----@return table<EEquipmentClothType, sEquipmentItemType> | nil
+---@return table<EEquipmentClothType, SEquipmentItemType> | nil
 DAO.equipment.get = function(citizen_id)
     -- Query equipment items
     local result = DAO.DB.Select('SELECT * FROM equipments where citizen_id = ?', { citizen_id })
