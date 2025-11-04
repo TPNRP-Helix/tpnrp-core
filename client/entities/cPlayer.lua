@@ -22,7 +22,7 @@ function CPlayer.new(playerSource)
     ---Contructor function
     local function _contructor()
         -- Get player's inventory
-        self.inventory = CInventory.new(self.playerSource)
+        self.inventory = CInventory.new(self)
         -- On Update playerData
         ---@param playerData PlayerData
         RegisterClientEvent('TPN:player:updatePlayerData', function(playerData)
