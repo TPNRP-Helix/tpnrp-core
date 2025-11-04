@@ -67,7 +67,7 @@ function SPlayer.new(playerSource)
     end
 
     ---Get player coords
-    ---@return vector3 coords Player's coords
+    ---@return Vector3 coords Player's coords
     function self:getCoords()
         local ped = GetPlayerPawn(self.playerSource)
         if ped then
@@ -82,7 +82,6 @@ function SPlayer.new(playerSource)
     function self:getHeading()
         local ped = GetPlayerPawn(self.playerSource)
         if ped then
-            ---@diagnostic disable-next-line: undefined-field
             return GetEntityRotation(ped).Yaw
         end
         -- Default heading from config

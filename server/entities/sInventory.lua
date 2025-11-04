@@ -163,6 +163,16 @@ function SInventory.new(player)
         -- No item slot found
         return nil
     end
+
+    ---Find an item by slot number
+    ---@param slotNumber number slot number
+    ---@return SInventoryItemType | nil item data, or nil if item not found
+    function self:findItemBySlot(slotNumber)
+        if not slotNumber then
+            return nil
+        end
+        return self.items[slotNumber] or nil
+    end
     
     ---Add item to inventory
     ---@param itemName string item name

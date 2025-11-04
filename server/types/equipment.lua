@@ -22,13 +22,13 @@ EEquipmentClothType = {
     Bracelets = "bracelets"
 }
 
----@class sEquipmentItemInfoType
+---@class SEquipmentItemInfoType
 ---@field slotCount number
 ---@field WeightLimit number
 
----@class sEquipmentItemType
+---@class SEquipmentItemType: SInventoryItemType
 ---@field slot number
----@field info sEquipmentItemInfoType
+---@field info SEquipmentItemInfoType
 ---@field name string           -- [DB]
 ---@field label string          -- [DB]
 ---@field weight number         -- [DB]
@@ -40,7 +40,7 @@ EEquipmentClothType = {
 ---@field description string    -- [DB]
 
 
----@class sEquipmentBackpackCapacityResultType
+---@class SEquipmentBackpackCapacityResultType
 ---@field status boolean
 ---@field slots number
 ---@field weightLimit number

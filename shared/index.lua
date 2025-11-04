@@ -184,7 +184,7 @@ end
 ----------------------------------------------------------------------
 ---Get cloth item type by item name
 ---@param itemName string
----@return string | nil
+---@return EEquipmentClothType | nil
 SHARED.getClothItemTypeByName = function(itemName)
     if not SHARED.startsWith(itemName, 'cloth_') then
         return nil
