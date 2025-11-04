@@ -1,19 +1,21 @@
 ---@class CPlayer
 ---@field playerData PlayerData|nil
----@field inventories SInventory|nil
+---@field inventory SInventory|nil
+---@field equipment SEquipment|nil
 CPlayer = {}
 CPlayer.__index = CPlayer
 
 ---@return CPlayer
-function CPlayer.new(playerSource, playerLicense)
+function CPlayer.new(playerSource)
     ---@class CPlayer
     local self = setmetatable({}, CPlayer)
 
-    -- Public
+    -- Player's fields
     self.playerSource = playerSource
-    self.license = playerLicense
     self.playerData = nil
-    self.inventories = nil
+    -- Player's Stacks
+    self.inventory = nil
+    self.equipment = nil
 
     /********************************/
     /*         Initializes          */

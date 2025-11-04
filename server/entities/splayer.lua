@@ -1,7 +1,7 @@
 ---@class SPlayer
 ---@field playerData PlayerData|nil
 ---@field inventory SInventory|nil
----@field equipment sEquipment|nil
+---@field equipment SEquipment|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -32,7 +32,7 @@ function SPlayer.new(playerSource)
         self.inventory:load('player')
 
         -- Get player's equipment
-        self.equipment = sEquipment.new(self)
+        self.equipment = SEquipment.new(self)
     end
 
     /********************************/
@@ -101,19 +101,33 @@ function SPlayer.new(playerSource)
 
     ---On Player logged in
     function self:login()
+        -- Get player state
+        local PlayerState = self.playerSource:GetLyraPlayerState()
+        -- Get player data from database
         local playerData = DAO.player.get(self.playerData.citizen_id)
         if not playerData then
-            print('[ERROR] SPLAYER.LOGIN - playerData is empty!')
-            return false
+            -- User first time login, create new player data
+            playerData = {
+                money = {},
+                character_info = {},
+                job = {},
+                gang = {},
+                position = SHARED.CONFIG.DEFAULT_SPAWN.POSITION,
+                metadata = {},
+                source = self.playerSource,
+                license = PlayerState:GetHelixUserId(),
+                name = PlayerState:GetPlayerName(),
+                character_id = 0,
+                citizen_id = SHARED.createCitizenId(),
+            }
         end
         -- Assign playerData
         self.playerData = playerData
-        playerData.source = self.playerSource
-        -- Get player state
-        local PlayerState = self.playerSource:GetLyraPlayerState()
-        playerData.netId = PlayerState:GetPlayerId()
-        playerData.license = PlayerState:GetHelixUserId()
-        playerData.name = PlayerState:GetPlayerName()
+        self.playerData.source = self.playerSource
+        -- Assign Helix data to playerData
+        self.playerData.netId = PlayerState:GetPlayerId()
+        self.playerData.license = PlayerState:GetHelixUserId()
+        self.playerData.name = PlayerState:GetPlayerName()
     end
 
     ---Logout player

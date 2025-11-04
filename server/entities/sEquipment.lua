@@ -1,14 +1,14 @@
----@class sEquipment
+---@class SEquipment
 ---@field player SPlayer
 ---@field items table<EEquipmentClothType, SEquipmentItemType>
 ---@field type 'player' | 'stack' | ''
-sEquipment = {}
-sEquipment.__index = sEquipment
+SEquipment = {}
+SEquipment.__index = SEquipment
 
----@return sEquipment
-function sEquipment.new(player)
-    ---@class sEquipment
-    local self = setmetatable({}, sEquipment)
+---@return SEquipment
+function SEquipment.new(player)
+    ---@class SEquipment
+    local self = setmetatable({}, SEquipment)
 
     -- Public
     self.player = player
@@ -100,4 +100,4 @@ function sEquipment.new(player)
     return self
 end
 
-return sEquipment
+return SEquipment

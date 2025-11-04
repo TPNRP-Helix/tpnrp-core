@@ -1,4 +1,4 @@
-
+DAO.player = {}
 ---Get player by citizen id
 ---@param citizen_id string
 ---@return PlayerData | nil
@@ -14,7 +14,6 @@ DAO.player.get = function(citizen_id)
         playerData.gang = JSON.parse(playerData.gang)
         playerData.position = JSON.parse(playerData.position)
         playerData.metadata = JSON.parse(playerData.metadata)
-        playerData.position = JSON.parse(playerData.position)
 
         ---@type PlayerData
         return playerData

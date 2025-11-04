@@ -81,13 +81,6 @@ function TPNRPServer.new()
     /********************************/
     /*          Functions           */
     /********************************/
-    
-    ---Create a new citizen id
-    ---@return string citizen id
-    function self:createCitizenId()
-        -- CitizenId: ABC12345 (3 characters, 5 numbers)
-        return tostring(SHARED.randomStr(3) .. SHARED.randomInt(10000, 99999)):upper()
-    end
 
     ---Create a new useable item
     ---@param itemName string item name

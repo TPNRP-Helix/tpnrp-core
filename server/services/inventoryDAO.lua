@@ -1,3 +1,4 @@
+DAO.inventory = {}
 ---Save inventory
 ---@param inventory SInventory
 ---@return boolean success
