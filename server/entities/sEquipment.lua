@@ -74,6 +74,12 @@ function SEquipment.new(player)
             -- [CHEAT] possible event cheat
             return { status = false, message = 'Item not found in inventory!' }
         end
+        -- Verify that the item in the slot matches the provided itemName
+        if item.name:lower() ~= itemName:lower() then
+            print(('[ERROR] sEquipment.equipItem: Item %s does not match item %s in slot %s!'):format(itemName, item.name, slotNumber))
+            -- [CHEAT] possible event cheat
+            return { status = false, message = 'Item mismatch!' }
+        end
         local clothItemType = SHARED.getClothItemTypeByName(itemName)
         if not clothItemType then
             print(('[ERROR] sEquipment.equipItem: Item %s is not a cloth item!'):format(itemName))
