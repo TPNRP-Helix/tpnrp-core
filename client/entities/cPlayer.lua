@@ -1,19 +1,19 @@
 ---@class CPlayer
 ---@field playerData PlayerData|nil
----@field inventories SInventory|nil
+---@field inventory CInventory|nil
 CPlayer = {}
 CPlayer.__index = CPlayer
 
 ---@return CPlayer
-function CPlayer.new(playerSource, playerLicense)
+function CPlayer.new(playerSource)
     ---@class CPlayer
     local self = setmetatable({}, CPlayer)
 
-    -- Public
+    -- Player's fields
     self.playerSource = playerSource
-    self.license = playerLicense
     self.playerData = nil
-    self.inventories = nil
+    -- Player's Stacks
+    self.inventory = nil
 
     /********************************/
     /*         Initializes          */
@@ -21,6 +21,8 @@ function CPlayer.new(playerSource, playerLicense)
 
     ---Contructor function
     local function _contructor()
+        -- Get player's inventory
+        self.inventory = CInventory.new(self)
         -- On Update playerData
         ---@param playerData PlayerData
         RegisterClientEvent('TPN:player:updatePlayerData', function(playerData)

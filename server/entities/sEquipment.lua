@@ -1,14 +1,15 @@
----@class sEquipment
+---@class SEquipment
 ---@field player SPlayer
 ---@field items table<EEquipmentClothType, SEquipmentItemType>
 ---@field type 'player' | 'stack' | ''
-sEquipment = {}
-sEquipment.__index = sEquipment
+SEquipment = {}
+SEquipment.__index = SEquipment
 
----@return sEquipment
-function sEquipment.new(player)
-    ---@class sEquipment
-    local self = setmetatable({}, sEquipment)
+---@param player SPlayer player entity
+---@return SEquipment
+function SEquipment.new(player)
+    ---@class SEquipment
+    local self = setmetatable({}, SEquipment)
 
     -- Public
     self.player = player
@@ -97,7 +98,7 @@ function sEquipment.new(player)
         ---@cast item SEquipmentItemType
         self.items[clothItemType] = item
         -- call client for sync (This mean equip cloth success)
-        TriggerClientEvent('TPN:equipment:sync', self.player.playerSource, clothItemType, itemName)
+        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', clothItemType, itemName)
         return { status = true, message = 'Item equipped to slot!' }
     end
 
@@ -106,4 +107,4 @@ function sEquipment.new(player)
     return self
 end
 
-return sEquipment
+return SEquipment

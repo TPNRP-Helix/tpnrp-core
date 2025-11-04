@@ -10,6 +10,7 @@
         "GetEntityCoords",
         "GetEntityRotation",
         "Wait",
-        "RegisterServerEvent"
+        "RegisterServerEvent",
+        "WebUI"
     ]
 }

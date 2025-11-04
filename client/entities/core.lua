@@ -14,18 +14,18 @@ function TPNRPClient.new()
     local self = setmetatable({}, TPNRPClient)
     
     self.player = nil
-    self.shared = SHARED    -- Bind shared
+    self.shared = SHARED    -- Bind shared for other resources to use it via exports
 
     ---Contructor function
     local function _contructor()
-        -- TODO: Init player
-        -- TODO: Bind function
-
-        self.player = CPlayer.new()
+        -- On Player Loaded
+        RegisterClientEvent('TPN:client:onPlayerLoaded', function(source)
+            self.player = CPlayer.new(source)
+        end)
 
         -- On Player Unloaded
-        RegisterClientEvent('TPN:client:onPlayerUnloaded', function(source)
-            -- TODO: Logout player
+        RegisterClientEvent('TPN:client:onPlayerUnloaded', function()
+            self.player = nil
         end)
     end
 

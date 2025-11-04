@@ -252,3 +252,13 @@ SHARED.getClothItemTypeByName = function(itemName)
     end
     
 end
+
+----------------------------------------------------------------------
+--- Create Citizen Id
+----------------------------------------------------------------------
+---Create a new citizen id
+---@return string citizen id
+SHARED.createCitizenId = function()
+    -- CitizenId: ABC12345 (3 characters, 5 numbers)
+    return tostring(SHARED.randomStr(3) .. SHARED.randomInt(10000, 99999)):upper()
+end
