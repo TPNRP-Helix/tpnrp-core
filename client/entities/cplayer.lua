@@ -1,7 +1,6 @@
 ---@class CPlayer
 ---@field playerData PlayerData|nil
----@field inventory SInventory|nil
----@field equipment SEquipment|nil
+---@field inventory CInventory|nil
 CPlayer = {}
 CPlayer.__index = CPlayer
 
@@ -15,7 +14,6 @@ function CPlayer.new(playerSource)
     self.playerData = nil
     -- Player's Stacks
     self.inventory = nil
-    self.equipment = nil
 
     /********************************/
     /*         Initializes          */
@@ -23,6 +21,8 @@ function CPlayer.new(playerSource)
 
     ---Contructor function
     local function _contructor()
+        -- Get player's inventory
+        self.inventory = CInventory.new(self.playerSource)
         -- On Update playerData
         ---@param playerData PlayerData
         RegisterClientEvent('TPN:player:updatePlayerData', function(playerData)

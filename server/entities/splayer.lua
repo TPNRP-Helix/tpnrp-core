@@ -6,12 +6,12 @@ SPlayer = {}
 SPlayer.__index = SPlayer
 
 ---@return SPlayer
-function SPlayer.new(playerSource)
+function SPlayer.new(playerController)
     ---@class SPlayer
     local self = setmetatable({}, SPlayer)
 
     -- Player's fields
-    self.playerSource = playerSource
+    self.playerController = playerController
     self.playerData = nil
     -- Player's Stacks
     self.inventory = nil
@@ -69,7 +69,7 @@ function SPlayer.new(playerSource)
     ---Get player coords
     ---@return Vector3 coords Player's coords
     function self:getCoords()
-        local ped = GetPlayerPawn(self.playerSource)
+        local ped = GetPlayerPawn(self.playerController)
         if ped then
             return GetEntityCoords(ped)
         end
@@ -80,7 +80,7 @@ function SPlayer.new(playerSource)
     ---Get player heading
     ---@return number heading
     function self:getHeading()
-        local ped = GetPlayerPawn(self.playerSource)
+        local ped = GetPlayerPawn(self.playerController)
         if ped then
             return GetEntityRotation(ped).Yaw
         end
@@ -96,13 +96,13 @@ function SPlayer.new(playerSource)
     --
     ---Sync playerData to client-side
     function self:updatePlayerData()
-        TriggerClientEvent('TPN:player:updatePlayerData', self.playerSource, self.playerData)
+        TriggerClientEvent(self.playerController, 'TPN:player:updatePlayerData', self.playerData)
     end
 
     ---On Player logged in
     function self:login()
         -- Get player state
-        local PlayerState = self.playerSource:GetLyraPlayerState()
+        local PlayerState = self.playerController:GetLyraPlayerState()
         -- Get player data from database
         local playerData = DAO.player.get(self.playerData.citizen_id)
         if not playerData then
@@ -114,7 +114,7 @@ function SPlayer.new(playerSource)
                 gang = {},
                 position = SHARED.CONFIG.DEFAULT_SPAWN.POSITION,
                 metadata = {},
-                source = self.playerSource,
+                source = self.playerController,
                 license = PlayerState:GetHelixUserId(),
                 name = PlayerState:GetPlayerName(),
                 character_id = 0,
@@ -123,7 +123,7 @@ function SPlayer.new(playerSource)
         end
         -- Assign playerData
         self.playerData = playerData
-        self.playerData.source = self.playerSource
+        self.playerData.source = self.playerController
         -- Assign Helix data to playerData
         self.playerData.netId = PlayerState:GetPlayerId()
         self.playerData.license = PlayerState:GetHelixUserId()
@@ -133,9 +133,9 @@ function SPlayer.new(playerSource)
     ---Logout player
     function self:logout()
         -- This will broadcast the event to all other resources in client-side
-        TriggerClientEvent('TPN:client:onPlayerUnloaded', self.playerSource)
+        TriggerClientEvent(self.playerController, 'TPN:client:onPlayerUnloaded')
         -- This will broadcast the event to all other resources in server-side
-        TriggerLocalServerEvent('TPN:server:onPlayerUnloaded', self.playerSource)
+        TriggerLocalServerEvent('TPN:server:onPlayerUnloaded', self.playerController)
 
         -- Wait for 200ms to ensure the player is logged out
         Wait(200)
@@ -145,7 +145,7 @@ function SPlayer.new(playerSource)
             print('[ERROR] SPLAYER.LOGOUT - Failed to save player data!')
         end
         -- Remove player from players table
-        TPNRPServer.players[self.playerSource] = nil
+        TPNRPServer.players[self.playerController] = nil
     end
 
     _contructor()

@@ -5,6 +5,7 @@
 SEquipment = {}
 SEquipment.__index = SEquipment
 
+---@param player SPlayer player entity
 ---@return SEquipment
 function SEquipment.new(player)
     ---@class SEquipment
@@ -91,7 +92,7 @@ function SEquipment.new(player)
         ---@cast item SEquipmentItemType
         self.items[clothItemType] = item
         -- call client for sync (This mean equip cloth success)
-        TriggerClientEvent('TPN:equipment:sync', self.player.playerSource, clothItemType, itemName)
+        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', clothItemType, itemName)
         return { status = true, message = 'Item equipped to slot!' }
     end
 

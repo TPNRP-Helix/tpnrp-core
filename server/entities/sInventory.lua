@@ -5,6 +5,7 @@
 SInventory = {}
 SInventory.__index = SInventory
 
+---@param player SPlayer player entity
 ---@return SInventory
 function SInventory.new(player)
     ---@class SInventory
@@ -297,7 +298,9 @@ function SInventory.new(player)
                 info = info or {}
             }
         end
-        
+        -- Tell player that item is added to inventory
+        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, self.items[targetSlot])
+
         return { status = true, message = 'Item added to inventory!', slot = targetSlot }
     end
 
