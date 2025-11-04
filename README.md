@@ -2,7 +2,7 @@
 
 Core gameplay systems for TPNRP, organized as a Helix package written in Lua. This module provides player, inventory, and equipment primitives plus data access objects and shared configuration.
 
-**Documentation**: `https://tpnrp.thientd.dev`
+**Documentation**: https://tpnrp.thientd.dev
 
 ### Features
 - **Player core**: basic player entity and persistence

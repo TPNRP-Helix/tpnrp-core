@@ -44,7 +44,7 @@ function TPNRPServer.new()
     ---@return SPlayer | nil player SPlayer entity
     function self:getPlayerBySource(source)
         for _, player in pairs(self.players) do
-            if player.playerSource == source then
+            if player.playerController == source then
                 return player
             end
         end
