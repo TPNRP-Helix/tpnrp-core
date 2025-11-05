@@ -208,6 +208,8 @@ function SPlayer.new(playerController)
         self:setMetaData('thirst', newThirst)
         -- Sync to client
         self:updatePlayerData()
+        -- Update hunger and thirst in client-side UI
+        TriggerClientEvent(self.playerController, 'TPN:ui:updateBasicNeeds', newHunger, newThirst)
     end
 
     _contructor()
