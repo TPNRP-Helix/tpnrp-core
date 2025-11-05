@@ -11,13 +11,21 @@ function SPlayer.new(playerController)
     ---@class SPlayer
     local self = setmetatable({}, SPlayer)
 
-    -- Player's fields
+    -- Player's controller
     self.playerController = playerController
+    -- Player's data
     self.playerData = nil
+    -- Player's level
     self.level = nil
-    -- Player's Stacks
+    -- Player's inventory
     self.inventory = nil
+    -- Player's equipment
     self.equipment = nil
+
+    -- Player's custom properties
+    self.properties = {}
+    -- Player's custom methods
+    self.methods = {}
 
     /********************************/
     /*         Initializes          */
@@ -101,7 +109,7 @@ function SPlayer.new(playerController)
     --
     ---Sync playerData to client-side
     function self:updatePlayerData()
-        TriggerClientEvent(self.playerController, 'TPN:player:updatePlayerData', self.playerData)
+        TriggerClientEvent(self.playerController, 'TPN:player:updatePlayerData', self.playerData, self.properties)
     end
 
     ---On Player logged in
@@ -151,6 +159,20 @@ function SPlayer.new(playerController)
         end
         -- Remove player from players table
         TPNRPServer.players[self.playerController] = nil
+    end
+
+    ---Add custom method to player
+    ---@param methodName string method name
+    ---@param methodFunction function method function
+    function self:addMethod(methodName, methodFunction)
+        self.methods[methodName] = methodFunction
+    end
+
+    ---Add custom property to player
+    ---@param propertyName string property name
+    ---@param propertyValue any property value
+    function self:addProperty(propertyName, propertyValue)
+        self.properties[propertyName] = propertyValue
     end
 
     _contructor()

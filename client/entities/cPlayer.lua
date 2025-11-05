@@ -12,8 +12,10 @@ function CPlayer.new(playerSource)
     -- Player's fields
     self.playerSource = playerSource
     self.playerData = nil
-    -- Player's Stacks
+    -- Player's inventory
     self.inventory = nil
+    -- Player's custom properties
+    self.properties = {}
 
     /********************************/
     /*         Initializes          */
@@ -25,8 +27,9 @@ function CPlayer.new(playerSource)
         self.inventory = CInventory.new(self)
         -- On Update playerData
         ---@param playerData PlayerData
-        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData)
+        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
             self.playerData = playerData
+            self.properties = properties or {}
         end)
     end
 

@@ -1,4 +1,4 @@
-TPNRPUI = WebUI('TPNRP-UI', 'tpnrp-core/ui/index.html', 0)
+TPNRPUI = WebUI('TPNRP-UI', 'tpnrp-core/client/tpnrp-ui/dist/index.html', 0)
 
 /********************************/
 /*            Main              */
