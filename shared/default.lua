@@ -1,0 +1,49 @@
+SHARED.DEFAULT = {
+    SPAWN = {
+        POSITION = { x = -274.27, y = 6641.01, z = 7.45 },
+        HEADING = 270.0,
+    },
+    LEVEL = 1,
+    SKILLS = {
+        miner = {
+            level = 1,
+            exp = 0
+        },       -- Miner
+        lumberjack = {
+            level = 1,
+            exp = 0
+        },  -- Lumberjack
+        fisherman = {
+            level = 1,
+            exp = 0
+        },   -- Fisherman
+        butcher = {
+            level = 1,
+            exp = 0
+        },     -- Butcher
+        herbalism = {
+            level = 1,
+            exp = 0
+        },   -- Herbalism
+        farmer = {
+            level = 1,
+            exp = 0
+        },      -- Farmer
+        tailor = {
+            level = 1,
+            exp = 0
+        },      -- Tailor
+        cooking = {
+            level = 1,
+            exp = 0
+        },      -- Cooking
+        furnacing = {
+            level = 1,
+            exp = 0
+        },      -- Furnacing
+        crafting = {
+            level = 1,
+            exp = 0
+        },      -- Crafting
+    }
+}
