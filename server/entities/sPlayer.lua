@@ -51,6 +51,7 @@ function SPlayer.new(playerController)
         local isSaved = DAO.player.save(self)
         local isInventoriesSaved = self.inventory:save()
         local isEquipmentsSaved = self.equipment:save()
+        local isLevelSaved = self.level:save()
         if not isSaved then
             print('[ERROR] SPLAYER.SAVE - Failed to save player!')
         end
@@ -63,7 +64,11 @@ function SPlayer.new(playerController)
             print('[ERROR] SPLAYER.SAVE - Failed to save player equipment!')
         end
 
-        return isSaved and isInventoriesSaved and isEquipmentsSaved
+        if not isLevelSaved then
+            print('[ERROR] SPLAYER.SAVE - Failed to save player level!')
+        end
+        -- Return true if all save success
+        return isSaved and isInventoriesSaved and isEquipmentsSaved and isLevelSaved
     end
 
     ---Get player coords

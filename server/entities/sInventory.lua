@@ -369,7 +369,8 @@ function SInventory.new(player, type)
         
         -- Calculate remaining amount
         local remainingAmount = item.amount - amount
-        
+        -- Tell player that item is remove from inventory
+        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'remove', amount, itemName)
         -- If remaining amount is 0 or less, remove the item entirely from the slot
         if remainingAmount <= 0 then
             self.items[targetSlot] = nil
