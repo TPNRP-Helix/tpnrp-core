@@ -24,15 +24,8 @@ function TPNRPServer.new()
     ---Contructor function
     local function _contructor()
        --- Base-game event
-       RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
-            ---@type SPlayer | nil
-            local player = self:getPlayerBySource(source)
-            if not player then
-                print('[ERROR] TPNRPServer>HEvent:PlayerUnloaded - Player not found!')
-                return
-            end
-            player:logout()
-        end)
+       RegisterServerEvent('HEvent:PlayerUnloaded', function(source) self:onPlayerUnloaded(source) end)
+       RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
     end
 
     /********************************/
@@ -96,9 +89,38 @@ function TPNRPServer.new()
         return self.useableItems[itemName] ~= nil
     end
 
-    ----------------------------------------------------------------------
-    --- Register Event
-    ----------------------------------------------------------------------
+    /********************************/
+    /*           Events             */
+    /********************************/
+
+    ---On Player Unloaded
+    ---@param source number player source
+    function self:onPlayerUnloaded(source)
+        ---@type SPlayer | nil
+        local player = self:getPlayerBySource(source)
+        if not player then
+            print('[ERROR] TPNRPServer>onPlayerUnloaded - Player not found!')
+            return
+        end
+        player:logout()
+    end
+
+    function self:onPlayerSync(source)
+        ---@type SPlayer | nil
+        local player = self:getPlayerBySource(source)
+        if not player then
+            print('[ERROR] TPNRPServer.onPlayerSync - Player not found!')
+            return
+        end
+        -- Update basic needs
+        player:basicNeedTick()
+        -- Save player data
+        local isSaved = player:save()
+        if not isSaved then
+            print('[ERROR] TPNRPServer.onPlayerSync - Failed to save player!')
+        end
+    end
+
 
     _contructor()
     return self

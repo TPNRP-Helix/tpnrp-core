@@ -175,6 +175,41 @@ function SPlayer.new(playerController)
         self.properties[propertyName] = propertyValue
     end
 
+    ---Set metadata value
+    ---@param key string metadata key
+    ---@param value any metadata value
+    ---@param isSyncToClient boolean|nil is sync to client (optional, defaults to false)
+    function self:setMetaData(key, value, isSyncToClient)
+        if isSyncToClient == nil then
+            isSyncToClient = false
+        end
+        -- hunger and thirst must be between 0 and 100
+        if key == 'hunger' or key == 'thirst' then
+            value = value > 100 and 100 or value
+        end
+        -- Assign new metadata
+        self.playerData.metadata[key] = value
+        -- Sync to client if needed
+        if isSyncToClient then
+            self:updatePlayerData()
+        end
+    end
+
+    ---Update basic needs
+    function self:basicNeedTick()
+        local newHunger = self.playerData.metadata['hunger'] - SHARED.CONFIG.BASIC_NEEDS.HUNGER_RATE
+        local newThirst = self.playerData.metadata['thirst'] - SHARED.CONFIG.BASIC_NEEDS.THIRST_RATE
+        if newHunger <= 0 then newHunger = 0 end
+        if newThirst <= 0 then newThirst = 0 end
+        -- Assign new hunger and thirst
+        -- Don't sync to client because we will sync at next line
+        -- This strategy is to optimize packet sending
+        self:setMetaData('hunger', newHunger)
+        self:setMetaData('thirst', newThirst)
+        -- Sync to client
+        self:updatePlayerData()
+    end
+
     _contructor()
     ---- END ----
     return self

@@ -31,6 +31,11 @@ function CPlayer.new(playerSource)
             self.playerData = playerData
             self.properties = properties or {}
         end)
+
+        -- Update
+        Timer.SetInterval(function()
+            TriggerServerEvent('TPN:player:syncPlayer')
+        end, (1000 * 60) * SHARED.CONFIG.UPDATE_INTERVAL)
     end
 
     /********************************/
