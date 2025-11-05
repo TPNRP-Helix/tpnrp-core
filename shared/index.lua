@@ -262,3 +262,11 @@ SHARED.createCitizenId = function()
     -- CitizenId: ABC12345 (3 characters, 5 numbers)
     return tostring(SHARED.randomStr(3) .. SHARED.randomInt(10000, 99999)):upper()
 end
+
+-----------------------------------------------------------------------
+--- Locale initialization (server-config driven)
+-----------------------------------------------------------------------
+local locale = require('shared/locales')
+local L, t = locale.load(SHARED.CONFIG and SHARED.CONFIG.LANGUAGE or 'en')
+SHARED.L = L
+SHARED.t = t

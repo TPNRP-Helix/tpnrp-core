@@ -34,10 +34,33 @@ TBU
 - Edit `shared/config.lua` for global settings.
 - Items are defined in `shared/items.lua`.
 
+#### Locale / i18n
+- Set language in `shared/config.lua` via `SHARED.CONFIG.LANGUAGE` (e.g., `en`, `vi`).
+- Translations load on resource start based on the server config (no hot-switch).
+- Use `SHARED.t(key, params?)` to translate; `SHARED.L` exposes the flattened strings of the active language.
+
+Example:
+
+```lua
+-- shared/config.lua
+SHARED.CONFIG = {
+    LANGUAGE = 'en',
+    -- ...
+}
+
+-- anywhere (client/server/shared)
+local msg = SHARED.t('inventory.full', { current = 64, limit = 64 })
+```
+
+Add a new language:
+- Create `shared/locales/<lang>.lua` returning a nested table of strings.
+- Keys are dot-notated when accessed, e.g., `inventory.full` maps to `{ inventory = { full = '...' } }`.
+- Missing keys fall back to English; if still missing, the key itself is returned.
+
 ### Project layout
 - `client/`: Client-side Lua scripts and entities
 - `server/`: Server-side entities, services (DAO), types, and entrypoint
-- `shared/`: Shared configuration and item registry
+- `shared/`: Shared configuration, item registry, and locales
 - `tpnrp_database.db`: SQLite database file used by DAOs
 
 ### Entrypoints

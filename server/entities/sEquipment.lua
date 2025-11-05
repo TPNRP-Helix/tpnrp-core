@@ -98,8 +98,40 @@ function SEquipment.new(player)
         ---@cast item SEquipmentItemType
         self.items[clothItemType] = item
         -- call client for sync (This mean equip cloth success)
-        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', clothItemType, itemName)
-        return { status = true, message = 'Item equipped to slot!' }
+        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', 'equip', clothItemType, itemName)
+        return { status = true, message = SHARED.t('equipment.equipped', { item = itemName }) }
+    end
+
+    ---Unequip item from slot
+    ---@param clothItemType EEquipmentClothType cloth item type
+    ---@param toSlotNumber number | nil slot number to add item to (optional)
+    ---@return {status:boolean, message:string} success Status when unequip item
+    function self:unequipItem(clothItemType, toSlotNumber)
+        -- Get item data
+        local item = self.items[clothItemType]
+        if not item then
+            print(('[ERROR] sEquipment.unequipItem: Failed to unequip item %s from slot %s!'):format(clothItemType, item.name))
+            -- [CHEAT] possible event cheat
+            return { status = false, message = 'Item not found in equipment!' }
+        end
+        -- Unequip item from slot
+        self.items[clothItemType] = nil
+        -- TODO: Find empty slot
+        if not toSlotNumber then
+            toSlotNumber = self.player.inventory:getEmptySlot()
+            if not toSlotNumber then
+                return { status = false, message = SHARED.t('inventory.full') }
+            end
+        end
+        -- Add item to inventory
+        local addResult = self.player.inventory:addItem(item.name, 1, toSlotNumber)
+        if not addResult.status then
+            print(('[ERROR] sEquipment.unequipItem: Failed to add item %s to inventory!'):format(item.name))
+            return { status = false, message = addResult.message }
+        end
+        -- call client for sync (This mean unequip cloth success)
+        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', 'unequip', clothItemType)
+        return { status = true, message = SHARED.t('equipment.unequipped', { item = item.name }) }
     end
 
     _contructor()
