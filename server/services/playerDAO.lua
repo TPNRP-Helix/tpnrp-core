@@ -30,10 +30,10 @@ DAO.player.save = function(player)
     local pCoords = player:getCoords()
     local pHeading = player:getHeading()
     if not playerData then
-        print('[ERROR] DAO.SAVEPLAYER - playerData is empty!')
+        print('[ERROR] DAO.player.save: playerData is empty!')
         return false
     end
-    -- TODO:
+    -- Save player into database
     local result = DAO.DB.Execute([[INSERT INTO players (character_id, citizen_id, license, name, money, character_info, job, gang, position, heading, metadata)
         VALUES (?,?,?,?,?,?,?,?,?,?,?)
         ON CONFLICT(citizen_id) DO UPDATE SET
@@ -60,16 +60,19 @@ DAO.player.save = function(player)
             pHeading,
             JSON.stringify(playerData.metadata),
         })
-    -- TODO: check result value before return
-    print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
-    return true
+    if result then
+        print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+        return true
+    end
+    print(('[ERROR] DAO.player.save: Failed to save player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+    return false
 end
 
 ---Delete player
 ---@param player SPlayer
 ---@return boolean success
 DAO.player.delete = function(player)
-    -- TODO:
+    -- TODO: Delete
     print('[ERROR] DAO.player.delete - Not implemented!')
     return false
 end

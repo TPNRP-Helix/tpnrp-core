@@ -5,7 +5,7 @@ DAO.inventory = {}
 DAO.inventory.save = function(inventory)
     -- Don't execute any query if inventory or player or playerData doesn't exist
     if not inventory or not inventory.player or not inventory.player.playerData then
-        print('[ERROR] DAO.saveInventory: Invalid inventory or player data!')
+        print('[ERROR] DAO.inventory.save: Invalid inventory or player data!')
         return false
     end
     local citizen_id = inventory.player.playerData.citizen_id
@@ -42,7 +42,7 @@ DAO.inventory.save = function(inventory)
         print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
         return true
     end
-    print(('[ERROR] Failed to save inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
+    print(('[ERROR] DAO.inventory.save: Failed to save inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end

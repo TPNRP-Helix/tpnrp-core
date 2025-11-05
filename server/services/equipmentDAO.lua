@@ -5,7 +5,7 @@ DAO.equipment = {}
 DAO.equipment.save = function(equipment)
     -- Don't execute any query if equipment or player or playerData doesn't exist
     if not equipment or not equipment.player or not equipment.player.playerData then
-        print('[ERROR] DAO.saveInventory: Invalid inventory or player data!')
+        print('[ERROR] DAO.equipment.save: Invalid equipment or player data!')
         return false
     end
     local citizen_id = equipment.player.playerData.citizen_id
@@ -37,10 +37,10 @@ DAO.equipment.save = function(equipment)
     local result = DAO.DB.Execute(sql, params)
     if result then
         DAO.DB.Execute('COMMIT;')
-        print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
+        print(('[LOG] Saved equipment for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
         return true
     end
-    print(('[ERROR] Failed to save inventory for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
+    print(('[ERROR] DAO.equipment.save: Failed to save equipment for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end
