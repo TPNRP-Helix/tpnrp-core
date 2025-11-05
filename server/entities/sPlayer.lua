@@ -2,6 +2,7 @@
 ---@field playerData PlayerData|nil
 ---@field inventory SInventory|nil
 ---@field equipment SEquipment|nil
+---@field level SLevel|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -13,6 +14,7 @@ function SPlayer.new(playerController)
     -- Player's fields
     self.playerController = playerController
     self.playerData = nil
+    self.level = nil
     -- Player's Stacks
     self.inventory = nil
     self.equipment = nil
@@ -25,12 +27,10 @@ function SPlayer.new(playerController)
     local function _contructor()
         -- Get player data
         self.playerData = DAO.getPlayer(self.playerData.citizen_id)
-        
+        -- Get player's level
+        self.level = SLevel.new(self)
         -- Get player's inventory
-        self.inventory = SInventory.new(self)
-        -- Load player's inventory for this player
-        self.inventory:load('player')
-
+        self.inventory = SInventory.new(self, 'player')
         -- Get player's equipment
         self.equipment = SEquipment.new(self)
     end
@@ -74,7 +74,7 @@ function SPlayer.new(playerController)
             return GetEntityCoords(ped)
         end
         -- Default coords from config
-        return SHARED.CONFIG.DEFAULT_SPAWN.POSITION
+        return SHARED.DEFAULT.SPAWN.POSITION
     end
 
     ---Get player heading
@@ -85,7 +85,7 @@ function SPlayer.new(playerController)
             return GetEntityRotation(ped).Yaw
         end
         -- Default heading from config
-        return SHARED.CONFIG.DEFAULT_SPAWN.HEADING
+        return SHARED.DEFAULT.SPAWN.HEADING
     end
 
     /********************************/
@@ -112,7 +112,7 @@ function SPlayer.new(playerController)
                 character_info = {},
                 job = {},
                 gang = {},
-                position = SHARED.CONFIG.DEFAULT_SPAWN.POSITION,
+                position = SHARED.DEFAULT.SPAWN.POSITION,
                 metadata = {},
                 source = self.playerController,
                 license = PlayerState:GetHelixUserId(),

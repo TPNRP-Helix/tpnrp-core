@@ -6,14 +6,15 @@ SInventory = {}
 SInventory.__index = SInventory
 
 ---@param player SPlayer player entity
+---@param type 'player' | 'stack' | ''
 ---@return SInventory
-function SInventory.new(player)
+function SInventory.new(player, type)
     ---@class SInventory
     local self = setmetatable({}, SInventory)
 
     -- Public
     self.player = player
-    self.type = 'player'
+    self.type = type
     self.items = {}
 
     /********************************/
@@ -22,7 +23,10 @@ function SInventory.new(player)
 
     ---Contructor function
     local function _contructor()
-        -- Empty contrutor function
+        -- type is player then load it
+        if type == 'player' then
+            self:load('player')
+        end
     end
 
     /********************************/
