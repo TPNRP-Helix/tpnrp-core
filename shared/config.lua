@@ -13,12 +13,9 @@ end)
 
 SHARED.CONFIG = {
     LANGUAGE = 'en',
-    DEFAULT_SPAWN = {
-        POSITION = { x = -274.27, y = 6641.01, z = 7.45 },
-        HEADING = 270.0,
-    },
-    INVENTORY = {
-        WEIGHT_LIMIT = 80000, -- 80kg
-        SLOTS = 64,
+    BASE_EXP = 100, -- Base experience for level 1
+    MULTIPLIER = {
+        LEVEL = 1, -- Level multiplier 
+        SKILL = 1, -- Skill level multiplier
     },
 }

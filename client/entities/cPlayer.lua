@@ -42,7 +42,7 @@ function CPlayer.new(playerSource)
             return ped:K2_GetActorLocation()
         end
         -- Default coords from config
-        return SHARED.CONFIG.DEFAULT_SPAWN.POSITION
+        return SHARED.DEFAULT.SPAWN.POSITION
     end
 
     ---Get player heading
@@ -53,7 +53,7 @@ function CPlayer.new(playerSource)
             return ped:K2_GetActorRotation().Yaw
         end
         -- Default heading from config
-        return SHARED.CONFIG.DEFAULT_SPAWN.HEADING
+        return SHARED.DEFAULT.SPAWN.HEADING
     end
 
     /********************************/

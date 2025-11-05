@@ -19,23 +19,8 @@ function CInventory.new(player)
     ---Contructor function
     local function _contructor()
         -- On Update inventory
-        ---@param type 'add' | 'remove' inventory type
-        ---@param amount number item amount
-        ---@param item SInventoryItemType item data
         RegisterClientEvent('TPN:inventory:sync', function(type, amount, item)
-            if type == 'add' then
-                -- Push item to items table
-                self.items[item.slot] = item
-            elseif type == 'remove' then
-                -- Remove item from items table
-                self.items[item.slot] = nil
-            end
-            -- Update UI for items changes
-            TPNRPUI:SendEvent('ITEM_CHANGED', {
-                type = type,
-                amount = amount,
-                item = item
-            })
+            self:onSyncInventory(type, amount, item)
         end)
     end
 
@@ -44,6 +29,25 @@ function CInventory.new(player)
     /*          Functions           */
     /********************************/
     
+    -- On Update inventory
+    ---@param type 'add' | 'remove' inventory type
+    ---@param amount number item amount
+    ---@param item SInventoryItemType item data
+    function self:onSyncInventory(type, amount, item)
+        if type == 'add' then
+            -- Push item to items table
+            self.items[item.slot] = item
+        elseif type == 'remove' then
+            -- Remove item from items table
+            self.items[item.slot] = nil
+        end
+        -- Update UI for items changes
+        TPNRPUI:SendEvent('ITEM_CHANGED', {
+            type = type,
+            amount = amount,
+            item = item
+        })
+    end
 
     _contructor()
     ---- END ----
