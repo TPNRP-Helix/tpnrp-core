@@ -1,5 +1,9 @@
 {
     "shared": [
+        "shared/types/equipment.lua",
+        "shared/types/inventory.lua",
+        "shared/types/player.lua",
+        "shared/types/game.lua",
         "shared/index.lua",
         "shared/config.lua",
         "shared/items.lua",
@@ -15,10 +19,6 @@
         "client/main.lua"
     ],
     "server": [
-        "server/types/equipment.lua",
-        "server/types/inventory.lua",
-        "server/types/player.lua",
-        "server/types/game.lua",
         "server/services/baseDAO.lua",
         "server/services/equipmentDAO.lua",
         "server/services/inventoryDAO.lua",
