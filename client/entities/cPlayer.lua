@@ -17,9 +17,9 @@ function CPlayer.new(playerSource)
     -- Player's custom properties
     self.properties = {}
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -38,9 +38,9 @@ function CPlayer.new(playerSource)
         end, (1000 * 60) * SHARED.CONFIG.UPDATE_INTERVAL)
     end
 
-    /********************************/
-    /*           Player             */
-    /********************************/
+    ---/********************************/
+    ---/*           Player             */
+    ---/********************************/
 
     ---Get player coords
     ---@return Vector3 coords Player's coords
@@ -64,9 +64,9 @@ function CPlayer.new(playerSource)
         return SHARED.DEFAULT.SPAWN.HEADING
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
     
 
     _contructor()

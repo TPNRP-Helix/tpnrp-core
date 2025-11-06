@@ -27,9 +27,9 @@ function SPlayer.new(playerController)
     -- Player's custom methods
     self.methods = {}
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -43,9 +43,9 @@ function SPlayer.new(playerController)
         self.equipment = SEquipment.new(self)
     end
 
-    /********************************/
-    /*           Player             */
-    /********************************/
+    ---/********************************/
+    ---/*           Player             */
+    ---/********************************/
 
     ---Save player
     ---@return boolean success is save success or not
@@ -101,9 +101,9 @@ function SPlayer.new(playerController)
         return SHARED.DEFAULT.SPAWN.HEADING
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
 
     ---**Update playerData**
     --

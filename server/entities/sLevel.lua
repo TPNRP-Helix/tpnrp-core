@@ -19,9 +19,9 @@ function SLevel.new(playerController)
     -- Skills data
     self.skills = SHARED.DEFAULT.SKILLS
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -33,9 +33,9 @@ function SLevel.new(playerController)
         self.skills = levelData.skills or SHARED.DEFAULT.SKILLS
     end
 
-    /********************************/
-    /*           Player             */
-    /********************************/
+    ---/********************************/
+    ---/*           Player             */
+    ---/********************************/
 
     ---Save player
     ---@return boolean success is save success or not
@@ -43,9 +43,9 @@ function SLevel.new(playerController)
         return DAO.level.save(self)
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
 
     ---Get required experience for a level
     ---@param level number level

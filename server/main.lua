@@ -1,9 +1,9 @@
-/********************************/
-/*            Main              */
-/********************************/
+---/********************************/
+---/*            Main              */
+---/********************************/
 TPNRPServer = TPNRPServer.new()
 
 -- Exports for other resources
-exports('core', function()
+exports('tpnrp-core', 'getCore', function()
     return TPNRPServer
 end)

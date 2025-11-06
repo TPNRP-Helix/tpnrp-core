@@ -1,11 +1,11 @@
 TPNRPUI = WebUI('TPNRP-UI', 'tpnrp-core/client/tpnrp-ui/dist/index.html', 0)
 
-/********************************/
-/*            Main              */
-/********************************/
+---/********************************/
+---/*            Main              */
+---/********************************/
 TPNRPClient = TPNRPClient.new()
 
 -- Exports for other resources
-exports('core', function()
+exports('tpnrp-core', 'getCore', function()
     return TPNRPClient
 end)

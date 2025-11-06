@@ -1,7 +1,8 @@
+LOCALES = {}
 -- Load your language here
 local LANGUAGES = {
-    en = require('shared/locales/en'),
-    vi = require('shared/locales/vi'),
+    en = LOCALES.EN,
+    vi = LOCALES.VI,
     -- Add more languages by appending here, e.g.:
     -- es = require('shared/locales/es'),
 }
@@ -47,9 +48,9 @@ local function interpolate(str, params)
     end))
 end
 
-local M = {}
+LANGUAGE_LOADER = {}
 
-function M.load(lang)
+function LANGUAGE_LOADER.load(lang)
     local selected = buildLookup(lang or 'en')
     local fallback = buildLookup('en')
     local function t(key, params)
@@ -62,6 +63,6 @@ function M.load(lang)
     return selected, t
 end
 
-return M
+return LANGUAGE_LOADER
 
 

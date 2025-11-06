@@ -15,9 +15,9 @@ function SEquipment.new(player)
     self.player = player
     self.items = {}
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -28,9 +28,9 @@ function SEquipment.new(player)
         end
     end
 
-    /********************************/
-    /*           Functions          */
-    /********************************/
+    ---/********************************/
+    ---/*           Functions          */
+    ---/********************************/
 
     ---Save equipment
     ---@return boolean success

@@ -1,12 +1,12 @@
 {
     "shared": [
+        "shared/locales/index.lua",
+        "shared/locales/en.lua",
+        "shared/locales/vi.lua",
         "shared/index.lua",
         "shared/config.lua",
         "shared/items.lua",
         "shared/default.lua",
-        "shared/locales/index.lua",
-        "shared/locales/en.lua",
-        "shared/locales/vi.lua",
         "shared/types/equipment.lua",
         "shared/types/inventory.lua",
         "shared/types/player.lua",

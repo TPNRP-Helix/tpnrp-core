@@ -3,9 +3,9 @@
 TPNRPServer = {}
 TPNRPServer.__index = TPNRPServer
 
-/********************************/
-/*        [Server] Core         */
-/********************************/
+---/********************************/
+---/*        [Server] Core         */
+---/********************************/
 
 --- Creates a new instance of TPNRPServer.
 ---@return TPNRPServer
@@ -17,9 +17,9 @@ function TPNRPServer.new()
     self.shared = SHARED    -- Bind shared for other resources to use it via exports
     self.useableItems = {}  -- Useable items table
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -28,9 +28,9 @@ function TPNRPServer.new()
        RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
     end
 
-    /********************************/
-    /*       Source/Identify        */
-    /********************************/
+    ---/********************************/
+    ---/*       Source/Identify        */
+    ---/********************************/
 
     ---Get player by source
     ---@param source number player source
@@ -71,9 +71,9 @@ function TPNRPServer.new()
         return nil
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
 
     ---Create a new useable item
     ---@param itemName string item name
@@ -89,9 +89,9 @@ function TPNRPServer.new()
         return self.useableItems[itemName] ~= nil
     end
 
-    /********************************/
-    /*           Events             */
-    /********************************/
+    ---/********************************/
+    ---/*           Events             */
+    ---/********************************/
 
     ---On Player Unloaded
     ---@param source number player source
