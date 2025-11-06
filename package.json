@@ -1,34 +1,15 @@
 {
     "shared": [
-        "shared/types/equipment.lua",
-        "shared/types/inventory.lua",
-        "shared/types/player.lua",
-        "shared/types/game.lua",
-        "shared/index.lua",
-        "shared/config.lua",
-        "shared/items.lua",
-        "shared/default.lua",
-        "shared/locales/en.lua",
-        "shared/locales/vi.lua",
-        "shared/locales/index.lua"
+        "shared/types/*.lua",
+        "shared/*.lua"
     ],
     "client": [
-        "client/entities/core.lua",
-        "client/entities/cPlayer.lua",
-        "client/entities/cInventory.lua",
+        "client/entities/*.lua",
         "client/main.lua"
     ],
     "server": [
-        "server/services/baseDAO.lua",
-        "server/services/equipmentDAO.lua",
-        "server/services/inventoryDAO.lua",
-        "server/services/playerDAO.lua",
-        "server/services/levelDAO.lua",
-        "server/entities/sEquipment.lua",
-        "server/entities/sInventory.lua",
-        "server/entities/sPlayer.lua",
-        "server/entities/sLevel.lua",
-        "server/classes/core.lua",
+        "server/services/*.lua",
+        "server/entities/*.lua",
         "server/main.lua"
     ]
 }
