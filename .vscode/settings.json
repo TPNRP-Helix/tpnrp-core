@@ -13,6 +13,7 @@
         "RegisterServerEvent",
         "WebUI",
         "Timer",
-        "TriggerServerEvent"
+        "TriggerServerEvent",
+        "onShutdown"
     ]
 }

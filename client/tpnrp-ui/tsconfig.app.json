@@ -2,7 +2,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@---/*": ["./src---/*"]
+      "@/*": [
+        "./src/*"
+      ]
     },
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2022",
@@ -12,7 +14,7 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
-    ---/* Bundler mode */
+    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
@@ -20,7 +22,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    ---/* Linting */
+    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
