@@ -1,4 +1,4 @@
-return {
+LOCALES.VI = {
     core = {
         unknown_key = "Thiếu bản dịch: {key}",
     },

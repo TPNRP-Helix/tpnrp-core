@@ -14,9 +14,9 @@ function CLevel.new(player)
     self.exp = 0
     self.skills = SHARED.DEFAULT.SKILLS
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -27,9 +27,9 @@ function CLevel.new(player)
     end
 
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
     
     -- On sync level
     ---@param type 'add' | 'remove' level type

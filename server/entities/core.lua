@@ -3,9 +3,9 @@
 TPNRPServer = {}
 TPNRPServer.__index = TPNRPServer
 
-/********************************/
-/*        [Server] Core         */
-/********************************/
+---/********************************/
+---/*        [Server] Core         */
+---/********************************/
 
 --- Creates a new instance of TPNRPServer.
 ---@return TPNRPServer
@@ -17,27 +17,20 @@ function TPNRPServer.new()
     self.shared = SHARED    -- Bind shared for other resources to use it via exports
     self.useableItems = {}  -- Useable items table
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
        --- Base-game event
-       RegisterServerEvent('HEvent:PlayerUnloaded', function(source)
-            ---@type SPlayer | nil
-            local player = self:getPlayerBySource(source)
-            if not player then
-                print('[ERROR] TPNRPServer>HEvent:PlayerUnloaded - Player not found!')
-                return
-            end
-            player:logout()
-        end)
+       RegisterServerEvent('HEvent:PlayerUnloaded', function(source) self:onPlayerUnloaded(source) end)
+       RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
     end
 
-    /********************************/
-    /*       Source/Identify        */
-    /********************************/
+    ---/********************************/
+    ---/*       Source/Identify        */
+    ---/********************************/
 
     ---Get player by source
     ---@param source number player source
@@ -78,9 +71,9 @@ function TPNRPServer.new()
         return nil
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
 
     ---Create a new useable item
     ---@param itemName string item name
@@ -96,9 +89,38 @@ function TPNRPServer.new()
         return self.useableItems[itemName] ~= nil
     end
 
-    ----------------------------------------------------------------------
-    --- Register Event
-    ----------------------------------------------------------------------
+    ---/********************************/
+    ---/*           Events             */
+    ---/********************************/
+
+    ---On Player Unloaded
+    ---@param source number player source
+    function self:onPlayerUnloaded(source)
+        ---@type SPlayer | nil
+        local player = self:getPlayerBySource(source)
+        if not player then
+            print('[ERROR] TPNRPServer>onPlayerUnloaded - Player not found!')
+            return
+        end
+        player:logout()
+    end
+
+    function self:onPlayerSync(source)
+        ---@type SPlayer | nil
+        local player = self:getPlayerBySource(source)
+        if not player then
+            print('[ERROR] TPNRPServer.onPlayerSync - Player not found!')
+            return
+        end
+        -- Update basic needs
+        player:basicNeedTick()
+        -- Save player data
+        local isSaved = player:save()
+        if not isSaved then
+            print('[ERROR] TPNRPServer.onPlayerSync - Failed to save player!')
+        end
+    end
+
 
     _contructor()
     return self

@@ -3,9 +3,9 @@
 TPNRPClient = {}
 TPNRPClient.__index = TPNRPClient
 
-/********************************/
-/*        [Server] Core         */
-/********************************/
+---/********************************/
+---/*        [Server] Core         */
+---/********************************/
 
 --- Creates a new instance of TPNRPClient.
 ---@return TPNRPClient
@@ -29,9 +29,9 @@ function TPNRPClient.new()
         end)
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
     
 
     _contructor()

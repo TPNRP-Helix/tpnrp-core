@@ -1,4 +1,4 @@
-return {
+LOCALES.EN = {
     core = {
         unknown_key = "Unknown translation: {key}",
     },

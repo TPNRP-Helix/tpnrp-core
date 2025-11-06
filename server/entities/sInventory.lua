@@ -17,9 +17,9 @@ function SInventory.new(player, type)
     self.type = type
     self.items = {}
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -29,9 +29,9 @@ function SInventory.new(player, type)
         end
     end
 
-    /********************************/
-    /*           Functions          */
-    /********************************/
+    ---/********************************/
+    ---/*           Functions          */
+    ---/********************************/
 
     ---Save inventory
     ---@return boolean success

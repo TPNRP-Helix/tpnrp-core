@@ -11,6 +11,9 @@
         "GetEntityRotation",
         "Wait",
         "RegisterServerEvent",
-        "WebUI"
+        "WebUI",
+        "Timer",
+        "TriggerServerEvent",
+        "onShutdown"
     ]
 }

@@ -12,9 +12,9 @@ function CInventory.new(player)
     self.player = player
     self.items = {}
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -25,9 +25,9 @@ function CInventory.new(player)
     end
 
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
     
     -- On Update inventory
     ---@param type 'add' | 'remove' inventory type

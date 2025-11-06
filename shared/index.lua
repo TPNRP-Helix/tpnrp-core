@@ -1,5 +1,4 @@
 SHARED = {}
-
 ---Generate a random alphabic string of the given length
 ---@param length number
 ---@return string
@@ -266,7 +265,6 @@ end
 -----------------------------------------------------------------------
 --- Locale initialization (server-config driven)
 -----------------------------------------------------------------------
-local locale = require('shared/locales')
-local L, t = locale.load(SHARED.CONFIG and SHARED.CONFIG.LANGUAGE or 'en')
+local L, t = LANGUAGE_LOADER.load(SHARED.CONFIG and SHARED.CONFIG.LANGUAGE or 'en')
 SHARED.L = L
 SHARED.t = t

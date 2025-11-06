@@ -11,17 +11,25 @@ function SPlayer.new(playerController)
     ---@class SPlayer
     local self = setmetatable({}, SPlayer)
 
-    -- Player's fields
+    -- Player's controller
     self.playerController = playerController
+    -- Player's data
     self.playerData = nil
+    -- Player's level
     self.level = nil
-    -- Player's Stacks
+    -- Player's inventory
     self.inventory = nil
+    -- Player's equipment
     self.equipment = nil
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    -- Player's custom properties
+    self.properties = {}
+    -- Player's custom methods
+    self.methods = {}
+
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -35,9 +43,9 @@ function SPlayer.new(playerController)
         self.equipment = SEquipment.new(self)
     end
 
-    /********************************/
-    /*           Player             */
-    /********************************/
+    ---/********************************/
+    ---/*           Player             */
+    ---/********************************/
 
     ---Save player
     ---@return boolean success is save success or not
@@ -93,15 +101,15 @@ function SPlayer.new(playerController)
         return SHARED.DEFAULT.SPAWN.HEADING
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
 
     ---**Update playerData**
     --
     ---Sync playerData to client-side
     function self:updatePlayerData()
-        TriggerClientEvent(self.playerController, 'TPN:player:updatePlayerData', self.playerData)
+        TriggerClientEvent(self.playerController, 'TPN:player:updatePlayerData', self.playerData, self.properties)
     end
 
     ---On Player logged in
@@ -151,6 +159,57 @@ function SPlayer.new(playerController)
         end
         -- Remove player from players table
         TPNRPServer.players[self.playerController] = nil
+    end
+
+    ---Add custom method to player
+    ---@param methodName string method name
+    ---@param methodFunction function method function
+    function self:addMethod(methodName, methodFunction)
+        self.methods[methodName] = methodFunction
+    end
+
+    ---Add custom property to player
+    ---@param propertyName string property name
+    ---@param propertyValue any property value
+    function self:addProperty(propertyName, propertyValue)
+        self.properties[propertyName] = propertyValue
+    end
+
+    ---Set metadata value
+    ---@param key string metadata key
+    ---@param value any metadata value
+    ---@param isSyncToClient boolean|nil is sync to client (optional, defaults to false)
+    function self:setMetaData(key, value, isSyncToClient)
+        if isSyncToClient == nil then
+            isSyncToClient = false
+        end
+        -- hunger and thirst must be between 0 and 100
+        if key == 'hunger' or key == 'thirst' then
+            value = value > 100 and 100 or value
+        end
+        -- Assign new metadata
+        self.playerData.metadata[key] = value
+        -- Sync to client if needed
+        if isSyncToClient then
+            self:updatePlayerData()
+        end
+    end
+
+    ---Update basic needs
+    function self:basicNeedTick()
+        local newHunger = self.playerData.metadata['hunger'] - SHARED.CONFIG.BASIC_NEEDS.HUNGER_RATE
+        local newThirst = self.playerData.metadata['thirst'] - SHARED.CONFIG.BASIC_NEEDS.THIRST_RATE
+        if newHunger <= 0 then newHunger = 0 end
+        if newThirst <= 0 then newThirst = 0 end
+        -- Assign new hunger and thirst
+        -- Don't sync to client because we will sync at next line
+        -- This strategy is to optimize packet sending
+        self:setMetaData('hunger', newHunger)
+        self:setMetaData('thirst', newThirst)
+        -- Sync to client
+        self:updatePlayerData()
+        -- Update hunger and thirst in client-side UI
+        TriggerClientEvent(self.playerController, 'TPN:ui:updateBasicNeeds', newHunger, newThirst)
     end
 
     _contructor()

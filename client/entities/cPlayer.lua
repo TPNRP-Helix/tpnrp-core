@@ -12,12 +12,14 @@ function CPlayer.new(playerSource)
     -- Player's fields
     self.playerSource = playerSource
     self.playerData = nil
-    -- Player's Stacks
+    -- Player's inventory
     self.inventory = nil
+    -- Player's custom properties
+    self.properties = {}
 
-    /********************************/
-    /*         Initializes          */
-    /********************************/
+    ---/********************************/
+    ---/*         Initializes          */
+    ---/********************************/
 
     ---Contructor function
     local function _contructor()
@@ -25,14 +27,20 @@ function CPlayer.new(playerSource)
         self.inventory = CInventory.new(self)
         -- On Update playerData
         ---@param playerData PlayerData
-        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData)
+        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
             self.playerData = playerData
+            self.properties = properties or {}
         end)
+
+        -- Update
+        Timer.SetInterval(function()
+            TriggerServerEvent('TPN:player:syncPlayer')
+        end, (1000 * 60) * SHARED.CONFIG.UPDATE_INTERVAL)
     end
 
-    /********************************/
-    /*           Player             */
-    /********************************/
+    ---/********************************/
+    ---/*           Player             */
+    ---/********************************/
 
     ---Get player coords
     ---@return Vector3 coords Player's coords
@@ -56,9 +64,9 @@ function CPlayer.new(playerSource)
         return SHARED.DEFAULT.SPAWN.HEADING
     end
 
-    /********************************/
-    /*          Functions           */
-    /********************************/
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
     
 
     _contructor()
