@@ -16,6 +16,8 @@
         "TriggerServerEvent",
         "onShutdown",
         "TriggerCallback",
-        "RegisterCallback"
+        "RegisterCallback",
+        "GetActorsWithTag",
+        "Input"
     ]
 }
