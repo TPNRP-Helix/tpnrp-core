@@ -14,6 +14,8 @@
         "WebUI",
         "Timer",
         "TriggerServerEvent",
-        "onShutdown"
+        "onShutdown",
+        "TriggerCallback",
+        "RegisterCallback"
     ]
 }

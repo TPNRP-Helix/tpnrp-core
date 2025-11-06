@@ -26,6 +26,8 @@ function TPNRPServer.new()
        --- Base-game event
        RegisterServerEvent('HEvent:PlayerUnloaded', function(source) self:onPlayerUnloaded(source) end)
        RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
+       -- Bind callback events
+       self:bindCallbackEvents()
     end
 
     ---/********************************/
@@ -105,6 +107,8 @@ function TPNRPServer.new()
         player:logout()
     end
 
+    ---On Player Sync
+    ---@param source number player source
     function self:onPlayerSync(source)
         ---@type SPlayer | nil
         local player = self:getPlayerBySource(source)
@@ -121,6 +125,36 @@ function TPNRPServer.new()
         end
     end
 
+    ---/********************************/
+    ---/*       Callback Events        */
+    ---/********************************/
+    
+    ---Bind callback events
+    function self:bindCallbackEvents()
+        RegisterCallback('TPN:player:callback:getCharacters', function(source) self:onCallbackGetCharacters(source) end)
+    end
+
+    ---On Callback Get Characters
+    ---@param source PlayerController source
+    ---@return table<number, PlayerData> characters
+    function self:onCallbackGetCharacters(source)
+        local playerState = source:GetLyraPlayerState()
+        local license = playerState:GetHelixUserId()
+        local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
+
+        local result = DAO.player.getCharacters(license)
+        if not result then
+            return {
+                maxCharacters = maxCharacters,
+                characters = {},
+            }
+        end
+        
+        return {
+            maxCharacters = maxCharacters,
+            characters = result,
+        }
+    end
 
     _contructor()
     return self

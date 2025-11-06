@@ -76,3 +76,30 @@ DAO.player.delete = function(player)
     print('[ERROR] DAO.player.delete - Not implemented!')
     return false
 end
+
+---Get player's characters
+---@param license string
+---@return table<number, PlayerData> characters
+DAO.player.getCharacters = function(license)
+    local result = DAO.DB.Select('SELECT * FROM players WHERE license = ?', { license })
+    if not result then return {} end
+    -- Format characters
+    ---@type table<number, PlayerData>
+    local characters = {}
+    for i = 1, #result do
+        local rowData = result[i]
+        if type(rowData) == 'table' then
+            local row = {}
+            for CName, CValue in pairs(rowData) do
+                row[CName] = CValue
+            end
+            row.charinfo            = JSON.parse(row.charinfo)
+            row.money               = JSON.parse(row.money)
+            row.job                 = JSON.parse(row.job)
+
+            characters[#characters + 1] = row
+        end
+    end
+    -- Return characters
+    return characters
+end
