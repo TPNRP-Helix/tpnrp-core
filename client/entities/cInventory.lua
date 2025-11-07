@@ -9,6 +9,7 @@ function CInventory.new(player)
     ---@class CInventory
     local self = setmetatable({}, CInventory)
 
+    self.core = player.core
     self.player = player
     self.items = {}
 
@@ -42,7 +43,7 @@ function CInventory.new(player)
             self.items[item.slot] = nil
         end
         -- Update UI for items changes
-        TPNRPUI:SendEvent('ITEM_CHANGED', {
+        self.core.webUI:sendEvent('ITEM_CHANGED', {
             type = type,
             amount = amount,
             item = item

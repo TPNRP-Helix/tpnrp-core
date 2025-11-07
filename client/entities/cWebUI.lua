@@ -39,7 +39,7 @@ function CWebUI.new(core)
     ---Destroy webUI entity
     function self:destroy()
         if not self._webUI then return end
-        self._webUI.Destroy()
+        self._webUI:Destroy()
         self._webUI = nil
     end
 
