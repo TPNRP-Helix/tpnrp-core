@@ -4,7 +4,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
-const IS_SHOW_BG = false
+import { Kbd } from "@/components/ui/kbd"
+const IS_SHOW_BG = true
 
 export const DevMode = () => {
     const [isOpenDevMode, setIsOpenDevMode] = useState(false)
@@ -58,7 +59,10 @@ export const DevMode = () => {
         </Sheet>
         <Sheet open={isShowConsole} onOpenChange={setIsShowConsole}>
             <SheetTrigger asChild>
-                <Button className="relative top-1 left-1 ml-2">Console</Button>
+                <Button className="relative top-1 left-1 ml-2 bg-primary! text-primary-foreground!">
+                    <Kbd>F8</Kbd>
+                    Console
+                </Button>
             </SheetTrigger>
             <SheetContent className="w-[800px] sm:max-w-[800px]">
                 <SheetHeader>

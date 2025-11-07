@@ -28,7 +28,7 @@ function CWebUI.new(core)
 
         Input.BindKey('F8', function()
             self:sendEvent('onToggleConsole')
-        end, 'Released')
+        end, 'Pressed')
     end
 
 
