@@ -23,11 +23,11 @@ function TPNRPServer.new()
 
     ---Contructor function
     local function _contructor()
-       --- Base-game event
-       RegisterServerEvent('HEvent:PlayerUnloaded', function(source) self:onPlayerUnloaded(source) end)
-       RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
-       -- Bind callback events
-       self:bindCallbackEvents()
+        --- Base-game event
+        RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) self:onPlayerUnloaded(playerController) end)
+        RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
+        -- Bind callback events
+        self:bindCallbackEvents()
     end
 
     ---/********************************/
@@ -131,12 +131,12 @@ function TPNRPServer.new()
     
     ---Bind callback events
     function self:bindCallbackEvents()
-        RegisterCallback('TPN:player:callback:getCharacters', function(source) self:onCallbackGetCharacters(source) end)
+        RegisterCallback('TPN:player:callback:getCharacters', function(source) return self:onCallbackGetCharacters(source) end)
     end
 
     ---On Callback Get Characters
     ---@param source PlayerController source
-    ---@return table<number, PlayerData> characters
+    ---@return { maxCharacters: number, characters: table<number, PlayerData> } data characters of this player
     function self:onCallbackGetCharacters(source)
         local playerState = source:GetLyraPlayerState()
         local license = playerState:GetHelixUserId()

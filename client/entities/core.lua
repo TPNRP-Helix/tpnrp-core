@@ -43,9 +43,10 @@ function TPNRPClient.new()
         -- On Player possessed
         RegisterClientEvent('HEvent:PlayerPossessed', function()
             print('HEvent:PlayerPossessed')
+            ---@param characters { maxCharacters: number, characters: table<number, PlayerData> } data characters of this player
             MODEL.player.getCharacters(function(characters)
                 print(characters)
-                self.webUI:sendEvent('ON_PLAYER_LOADED', characters)
+                self.webUI:sendEvent('setPlayerCharacters', characters)
             end)
         end)
         -- On Player unpossessed
