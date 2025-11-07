@@ -5,29 +5,35 @@ import { useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
 import { Kbd } from "@/components/ui/kbd"
+import { useDevModeStore } from "@/stores/useDevModeStore"
+import { useGameStore } from "@/stores/useGameStore"
+import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useWebUIMessage } from "@/hooks/use-hevent"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
-    const [isOpenDevMode, setIsOpenDevMode] = useState(false)
-    const [isShowConsole, setIsShowConsole] = useState(false)
+    const [enableDevMode, setEnableDevMode] = useState(true)
+    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen } = useDevModeStore()
+    const { toggleHud } = useGameStore()
+    const { toggleSettings } = useGameSettingStore()
 
-    const handleMessage = (event: MessageEvent) => {
-        if (!event.data || !event.data.name) return
-        console.log('event.data', event.data)
-        switch (event.data.name) {
-            case "onToggleConsole":
-                setIsShowConsole(prev => !prev)
-            break
-        }
-    }
+    useWebUIMessage<[boolean]>('setConsoleOpen', (args) => {
+        setConsoleOpen(args[0])
+    })
+    useWebUIMessage<[boolean]>('setDevModeOpen', (args) => {
+        setDevModeOpen(args[0])
+    })
 
     useEffect(() => {
-        window.addEventListener("message", handleMessage)
-        return () => {
-            window.removeEventListener("message", handleMessage)
+        const isInBrowser = window.location.href.includes("http://localhost:")
+        if (isInBrowser) {
+            setEnableDevMode(true)
         }
     }, [])
     
+    // Don't render the dev mode tools if not in browser
+    if (!enableDevMode) return null
+
     return (
         <>
         {IS_SHOW_BG && (
@@ -35,9 +41,17 @@ export const DevMode = () => {
                 <img src={helixBgImage} alt="DevMode" className="w-full h-full object-cover" />
             </div>
         )}
-        <Sheet open={isOpenDevMode} onOpenChange={setIsOpenDevMode}>
+        <Sheet open={isDevModeOpen} onOpenChange={(open) => {
+            setDevModeOpen(open)
+            if (!open) {
+                window.hEvent("doOutFocus")
+            }
+        }}>
             <SheetTrigger asChild>
-                <Button className="relative top-1 left-1">Dev Mode</Button>
+                <Button className="relative top-1 left-1">
+                    <Kbd>F7</Kbd>
+                    Dev Mode Tools
+                </Button>
             </SheetTrigger>
             <SheetContent side="left">
                 <SheetHeader>
@@ -47,7 +61,8 @@ export const DevMode = () => {
                     </SheetDescription>
                 </SheetHeader>
                 <div className="grid gap-4 p-4">
-                    <Button onClick={() => setIsOpenDevMode(false)}>Toggle Basic needs HUD</Button>
+                    <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
+                    <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="inventory">Inventory</TabsTrigger>
@@ -63,7 +78,12 @@ export const DevMode = () => {
                 </div>
             </SheetContent>
         </Sheet>
-        <Sheet open={isShowConsole} onOpenChange={setIsShowConsole}>
+        <Sheet open={isConsoleOpen} onOpenChange={(open) => {
+            setConsoleOpen(open)
+            if (!open) {
+                window.hEvent("doOutFocus")
+            }
+        }}>
             <SheetTrigger asChild>
                 <Button className="relative top-1 left-1 ml-2 bg-primary! text-primary-foreground!">
                     <Kbd>F8</Kbd>
