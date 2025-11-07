@@ -21,3 +21,10 @@ EEquipmentClothType = {
     Watch = "watch",
     Bracelets = "bracelets"
 }
+
+---@enum EWebUIInputMode
+EWebUIInputMode = {
+    None = 0,   -- Focus on game world
+    UI = 1,     -- Focus on UI only
+    Both = 2    -- Focus on game world and UI
+}

@@ -71,6 +71,10 @@ function CPlayer.new(core)
         RegisterClientEvent('HEvent:VoiceStateChanged', function(isTalking)
             print('HEvent:VoiceStateChanged')
         end)
+        -- On Health changed
+        RegisterClientEvent('HEvent:HealthChanged', function(oldHealth, newHealth)
+            self.core.webUI:sendEvent('setHealth', newHealth)
+        end)
     end
 
     ---Bind TPN events

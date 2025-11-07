@@ -13,6 +13,7 @@ function CWebUI.new(core)
 
     self._core = core
     self._webUI = nil
+    self._isFocusing = false
     -- Log
     self.nucleus = nil
     self.lastLogIndex = 0
@@ -24,11 +25,42 @@ function CWebUI.new(core)
     ---Contructor function
     local function _contructor()
         self._webUI = WebUI('tpnrp-core', 'tpnrp-core/client/tpnrp-ui/dist/index.html', 0)
+        self._webUI:BringToFront()
+        -- Bind log tool
         self:bindLog()
 
-        Input.BindKey('F8', function()
-            self:sendEvent('onToggleConsole')
+        -- On pressed `F7` to open dev mode
+        Input.BindKey('F7', function()
+            if self._isFocusing then
+                -- Close focus 
+                self:outFocus()
+                self:sendEvent('setDevModeOpen', false)
+                return
+            end
+            -- Open focus and open console
+            self._webUI:SetInputMode(EWebUIInputMode.UI)
+            self:sendEvent('setDevModeOpen', true)
+            self._isFocusing = true
         end, 'Pressed')
+
+        -- On pressed `F8` to open console
+        Input.BindKey('F8', function()
+            if self._isFocusing then
+                -- Close focus and close console
+                self:outFocus()
+                self:sendEvent('setConsoleOpen', false)
+                return
+            end
+            -- Open focus and open console
+            self._webUI:SetInputMode(EWebUIInputMode.UI)
+            self:sendEvent('setConsoleOpen', true)
+            self._isFocusing = true
+        end, 'Pressed')
+
+        -- out focus UI
+        self:registerEventHandler('doOutFocus', function()
+            self:outFocus()
+        end)
     end
 
 
@@ -53,7 +85,7 @@ function CWebUI.new(core)
         end
         -- TODO: Implement a cheat detection system for sending events
         -- All event that is not sent by authorized packages should be dropped
-        self._webUI.SendEvent(event, ...)
+        self._webUI:SendEvent(event, ...)
         print('[INFO] CWebUI.SEND_EVENT - event \'' .. event .. '\' sent to webUI!')
         return true
     end
@@ -68,9 +100,19 @@ function CWebUI.new(core)
         end
         -- TODO: Implement a cheat detection system for event handlers
         -- All event handlers that are not registered by authorized packages should be dropped
-        self._webUI.RegisterEventHandler(event, callback)
+        self._webUI:RegisterEventHandler(event, callback)
         print('[INFO] CWebUI.REGISTER_EVENT_HANDLER - event handler registered!')
         return true
+    end
+
+    ---Out focus from webUI
+    function self:outFocus()
+        if not self._webUI then
+            print('[ERROR] CWebUI.OUT_FOCUS - webUI is not initialized!')
+            return false
+        end
+        self._webUI:SetInputMode(EWebUIInputMode.None)
+        self._isFocusing = false
     end
 
     function self:getActorsWithTag(tag)

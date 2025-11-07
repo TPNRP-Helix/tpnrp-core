@@ -19,6 +19,8 @@
 ---@field GetLyraPlayerState fun(): LyraPlayerState
 
 ---@class WebUI
----@field SendEvent fun(event: string, ...: any): nil
----@field Destroy fun(): nil
----@field RegisterEventHandler fun(event: string, callback: function): nil
+---@field SendEvent fun(self: WebUI, event: string, ...: any): nil
+---@field Destroy fun(self: WebUI): nil
+---@field RegisterEventHandler fun(self: WebUI, event: string, callback: function): nil
+---@field SetInputMode fun(self: WebUI, mode: EWebUIInputMode): nil
+---@field BringToFront fun(self: WebUI): nil
