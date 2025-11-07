@@ -1,21 +1,23 @@
 ---@class CPlayer
+---@field core TPNRPClient core entity
 ---@field playerData PlayerData|nil
 ---@field inventory CInventory|nil
 CPlayer = {}
 CPlayer.__index = CPlayer
 
 ---@return CPlayer
-function CPlayer.new(playerSource)
+function CPlayer.new(core)
     ---@class CPlayer
     local self = setmetatable({}, CPlayer)
 
-    -- Player's fields
-    self.playerSource = playerSource
+    self.core = core
     self.playerData = nil
     -- Player's inventory
     self.inventory = nil
     -- Player's custom properties
     self.properties = {}
+    -- Player's dead state
+    self.isDead = false
 
     ---/********************************/
     ---/*         Initializes          */
@@ -23,15 +25,12 @@ function CPlayer.new(playerSource)
 
     ---Contructor function
     local function _contructor()
+        -- Bind Helix events (Default events of game)
+        self:bindHelixEvents()
+        -- Bind TPN events (Custom events of TPNRP-Core)
+        self:bindTPNEvents()
         -- Get player's inventory
         self.inventory = CInventory.new(self)
-        -- On Update playerData
-        ---@param playerData PlayerData
-        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
-            self.playerData = playerData
-            self.properties = properties or {}
-        end)
-
         -- Update
         Timer.SetInterval(function()
             TriggerServerEvent('TPN:player:syncPlayer')
@@ -45,10 +44,7 @@ function CPlayer.new(playerSource)
     ---Get player coords
     ---@return Vector3 coords Player's coords
     function self:getCoords()
-        local ped = self.playerSource:K2_GetPawn()
-        if ped then
-            return ped:K2_GetActorLocation()
-        end
+        -- TODO: Implement this
         -- Default coords from config
         return SHARED.DEFAULT.SPAWN.POSITION
     end
@@ -56,10 +52,7 @@ function CPlayer.new(playerSource)
     ---Get player heading
     ---@return number heading Player's heading
     function self:getHeading()
-        local ped = self.playerSource:K2_GetPawn()
-        if ped then
-            return ped:K2_GetActorRotation().Yaw
-        end
+        -- TODO: Implement this
         -- Default heading from config
         return SHARED.DEFAULT.SPAWN.HEADING
     end
@@ -68,6 +61,31 @@ function CPlayer.new(playerSource)
     ---/*          Functions           */
     ---/********************************/
     
+    ---Bind Helix events
+    function self:bindHelixEvents()
+        -- On Player death
+        RegisterClientEvent('HEvent:Death', function()
+            self.isDead = true
+        end)
+        -- On Voice state changed
+        RegisterClientEvent('HEvent:VoiceStateChanged', function(isTalking)
+            print('HEvent:VoiceStateChanged')
+        end)
+        -- On Health changed
+        RegisterClientEvent('HEvent:HealthChanged', function(oldHealth, newHealth)
+            self.core.webUI:sendEvent('setHealth', newHealth)
+        end)
+    end
+
+    ---Bind TPN events
+    function self:bindTPNEvents()
+        -- On Update playerData
+        ---@param playerData PlayerData
+        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
+            self.playerData = playerData
+            self.properties = properties or {}
+        end)
+    end
 
     _contructor()
     ---- END ----

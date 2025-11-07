@@ -9,5 +9,6 @@ SHARED.CONFIG = {
     BASIC_NEEDS = {
         HUNGER_RATE = 5, -- Hunger rate
         THIRST_RATE = 4, -- Thirst rate
-    }
+    },
+    MAX_CHARACTERS = 3, -- Maximum number of characters per player
 }

@@ -1,5 +1,9 @@
 ---@class CLevel
+---@field core TPNRPClient core entity
 ---@field player CPlayer player entity
+---@field level number current level
+---@field exp number current experience
+---@field skills table<string, {level: number, exp: number}> skills data
 CLevel = {}
 CLevel.__index = CLevel
 
@@ -9,6 +13,7 @@ function CLevel.new(player)
     ---@class CLevel
     local self = setmetatable({}, CLevel)
 
+    self.core = player.core
     self.player = player
     self.level = SHARED.DEFAULT.LEVEL
     self.exp = 0
@@ -54,7 +59,7 @@ function CLevel.new(player)
             end
         end
         -- Update UI for level changes
-        TPNRPUI:SendEvent('LEVEL_EXP_GAIN', {
+        self.core.webUI:sendEvent('LEVEL_EXP_GAIN', {
             type = type,
             name = name,
             expGain = expGain,

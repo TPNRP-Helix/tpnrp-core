@@ -1,0 +1,40 @@
+import { create } from "zustand"
+
+export type ConsoleMessage = {
+  message: string
+  index: number
+}
+
+type DevModeState = {
+  isDevModeOpen: boolean
+  isConsoleOpen: boolean
+  consoleMessages: ConsoleMessage[]
+  setDevModeOpen: (value: boolean) => void
+  toggleDevMode: () => void
+  setConsoleOpen: (value: boolean) => void
+  toggleConsole: () => void
+  appendConsoleMessage: (message: ConsoleMessage) => void
+  resetConsole: () => void
+}
+
+export const useDevModeStore = create<DevModeState>((set) => ({
+  isDevModeOpen: false,
+  isConsoleOpen: false,
+  consoleMessages: [],
+  setDevModeOpen: (value) => set({ isDevModeOpen: value }),
+  toggleDevMode: () =>
+    set((state) => ({
+      isDevModeOpen: !state.isDevModeOpen,
+    })),
+  setConsoleOpen: (value) => set({ isConsoleOpen: value }),
+  toggleConsole: () =>
+    set((state) => ({
+      isConsoleOpen: !state.isConsoleOpen,
+    })),
+  appendConsoleMessage: (message) =>
+    set((state) => ({
+      consoleMessages: [...state.consoleMessages, message],
+    })),
+  resetConsole: () => set({ consoleMessages: [] }),
+}))
+

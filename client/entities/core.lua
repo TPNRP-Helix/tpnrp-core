@@ -1,5 +1,6 @@
 ---@class TPNRPClient
 ---@field player CPlayer
+---@field ui CWebUI webUI entity
 TPNRPClient = {}
 TPNRPClient.__index = TPNRPClient
 
@@ -15,9 +16,46 @@ function TPNRPClient.new()
     
     self.player = nil
     self.shared = SHARED    -- Bind shared for other resources to use it via exports
+    self.webUI = nil
 
     ---Contructor function
     local function _contructor()
+        self.webUI = CWebUI.new(self)
+        self:bindHelixEvents()
+        self:bindTPNEvents()
+    end
+
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
+    
+    ---Bind Helix events
+    function self:bindHelixEvents()
+        -- Helix event
+        RegisterClientEvent('HEvent:PlayerLoggedIn', function()
+            print('HEvent:PlayerLoggedIn')
+        end)
+        
+        RegisterClientEvent('HEvent:PlayerLoaded', function()
+            print('HEvent:PlayerLoaded')
+        end)
+
+        -- On Player possessed
+        RegisterClientEvent('HEvent:PlayerPossessed', function()
+            print('HEvent:PlayerPossessed')
+            MODEL.player.getCharacters(function(characters)
+                print(characters)
+                self.webUI:sendEvent('ON_PLAYER_LOADED', characters)
+            end)
+        end)
+        -- On Player unpossessed
+        RegisterClientEvent('HEvent:PlayerUnPossessed', function()
+            print('HEvent:PlayerUnPossessed')
+        end)
+    end
+
+    ---Bind TPN events
+    function self:bindTPNEvents()
         -- On Player Loaded
         RegisterClientEvent('TPN:client:onPlayerLoaded', function(source)
             self.player = CPlayer.new(source)
@@ -29,10 +67,12 @@ function TPNRPClient.new()
         end)
     end
 
-    ---/********************************/
-    ---/*          Functions           */
-    ---/********************************/
-    
+    ---On shutdown
+    function self:onShutdown()
+        if not self.webUI then return end
+        self.webUI:destroy()
+        self.webUI = nil
+    end
 
     _contructor()
     return self
