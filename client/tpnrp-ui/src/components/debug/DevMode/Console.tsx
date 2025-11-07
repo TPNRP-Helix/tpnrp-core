@@ -4,18 +4,21 @@ import { useEffect, useState } from "react"
 export const Console = () => {
     const [messages, setMessages] = useState<{ message: string, index: number }[]>([])
 
-    useEffect(() => {
-        
-        window.addEventListener("message", function (event) {
-            if (!event.data || !event.data.name) return;
+    const handleConsoleMessage = (event: MessageEvent) => {
+        if (!event.data || !event.data.name) return
+        console.log('event.data', event.data)
+        switch (event.data.name) {
+            case "onLogMessage":
+                setMessages((prev) => [...prev, { message: event.data.args[0], index: event.data.args[1] }])
+            break
+        }
+    }
 
-            switch (event.data.name) {
-                case "onLogMessage":
-                    console.log('event.data', event.data)
-                    setMessages((prev) => [...prev, { message: event.data.args[0], index: event.data.args[1] }])
-                break;
-            }
-        });
+    useEffect(() => {
+        window.addEventListener("message", handleConsoleMessage)
+        return () => {
+            window.removeEventListener("message", handleConsoleMessage)
+        }
     }, [])
 
     return (

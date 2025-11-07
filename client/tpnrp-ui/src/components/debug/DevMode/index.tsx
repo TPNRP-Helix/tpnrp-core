@@ -5,22 +5,27 @@ import { useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
 import { Kbd } from "@/components/ui/kbd"
-const IS_SHOW_BG = true
+const IS_SHOW_BG = false
 
 export const DevMode = () => {
     const [isOpenDevMode, setIsOpenDevMode] = useState(false)
-    const [isShowConsole, setIsShowConsole] = useState(true)
+    const [isShowConsole, setIsShowConsole] = useState(false)
+
+    const handleMessage = (event: MessageEvent) => {
+        if (!event.data || !event.data.name) return
+        console.log('event.data', event.data)
+        switch (event.data.name) {
+            case "onToggleConsole":
+                setIsShowConsole(prev => !prev)
+            break
+        }
+    }
 
     useEffect(() => {
-        window.addEventListener("message", function (event) {
-            if (!event.data || !event.data.name) return;
-
-            switch (event.data.name) {
-                case "onToggleConsole":
-                    setIsShowConsole(prev => !prev)
-                break;
-            }
-        });
+        window.addEventListener("message", handleMessage)
+        return () => {
+            window.removeEventListener("message", handleMessage)
+        }
     }, [])
     
     return (
@@ -34,14 +39,15 @@ export const DevMode = () => {
             <SheetTrigger asChild>
                 <Button className="relative top-1 left-1">Dev Mode</Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent side="left">
                 <SheetHeader>
-                <SheetTitle>Dev Mode Tools</SheetTitle>
-                <SheetDescription>
-                    DevMode Tools support for testing inventory features
-                </SheetDescription>
+                    <SheetTitle>Dev Mode Tools</SheetTitle>
+                    <SheetDescription>
+                        DevMode Tools support for testing inventory features
+                    </SheetDescription>
                 </SheetHeader>
                 <div className="grid gap-4 p-4">
+                    <Button onClick={() => setIsOpenDevMode(false)}>Toggle Basic needs HUD</Button>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="inventory">Inventory</TabsTrigger>
