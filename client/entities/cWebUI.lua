@@ -26,6 +26,8 @@ function CWebUI.new(core)
     local function _contructor()
         self._webUI = WebUI('tpnrp-core', 'tpnrp-core/client/tpnrp-ui/dist/index.html', 0)
         self._webUI:BringToFront()
+        -- Hide default UI
+        self:hideDefaultUI()
         -- Bind log tool
         self:bindLog()
 
@@ -68,6 +70,18 @@ function CWebUI.new(core)
     ---/*          Functions           */
     ---/********************************/
     
+    ---Hide default UI
+    function self:hideDefaultUI()
+        local actors = UE.TArray(UE.AActor)
+        UE.UGameplayStatics.GetAllActorsWithTag(HWorld, 'HWebUI', actors)
+        if not actors[1] then
+            print('[ERROR] CWebUI.HIDE_DEFAULT_UI - HWebUI actor not found')
+            return false
+        end
+        actors[1]:SetHUDVisibility(false, false, true, true, false)
+        return true
+    end
+    
     ---Destroy webUI entity
     function self:destroy()
         if not self._webUI then return end
@@ -103,6 +117,16 @@ function CWebUI.new(core)
         self._webUI:RegisterEventHandler(event, callback)
         print('[INFO] CWebUI.REGISTER_EVENT_HANDLER - event handler registered!')
         return true
+    end
+
+    ---Focus webUI
+    function self:focus()
+        if not self._webUI then
+            print('[ERROR] CWebUI.FOCUS - webUI is not initialized!')
+            return false
+        end
+        self._webUI:SetInputMode(EWebUIInputMode.UI)
+        self._isFocusing = true
     end
 
     ---Out focus from webUI

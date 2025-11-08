@@ -83,11 +83,12 @@ end
 DAO.player.getCharacters = function(license)
     local result = DAO.DB.Select('SELECT * FROM players WHERE license = ?', { license })
     if not result then return {} end
+    local resultData = result and result:ToTable()
     -- Format characters
     ---@type table<number, PlayerData>
     local characters = {}
-    for i = 1, #result do
-        local rowData = result[i]
+    for i = 1, #resultData do
+        local rowData = resultData[i]
         if type(rowData) == 'table' then
             local row = {}
             for CName, CValue in pairs(rowData) do

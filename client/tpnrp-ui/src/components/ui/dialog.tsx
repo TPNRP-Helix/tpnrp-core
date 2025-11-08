@@ -1,6 +1,5 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -57,22 +56,30 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
+        aria-describedby=''
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          "rounded rounded-tl-none border-none p-0",
           className
         )}
         {...props}
       >
-        {children}
         {showCloseButton && (
-          <DialogPrimitive.Close
-            data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-          >
-            <XIcon />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
+          <DialogClose asChild>
+            <button
+                className="absolute -right-3.5 -top-3.5 hover:opacity-90 active:scale-95 transition"
+                aria-label="Close"
+            >
+                <svg width="32" height="32" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="scale(-1,1) translate(-64,0)">
+                        <path d="M8 0H56C60.4183 0 64 3.58172 64 8V48L48 64H8C3.58172 64 0 60.4183 0 56V8C0 3.58172 3.58172 0 8 0Z" fill="#E53935"/>
+                        <path d="M21 21L43 43M43 21L21 43" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                    </g>
+                </svg>
+            </button>
+          </DialogClose>
         )}
+        {children}
       </DialogPrimitive.Content>
     </DialogPortal>
   )
@@ -82,7 +89,7 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      className={cn("flex flex-col gap-2 text-center sm:text-left px-4 pt-4", className)}
       {...props}
     />
   )
@@ -94,6 +101,7 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="dialog-footer"
       className={cn(
         "flex flex-col-reverse gap-2 sm:flex-row sm:justify-end",
+        "p-4 border-t bg-neutral-900 border-white/10",
         className
       )}
       {...props}
@@ -108,9 +116,14 @@ function DialogTitle({
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-lg leading-none font-semibold text-primary uppercase absolute -top-[24px] left-0 pl-2 pr-6 h-7 flex items-center justify-center gap-1.5", className)}
       {...props}
-    />
+    >
+      {props.children}
+      <svg className="absolute -z-1 inset-0 w-full" viewBox="0 0 162 29" fill="none">
+          <path d="M0 28.0332H162V14.6376C162 13.4903 161.507 12.3983 160.647 11.639L148.635 1.03454C147.904 0.389288 146.963 0.0331955 145.988 0.0331955H3C1.34314 0.0331955 0 1.37634 0 3.0332V28.0332Z" fill="var(--background)" fill-opacity="1"></path>
+      </svg>
+    </DialogPrimitive.Title>
   )
 }
 

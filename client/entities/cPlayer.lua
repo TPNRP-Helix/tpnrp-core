@@ -75,6 +75,10 @@ function CPlayer.new(core)
         RegisterClientEvent('HEvent:HealthChanged', function(oldHealth, newHealth)
             self.core.webUI:sendEvent('setHealth', newHealth)
         end)
+        -- On Weapon equipped
+        RegisterClientEvent('HEvent:WeaponEquipped', function(displayName, weaponName)
+            print('Equipped weapon: ' .. displayName .. ' (' .. weaponName .. ')')
+        end)
     end
 
     ---Bind TPN events

@@ -20,7 +20,7 @@ export const Settings = () => {
 
     return (
         <Sheet open={isSettingsOpen} onOpenChange={setSettingsOpen}>
-            <SheetContent side="left">
+            <SheetContent side="left" className="w-[800px] sm:max-w-[800px]">
                 <SheetHeader>
                     <SheetTitle>Settings</SheetTitle>
                     <SheetDescription>

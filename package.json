@@ -12,12 +12,17 @@
     ],
     "client": [
         "client/entities/*.lua",
-        "client/models/*.lua",
+        "client/models/baseModel.lua",
+        "client/models/playerModel.lua",
         "client/main.lua"
     ],
     "server": [
         "server/index.lua",
-        "server/services/*.lua",
+        "server/services/baseDAO.lua",
+        "server/services/playerDAO.lua",
+        "server/services/levelDAO.lua",
+        "server/services/inventoryDAO.lua",
+        "server/services/equipmentDAO.lua",
         "server/entities/*.lua",
         "server/main.lua"
     ]
