@@ -25,6 +25,8 @@ function TPNRPServer.new()
     local function _contructor()
         --- Base-game event
         RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) self:onPlayerUnloaded(playerController) end)
+        RegisterServerEvent('HEvent:PlayerPossessed', function(source) self:onPlayerPossessed(source) end)
+        -- TPN events
         RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
         -- Bind callback events
         self:bindCallbackEvents()
@@ -125,36 +127,36 @@ function TPNRPServer.new()
         end
     end
 
+    ---On Player Possessed
+    ---@param source PlayerController player controller
+    function self:onPlayerPossessed(source)
+        local playerState = source:GetLyraPlayerState()
+        local license = playerState:GetHelixUserId()
+        local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
+        local result = DAO.player.getCharacters(license)
+        if not result then
+            TriggerClientEvent(source, 'TPN:core:setCharacters', {
+                maxCharacters = maxCharacters,
+                characters = {},
+            })
+            return
+        end
+
+        TriggerClientEvent(source, 'TPN:core:setCharacters', {
+            maxCharacters = maxCharacters,
+            characters = result,
+        })
+    end
+
     ---/********************************/
     ---/*       Callback Events        */
     ---/********************************/
     
     ---Bind callback events
     function self:bindCallbackEvents()
-        RegisterCallback('TPN:player:callback:getCharacters', function(source) return self:onCallbackGetCharacters(source) end)
+        print('[TPN][SERVER] bindCallbackEvents - register callback')
     end
 
-    ---On Callback Get Characters
-    ---@param source PlayerController source
-    ---@return { maxCharacters: number, characters: table<number, PlayerData> } data characters of this player
-    function self:onCallbackGetCharacters(source)
-        local playerState = source:GetLyraPlayerState()
-        local license = playerState:GetHelixUserId()
-        local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
-
-        local result = DAO.player.getCharacters(license)
-        if not result then
-            return {
-                maxCharacters = maxCharacters,
-                characters = {},
-            }
-        end
-        
-        return {
-            maxCharacters = maxCharacters,
-            characters = result,
-        }
-    end
 
     _contructor()
     return self

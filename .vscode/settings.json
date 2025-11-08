@@ -18,6 +18,8 @@
         "TriggerCallback",
         "RegisterCallback",
         "GetActorsWithTag",
-        "Input"
+        "Input",
+        "UE",
+        "HWorld"
     ]
 }

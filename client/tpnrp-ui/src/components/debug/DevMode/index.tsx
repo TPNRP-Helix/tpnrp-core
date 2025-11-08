@@ -9,6 +9,7 @@ import { useDevModeStore } from "@/stores/useDevModeStore"
 import { useGameStore } from "@/stores/useGameStore"
 import { useGameSettingStore } from "@/stores/useGameSetting"
 import { useWebUIMessage } from "@/hooks/use-hevent"
+import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
@@ -16,6 +17,7 @@ export const DevMode = () => {
     const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
+    const { toggleSelectCharacter, toggleCreateCharacter } = useCreateCharacterStore()
 
     useWebUIMessage<[boolean]>('setConsoleOpen', (args) => {
         setConsoleOpen(args[0])
@@ -71,8 +73,12 @@ export const DevMode = () => {
                         <TabsContent value="inventory">
                             inventory
                         </TabsContent>
-                        <TabsContent value="menu">
-                            menu
+                        <TabsContent value="menu" className="grid gap-2">
+                            <Button onClick={() => {
+                                setDevModeOpen(false)
+                                toggleSelectCharacter()
+                            }}>Select Character</Button>
+                            <Button onClick={() => toggleCreateCharacter()}>Create Character</Button>
                         </TabsContent>
                     </Tabs>
                 </div>

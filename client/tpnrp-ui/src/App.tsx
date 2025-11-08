@@ -3,6 +3,7 @@ import { DevMode } from "./components/debug/DevMode"
 import { HUD } from "./components/game/HUD"
 import { ThemeProvider } from "./components/theme-provider"
 import { Settings } from "./components/game/Settings"
+import { CreateCharacter } from "./components/game/CreateCharacter";
 
 declare global {
   interface Window {
@@ -19,6 +20,7 @@ function App() {
         <DevMode />
         <HUD />
         <Settings />
+        <CreateCharacter />
       </ThemeProvider>
     </>
   )

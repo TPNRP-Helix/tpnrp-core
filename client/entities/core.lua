@@ -32,27 +32,17 @@ function TPNRPClient.new()
     ---Bind Helix events
     function self:bindHelixEvents()
         -- Helix event
-        RegisterClientEvent('HEvent:PlayerLoggedIn', function()
-            print('HEvent:PlayerLoggedIn')
-        end)
+        -- RegisterClientEvent('HEvent:PlayerLoggedIn', function()
+        --     print('[TPN][CLIENT] HEvent:PlayerLoggedIn')
+        -- end)
         
-        RegisterClientEvent('HEvent:PlayerLoaded', function()
-            print('HEvent:PlayerLoaded')
-        end)
-
-        -- On Player possessed
-        RegisterClientEvent('HEvent:PlayerPossessed', function()
-            print('HEvent:PlayerPossessed')
-            ---@param characters { maxCharacters: number, characters: table<number, PlayerData> } data characters of this player
-            MODEL.player.getCharacters(function(characters)
-                print(characters)
-                self.webUI:sendEvent('setPlayerCharacters', characters)
-            end)
-        end)
-        -- On Player unpossessed
-        RegisterClientEvent('HEvent:PlayerUnPossessed', function()
-            print('HEvent:PlayerUnPossessed')
-        end)
+        -- RegisterClientEvent('HEvent:PlayerLoaded', function()
+        --     print('[TPN][CLIENT] HEvent:PlayerLoaded')
+        -- end)    
+        -- -- On Player unpossessed
+        -- RegisterClientEvent('HEvent:PlayerUnPossessed', function()
+        --     print('[CLIENT] HEvent:PlayerUnPossessed')
+        -- end)
     end
 
     ---Bind TPN events
@@ -65,6 +55,15 @@ function TPNRPClient.new()
         -- On Player Unloaded
         RegisterClientEvent('TPN:client:onPlayerUnloaded', function()
             self.player = nil
+        end)
+        
+        RegisterClientEvent('TPN:core:setCharacters', function(result)
+            -- TODO: Teleport player to Select character Room
+
+            -- Lock game input (Focus input on UI)
+            self.webUI:focus()
+            -- Show Select Character UI
+            self.webUI:sendEvent('setPlayerCharacters', result)
         end)
     end
 
