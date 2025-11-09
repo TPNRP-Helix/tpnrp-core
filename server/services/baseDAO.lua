@@ -3,11 +3,6 @@ Database.Initialize('TPNRP.sqlite')
 DAO = {}
 DAO.DB = Database
 
-function onShutdown()
-    print('[TPN][SERVER] onShutdown - Close database connection')
-    DAO.DB.Close()
-end
-
 ---/********************************/
 ---/*         Init table           */
 ---/********************************/
