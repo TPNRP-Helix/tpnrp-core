@@ -33,35 +33,53 @@ function CWebUI.new(core)
 
         -- On pressed `F7` to open dev mode
         Input.BindKey('F7', function()
-            if self._isFocusing then
-                -- Close focus 
-                self:outFocus()
-                self:sendEvent('setDevModeOpen', false)
-                return
-            end
-            -- Open focus and open console
-            self._webUI:SetInputMode(EWebUIInputMode.UI)
-            self:sendEvent('setDevModeOpen', true)
-            self._isFocusing = true
+            TriggerCallback('getPermissions', function(result)
+                if result ~= 'admin' then
+                    return
+                end
+                -- Player is admin
+                if self._isFocusing then
+                    -- Close focus 
+                    self:outFocus()
+                    self:sendEvent('setDevModeOpen', false)
+                    return
+                end
+                -- Open focus and open console
+                self._webUI:SetInputMode(EWebUIInputMode.UI)
+                self:sendEvent('setDevModeOpen', true)
+                self._isFocusing = true
+            end)
         end, 'Pressed')
 
         -- On pressed `F8` to open console
         Input.BindKey('F8', function()
-            if self._isFocusing then
-                -- Close focus and close console
-                self:outFocus()
-                self:sendEvent('setConsoleOpen', false)
-                return
-            end
-            -- Open focus and open console
-            self._webUI:SetInputMode(EWebUIInputMode.UI)
-            self:sendEvent('setConsoleOpen', true)
-            self._isFocusing = true
+            TriggerCallback('getPermissions', function(result)
+                if result ~= 'admin' then
+                    return
+                end
+                -- Player is admin
+                if self._isFocusing then
+                    -- Close focus and close console
+                    self:outFocus()
+                    self:sendEvent('setConsoleOpen', false)
+                    return
+                end
+                -- Open focus and open console
+                self._webUI:SetInputMode(EWebUIInputMode.UI)
+                self:sendEvent('setConsoleOpen', true)
+                self._isFocusing = true
+            end)
+            
         end, 'Pressed')
 
         -- out focus UI
         self:registerEventHandler('doOutFocus', function()
             self:outFocus()
+        end)
+        
+        -- Get player's permission for WebUI
+        TriggerCallback('getPermissions', function(result)
+            self:sendEvent('setPermission', result)
         end)
     end
 
@@ -147,6 +165,7 @@ function CWebUI.new(core)
         return actors[1]
     end
     
+    --- [HELIX Team are working on this]
     function self:bindLog()
         Timer.SetInterval(function()
             if not self.nucleus then

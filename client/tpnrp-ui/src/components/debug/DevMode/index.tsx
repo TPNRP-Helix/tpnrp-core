@@ -14,7 +14,7 @@ const IS_SHOW_BG = false
 
 export const DevMode = () => {
     const [enableDevMode, setEnableDevMode] = useState(true)
-    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen } = useDevModeStore()
+    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter } = useCreateCharacterStore()
@@ -26,6 +26,10 @@ export const DevMode = () => {
         setDevModeOpen(args[0])
     })
 
+    useWebUIMessage<[string]>('setPermission', (args) => {
+        setPermission(args[0])
+    })
+
     useEffect(() => {
         const isInBrowser = window.location.href.includes("http://localhost:")
         if (isInBrowser) {
@@ -34,7 +38,7 @@ export const DevMode = () => {
     }, [])
     
     // Don't render the dev mode tools if not in browser
-    if (!enableDevMode) return null
+    if (!enableDevMode || permission !== 'admin') return null
 
     return (
         <>

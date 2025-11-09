@@ -155,6 +155,13 @@ function TPNRPServer.new()
     ---Bind callback events
     function self:bindCallbackEvents()
         print('[TPN][SERVER] bindCallbackEvents - register callback')
+        -- Get player's role
+        ---@param source PlayerController player controller
+        ---@return string role
+        RegisterCallback('getPermissions', function(source)
+            -- Get player's role
+            return SHARED.getPermission(source)
+        end)
     end
 
 

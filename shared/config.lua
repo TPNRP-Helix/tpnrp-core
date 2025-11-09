@@ -11,4 +11,10 @@ SHARED.CONFIG = {
         THIRST_RATE = 4, -- Thirst rate
     },
     MAX_CHARACTERS = 3, -- Maximum number of characters per player
+    PERMISSIONS = {
+        [1] = {
+            role = 'admin',
+            license = '7c463225-264c-4bf3-bc9a-cbd74938e5f6' -- Leopold
+        }
+    }
 }

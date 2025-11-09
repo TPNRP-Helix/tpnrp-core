@@ -6,6 +6,7 @@ export type ConsoleMessage = {
 }
 
 type DevModeState = {
+  permission: string
   isDevModeOpen: boolean
   isConsoleOpen: boolean
   consoleMessages: ConsoleMessage[]
@@ -15,9 +16,11 @@ type DevModeState = {
   toggleConsole: () => void
   appendConsoleMessage: (message: ConsoleMessage) => void
   resetConsole: () => void
+  setPermission: (value: string) => void
 }
 
 export const useDevModeStore = create<DevModeState>((set) => ({
+  permission: 'player',
   isDevModeOpen: false,
   isConsoleOpen: false,
   consoleMessages: [],
@@ -36,5 +39,6 @@ export const useDevModeStore = create<DevModeState>((set) => ({
       consoleMessages: [...state.consoleMessages, message],
     })),
   resetConsole: () => set({ consoleMessages: [] }),
+  setPermission: (value) => set({ permission: value }),
 }))
 
