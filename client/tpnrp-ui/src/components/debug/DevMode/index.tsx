@@ -17,7 +17,7 @@ export const DevMode = () => {
     const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
-    const { toggleSelectCharacter, toggleCreateCharacter } = useCreateCharacterStore()
+    const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
 
     useWebUIMessage<[boolean]>('setConsoleOpen', (args) => {
         setConsoleOpen(args[0])
@@ -34,6 +34,7 @@ export const DevMode = () => {
         const isInBrowser = window.location.href.includes("http://localhost:")
         if (isInBrowser) {
             setEnableDevMode(true)
+            setPermission('admin')
         }
     }, [])
     
@@ -62,11 +63,11 @@ export const DevMode = () => {
             <SheetContent side="left">
                 <SheetHeader>
                     <SheetTitle>Dev Mode Tools</SheetTitle>
+                </SheetHeader>
+                <div className="grid gap-4 p-4">
                     <SheetDescription>
                         DevMode Tools support for testing inventory features
                     </SheetDescription>
-                </SheetHeader>
-                <div className="grid gap-4 p-4">
                     <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
                     <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
                     <Tabs defaultValue="inventory" className="w-full">
@@ -81,6 +82,7 @@ export const DevMode = () => {
                             <Button onClick={() => {
                                 setDevModeOpen(false)
                                 toggleSelectCharacter()
+                                setMaxCharacters(5)
                             }}>Select Character</Button>
                             <Button onClick={() => toggleCreateCharacter()}>Create Character</Button>
                         </TabsContent>

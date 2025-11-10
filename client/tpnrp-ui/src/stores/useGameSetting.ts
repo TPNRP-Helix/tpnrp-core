@@ -7,6 +7,8 @@ type GameSettingState = {
   showHungerBadgeWhenSmallerThan: number
   showThirstBadgeWhenSmallerThan: number
   showStaminaBadgeWhenSmallerThan: number
+  language: string
+  setLanguage: (value: string) => void
   setShowHealthBadgeWhenSmallerThan: (value: number) => void
   setShowArmorBadgeWhenSmallerThan: (value: number) => void
   setShowHungerBadgeWhenSmallerThan: (value: number) => void
@@ -23,6 +25,8 @@ export const useGameSettingStore = create<GameSettingState>((set) => ({
   showHungerBadgeWhenSmallerThan: 100,
   showThirstBadgeWhenSmallerThan: 100,
   showStaminaBadgeWhenSmallerThan: 100,
+  language: 'en',
+  setLanguage: (value) => set({ language: value }),
   setShowHealthBadgeWhenSmallerThan: (value) => set({ showHealthBadgeWhenSmallerThan: value }),
   setShowArmorBadgeWhenSmallerThan: (value) => set({ showArmorBadgeWhenSmallerThan: value }),
   setShowHungerBadgeWhenSmallerThan: (value) => set({ showHungerBadgeWhenSmallerThan: value }),

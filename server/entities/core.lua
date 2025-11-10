@@ -162,6 +162,15 @@ function TPNRPServer.new()
             -- Get player's role
             return SHARED.getPermission(source)
         end)
+        -- Get player's language
+        ---@param source PlayerController player controller
+        ---@return string language
+        RegisterCallback('getLanguage', function(source)
+            -- TODO: Get Player's language from database
+            
+            -- Return default language by server's config
+            return SHARED.CONFIG.LANGUAGE
+        end)
     end
 
 
