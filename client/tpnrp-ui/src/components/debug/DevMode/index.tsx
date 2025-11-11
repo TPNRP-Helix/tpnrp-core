@@ -10,11 +10,12 @@ import { useGameStore } from "@/stores/useGameStore"
 import { useGameSettingStore } from "@/stores/useGameSetting"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
+import { UIPreview } from "./UIPreview"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
     const [enableDevMode, setEnableDevMode] = useState(true)
-    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission } = useDevModeStore()
+    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
@@ -39,6 +40,7 @@ export const DevMode = () => {
     }, [])
     
     // Don't render the dev mode tools if not in browser
+    // Or if the permission is not admin
     if (!enableDevMode || permission !== 'admin') return null
 
     return (
@@ -70,6 +72,7 @@ export const DevMode = () => {
                     </SheetDescription>
                     <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
                     <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
+                    <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="inventory">Inventory</TabsTrigger>
@@ -111,6 +114,7 @@ export const DevMode = () => {
                 </div>
             </SheetContent>
         </Sheet>
+        <UIPreview />
     </>
     )
 }
