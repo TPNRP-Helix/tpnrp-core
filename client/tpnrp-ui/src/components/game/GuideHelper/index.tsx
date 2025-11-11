@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
+import { Kbd } from "@/components/ui/kbd";
 import { verticalStackAnim } from "@/lib/animation";
-import { Download } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
@@ -17,41 +17,57 @@ interface FileItem {
     { id: 4, name: "Music.mp3", icon: "🎵" },
 ]
 
+const MotionButton = motion(Button)
   
 export const GuideHelper = () => {
     const [open, setOpen] = useState(false)
 
     return (
-        <div className="fixed bottom-8 right-8 flex flex-col items-center">
+        <div className="fixed bottom-8 right-2 flex flex-col items-end">
             {/* Stack Animation */}
             <AnimatePresence>
-                {open &&
-                files.map((file, index) => (
-                    <motion.div
-                    key={file.id}
-                    initial={{ y: 0, rotate: 0, opacity: 0 }}
-                    animate={verticalStackAnim({ index })}
-                    exit={{ y: 0, rotate: 0, opacity: 0 }}
-                    transition={{ type: "spring", stiffness: 250, damping: 18 }}
-                    className="absolute flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-lg border"
-                    style={{
-                        zIndex: files.length - index,
-                        transformOrigin: "bottom center",
-                    }}
+                {open && files.map((file, index) => (
+                    // <motion.div
+                    //     key={file.id}
+                    //     initial={{ y: 0, rotate: 0, opacity: 0 }}
+                    //     animate={verticalStackAnim({ index })}
+                    //     exit={{ y: 0, rotate: 0, opacity: 0 }}
+                    //     transition={{ type: "spring", stiffness: 250, damping: 18 }}
+                    //     className="absolute flex p-2 items-center justify-center bg-background rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!"
+                    //     style={{
+                    //         zIndex: files.length - index,
+                    //         transformOrigin: "bottom center",
+                    //     }}
+                    //     >
+                    //     <span className="text-sm">{file.name}</span>
+                    // </motion.div>
+                    <MotionButton
+                        key={file.id}
+                        initial={{ y: 0, rotate: 0, opacity: 0 }}
+                        animate={verticalStackAnim({ index })}
+                        exit={{ y: 0, rotate: 0, opacity: 0 }}
+                        transition={{ type: "spring", stiffness: 250, damping: 18 }}
+                        variant="secondary"
+                        size="sm"
+                        className="absolute flex items-center justify-center rounded p-1 [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]! transition-none"
+                        style={{
+                            zIndex: files.length - index,
+                            transformOrigin: "bottom center",
+                        }}
                     >
-                    <span className="text-2xl">{file.icon}</span>
-                    </motion.div>
+                        <span className="text-sm">{file.name}</span>
+                    </MotionButton>
                 ))}
             </AnimatePresence>
 
             {/* Main Dock Button */}
             <Button
-                variant="default"
-                size="icon"
+                variant="secondary"
+                size="sm"
                 onClick={() => setOpen((prev) => !prev)}
-                className="relative z-50 h-12 w-12 rounded-full"
+                className="relative z-50"
             >
-                <Download className="h-5 w-5" />
+                <Kbd className="bg-muted-foreground text-muted-background">/</Kbd> Toggle Guide
             </Button>
         </div>
     )

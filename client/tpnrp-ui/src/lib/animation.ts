@@ -1,7 +1,7 @@
 export const verticalStackAnim = ({ index }: { index: number }) => {
     return {
-        y: -(index + 1) * 60,
-        scale: 1 - index * 0.05,
+        y: -(index + 1) * 44,
+        scale: 1,
         opacity: 1,
     }
 }
