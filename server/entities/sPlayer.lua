@@ -34,7 +34,7 @@ function SPlayer.new(playerController)
     ---Contructor function
     local function _contructor()
         -- Get player data
-        self.playerData = DAO.getPlayer(self.playerData.citizen_id)
+        self.playerData = DAO.player.get(self.playerData.citizen_id)
         -- Get player's level
         self.level = SLevel.new(self)
         -- Get player's inventory

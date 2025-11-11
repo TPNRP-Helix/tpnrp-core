@@ -45,5 +45,32 @@ SHARED.DEFAULT = {
             level = 1,
             exp = 0
         },      -- Crafting
+    },
+    PLAYER = {
+        money = {
+            cash = 0,
+            bank = 0,
+        },
+        character_info = {
+            firstName = '',
+            lastName = '',
+            gender = '',
+            birthday = ''
+        },
+        job = {
+            name = '',
+            grade = 0,
+        },
+        gang = {},
+        position = SHARED.DEFAULT.SPAWN.POSITION,
+        heading = SHARED.DEFAULT.SPAWN.HEADING,
+        metadata = {
+            hunger = 100,
+            thirst = 100,
+            health = 100,
+            armor = 0,
+            stamina = 100,
+            isDead = false
+        },
     }
 }

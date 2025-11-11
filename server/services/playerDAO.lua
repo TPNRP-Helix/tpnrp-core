@@ -18,8 +18,8 @@ DAO.player.get = function(citizen_id)
         ---@type PlayerData
         return playerData
     end
-
-    return nil
+    -- Fallback to default playerData if user didn't have yet
+    return SHARED.DEFAULT.PLAYER
 end
 
 ---Save player
@@ -34,10 +34,9 @@ DAO.player.save = function(player)
         return false
     end
     -- Save player into database
-    local result = DAO.DB.Execute([[INSERT INTO players (character_id, citizen_id, license, name, money, character_info, job, gang, position, heading, metadata)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?)
+    local result = DAO.DB.Execute([[INSERT INTO players (citizen_id, license, name, money, character_info, job, gang, position, heading, metadata)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
         ON CONFLICT(citizen_id) DO UPDATE SET
-            character_id = excluded.character_id,
             name = excluded.name,
             money = excluded.money,
             character_info = excluded.character_info,
@@ -48,7 +47,6 @@ DAO.player.save = function(player)
             metadata = excluded.metadata;
         ]],
         {
-            tonumber(playerData.character_id),
             playerData.citizen_id,
             playerData.license,
             playerData.name,
@@ -103,4 +101,42 @@ DAO.player.getCharacters = function(license)
     end
     -- Return characters
     return characters
+end
+
+---Create character
+---@param license string
+---@param playerData PlayerData
+---@return boolean success
+DAO.player.createCharacter = function(license, playerData)
+    -- Save player into database
+    local result = DAO.DB.Execute([[INSERT INTO players (citizen_id, license, name, money, character_info, job, gang, position, heading, metadata)
+        VALUES (?,?,?,?,?,?,?,?,?,?)
+        ON CONFLICT(citizen_id) DO UPDATE SET
+            name = excluded.name,
+            money = excluded.money,
+            character_info = excluded.character_info,
+            job = excluded.job,
+            gang = excluded.gang,
+            position = excluded.position,
+            heading = excluded.heading,
+            metadata = excluded.metadata;
+        ]],
+        {
+            playerData.citizen_id,
+            license,
+            playerData.name,
+            JSON.stringify(playerData.money),
+            JSON.stringify(playerData.character_info),
+            JSON.stringify(playerData.job),
+            JSON.stringify(playerData.gang),
+            JSON.stringify(SHARED.DEFAULT.SPAWN.POSITION),
+            SHARED.DEFAULT.SPAWN.HEADING,
+            JSON.stringify(playerData.metadata),
+        })
+    if result then
+        print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+        return true
+    end
+    print(('[ERROR] DAO.player.save: Failed to save player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+    return false
 end
