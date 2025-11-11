@@ -1,10 +1,9 @@
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
-import { Kbd } from "@/components/ui/kbd"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { useGameStore } from "@/stores/useGameStore"
 import { useGameSettingStore } from "@/stores/useGameSetting"
@@ -57,12 +56,12 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            <SheetTrigger asChild>
+            {/* <SheetTrigger asChild>
                 <Button className="relative top-1 left-1">
                     <Kbd>F7</Kbd>
                     Dev Mode Tools
                 </Button>
-            </SheetTrigger>
+            </SheetTrigger> */}
             <SheetContent side="left">
                 <SheetHeader>
                     <SheetTitle>Dev Mode Tools</SheetTitle>
@@ -104,12 +103,12 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            <SheetTrigger asChild>
+            {/* <SheetTrigger asChild>
                 <Button className="relative top-1 left-1 ml-2 bg-primary! text-primary-foreground!">
                     <Kbd>F8</Kbd>
                     Console
                 </Button>
-            </SheetTrigger>
+            </SheetTrigger> */}
             <SheetContent className="w-[800px] sm:max-w-[800px]">
                 <SheetHeader>
                     <SheetTitle>Console</SheetTitle>

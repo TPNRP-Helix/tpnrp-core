@@ -25,9 +25,11 @@ function TPNRPServer.new()
     local function _contructor()
         --- Base-game event
         RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) self:onPlayerUnloaded(playerController) end)
-        RegisterServerEvent('HEvent:PlayerPossessed', function(source) self:onPlayerPossessed(source) end)
+        RegisterServerEvent('HEvent:PlayerPossessed', function(playerController) self:onPlayerPossessed(playerController) end)
+        RegisterServerEvent('HEvent:PlayerReady', function(playerController) self:onPlayerReady(playerController) end)
+        
         -- TPN events
-        RegisterServerEvent('TPN:player:syncPlayer', function(source) self:onPlayerSync(source) end)
+        RegisterServerEvent('TPN:player:syncPlayer', function(playerController) self:onPlayerSync(playerController) end)
         -- Bind callback events
         self:bindCallbackEvents()
     end
@@ -67,7 +69,7 @@ function TPNRPServer.new()
     ---@return SPlayer | nil player SPlayer entity
     function self:getPlayerByCitizenId(citizenId)
         for _, player in pairs(self.players) do
-            if player.playerData.citizen_id == citizenId then
+            if player.playerData.citizenId == citizenId then
                 return player
             end
         end
@@ -157,6 +159,27 @@ function TPNRPServer.new()
         TriggerClientEvent(source, 'TPN:client:setCharacters', {
             maxCharacters = maxCharacters,
             characters = result,
+        })
+    end
+
+    ---On Player Ready
+    ---@param playerController PlayerController player controller
+    function self:onPlayerReady(playerController)
+        local license = self:getLicenseBySource(playerController)
+        if not license then
+            print('[ERROR] TPNRPServer.onPlayerReady - Failed to get license by source!')
+            return
+        end
+        local characters = DAO.player.getCharacters(license)
+        if not characters then
+            print('[ERROR] TPNRPServer.onPlayerReady - Failed to get characters by license!')
+            return
+        end
+        print('[TPN][SERVER] onPlayerReady - characters: ', JSON.stringify(characters))
+        -- Set characters to client
+        TriggerClientEvent(playerController, 'TPN:client:setCharacters', {
+            maxCharacters = SHARED.CONFIG.MAX_CHARACTERS,
+            characters = characters,
         })
     end
 

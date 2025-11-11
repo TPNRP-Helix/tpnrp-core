@@ -7,6 +7,7 @@ import { useGameSettingStore } from "@/stores/useGameSetting"
 import defaultAvatar from "@/assets/images/default-avatar.png"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { usePhoneStore } from "@/stores/usePhoneStore"
+import { heartbeatAnimation } from "@/lib/animation"
 
 const MotionHeart = motion(Heart)
 const MotionShield = motion(Shield)
@@ -88,7 +89,10 @@ export const HUD = () => {
           key={key}
           className={`relative flex items-center justify-center w-12 ${containerClassName ?? ""}`.trim()}
         >
-          <Icon className={iconClassName} />
+          <Icon
+            className={iconClassName}
+            {...(showBadge && value > 0 && value < 20 ? heartbeatAnimation : { animate: { scale: 1 }, transition: { duration: 0.2 } })}
+          />
           {showBadge && value > 0 && (
             <Badge
               className="text-xs! h-5 min-w-5 rounded-full px-1 font-mono tabular-nums absolute -top-1 -right-1"

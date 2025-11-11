@@ -133,6 +133,7 @@ function CWebUI.new(core)
             print('[ERROR] CWebUI.HIDE_DEFAULT_UI - HWebUI actor not found')
             return false
         end
+        print('[INFO] CWebUI.HIDE_DEFAULT_UI - HWebUI actor found => Hide UI')
         actors[1]:SetHUDVisibility(false, false, true, true, false)
         return true
     end

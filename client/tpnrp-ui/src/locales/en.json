@@ -36,7 +36,13 @@
 
   "error.firstNameRequired": "First name is required",
   "error.lastNameRequired": "Last name is required",
-  "error.dobRequired": "Date of birth is required"
+  "error.dobRequired": "Date of birth is required",
+
+  "helper.toggleGuideHelper": "Toggle Guide",
+  "helper.toggleFocus": "Toggle focus",
+  "helper.toggleToastExpand": "Toggle toast expand",
+  "helper.toggleDevMode": "Toggle dev mode",
+  "helper.toggleConsole": "Toggle console"
 }
 
 

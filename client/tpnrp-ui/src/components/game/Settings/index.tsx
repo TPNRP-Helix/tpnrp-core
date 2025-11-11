@@ -10,17 +10,9 @@ import { useI18n } from "@/i18n"
 export const Settings = () => {
     const {
         isSettingsOpen,
-        showHealthBadgeWhenSmallerThan,
-        showArmorBadgeWhenSmallerThan,
-        showHungerBadgeWhenSmallerThan,
-        showThirstBadgeWhenSmallerThan,
-        showStaminaBadgeWhenSmallerThan,
         setSettingsOpen,
-        setShowHealthBadgeWhenSmallerThan,
-        setShowArmorBadgeWhenSmallerThan,
-        setShowHungerBadgeWhenSmallerThan,
-        setShowThirstBadgeWhenSmallerThan,
-        setShowStaminaBadgeWhenSmallerThan,
+        basicNeedHUDConfig,
+        setBasicNeedHUDConfig,
         language,
         setLanguage,
     } = useGameSettingStore()
@@ -52,23 +44,23 @@ export const Settings = () => {
                     </div>
                     <div className="grid gap-2">
                         <Label>{t("settings.showHealth")}</Label>
-                        <Input type="number" value={showHealthBadgeWhenSmallerThan} onChange={(e) => setShowHealthBadgeWhenSmallerThan(Number(e.target.value))} />
+                        <Input type="number" value={basicNeedHUDConfig.health} onChange={(e) => setBasicNeedHUDConfig({ health: Number(e.target.value) })} />
                     </div>
                     <div className="grid gap-2">
                         <Label>{t("settings.showArmor")}</Label>
-                        <Input type="number" value={showArmorBadgeWhenSmallerThan} onChange={(e) => setShowArmorBadgeWhenSmallerThan(Number(e.target.value))} />
+                        <Input type="number" value={basicNeedHUDConfig.armor} onChange={(e) => setBasicNeedHUDConfig({ armor: Number(e.target.value) })} />
                     </div>
                     <div className="grid gap-2">
                         <Label>{t("settings.showHunger")}</Label>
-                        <Input type="number" value={showHungerBadgeWhenSmallerThan} onChange={(e) => setShowHungerBadgeWhenSmallerThan(Number(e.target.value))} />
+                        <Input type="number" value={basicNeedHUDConfig.hunger} onChange={(e) => setBasicNeedHUDConfig({ hunger: Number(e.target.value) })} />
                     </div>
                     <div className="grid gap-2">
                         <Label>{t("settings.showThirst")}</Label>
-                        <Input type="number" value={showThirstBadgeWhenSmallerThan} onChange={(e) => setShowThirstBadgeWhenSmallerThan(Number(e.target.value))} />
+                        <Input type="number" value={basicNeedHUDConfig.thirst} onChange={(e) => setBasicNeedHUDConfig({ thirst: Number(e.target.value) })} />
                     </div>
                     <div className="grid gap-2">
                         <Label>{t("settings.showStamina")}</Label>
-                        <Input type="number" value={showStaminaBadgeWhenSmallerThan} onChange={(e) => setShowStaminaBadgeWhenSmallerThan(Number(e.target.value))} />
+                        <Input type="number" value={basicNeedHUDConfig.stamina} onChange={(e) => setBasicNeedHUDConfig({ stamina: Number(e.target.value) })} />
                     </div>
                 </div>
             </SheetContent>

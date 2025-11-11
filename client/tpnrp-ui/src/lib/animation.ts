@@ -13,3 +13,13 @@ export const verticalFanStackAnim = ({ index }: { index: number }) => {
         opacity: 1,
       }
 }
+
+export const heartbeatAnimation = {
+  animate: { scale: [1, 1.15, 1] },
+  transition: {
+    duration: 0.2,
+    ease: "easeInOut" as const,
+    repeat: Infinity,
+    repeatDelay: 0.2,
+  },
+}

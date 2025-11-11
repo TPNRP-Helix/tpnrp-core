@@ -34,7 +34,7 @@ function SPlayer.new(playerController)
     ---Contructor function
     local function _contructor()
         -- Get player data
-        self.playerData = DAO.player.get(self.playerData.citizen_id)
+        self.playerData = DAO.player.get(self.playerData.citizenId)
         -- Get player's level
         self.level = SLevel.new(self)
         -- Get player's inventory
@@ -117,22 +117,14 @@ function SPlayer.new(playerController)
         -- Get player state
         local PlayerState = self.playerController:GetLyraPlayerState()
         -- Get player data from database
-        local playerData = DAO.player.get(self.playerData.citizen_id)
+        local playerData = DAO.player.get(self.playerData.citizenId)
         if not playerData then
             -- User first time login, create new player data
-            playerData = {
-                money = {},
-                character_info = {},
-                job = {},
-                gang = {},
-                position = SHARED.DEFAULT.SPAWN.POSITION,
-                metadata = {},
-                source = self.playerController,
-                license = PlayerState:GetHelixUserId(),
-                name = PlayerState:GetPlayerName(),
-                character_id = 0,
-                citizen_id = SHARED.createCitizenId(),
-            }
+            playerData = SHARED.DEFAULT.PLAYER
+            playerData.citizenId = SHARED.createCitizenId()
+            playerData.source = self.playerController
+            playerData.license = PlayerState:GetHelixUserId()
+            playerData.name = PlayerState:GetPlayerName()
         end
         -- Assign playerData
         self.playerData = playerData

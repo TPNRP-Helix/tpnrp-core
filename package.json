@@ -17,7 +17,6 @@
         "client/main.lua"
     ],
     "server": [
-        "server/index.lua",
         "server/services/baseDAO.lua",
         "server/services/playerDAO.lua",
         "server/services/levelDAO.lua",

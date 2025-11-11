@@ -36,7 +36,13 @@
 
   "error.firstNameRequired": "Tên là bắt buộc",
   "error.lastNameRequired": "Họ là bắt buộc",
-  "error.dobRequired": "Ngày sinh là bắt buộc"
+  "error.dobRequired": "Ngày sinh là bắt buộc",
+  
+  "helper.toggleGuideHelper": "Bật/tắt trợ giúp",
+  "helper.toggleFocus": "Bật/tắt con trỏ",
+  "helper.toggleToastExpand": "Bật/tắt thông báo",
+  "helper.toggleDevMode": "Bật/Tắt DevMode",
+  "helper.toggleConsole": "Bật/Tắt Console"
 }
 
 
