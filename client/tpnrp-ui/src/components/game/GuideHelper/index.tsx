@@ -67,7 +67,7 @@ export const GuideHelper = () => {
                 onClick={() => setOpen((prev) => !prev)}
                 className="relative z-50"
             >
-                <Kbd className="bg-muted-foreground text-muted-background">/</Kbd> Toggle Guide
+                <Kbd className="bg-muted-foreground text-muted-background">/</Kbd> Guide
             </Button>
         </div>
     )
