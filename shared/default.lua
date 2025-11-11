@@ -62,8 +62,8 @@ SHARED.DEFAULT = {
             grade = 0,
         },
         gang = {},
-        position = SHARED.DEFAULT.SPAWN.POSITION,
-        heading = SHARED.DEFAULT.SPAWN.HEADING,
+        position = { x = -274.27, y = 6641.01, z = 7.45 },
+        heading = 270.0,
         metadata = {
             hunger = 100,
             thirst = 100,

@@ -61,8 +61,13 @@ function CWebUI.new(core)
     ---/********************************/
 
     function self:bindInput()
-        -- [GAME] [F1] Toggle focus with mouse
+        -- [GAME] [F1] Toggle guide helper
         Input.BindKey('F1', function()
+            self:sendEvent('toggleGuideHelper')
+        end, 'Pressed')
+
+        -- [GAME] [F2] Toggle focus with mouse
+        Input.BindKey('F2', function()
             if self._isFocusing then
                 -- Close focus 
                 self:outFocus()

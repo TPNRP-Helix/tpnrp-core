@@ -37,9 +37,9 @@ DAO.DB.Execute([[
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS players (
         character_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        citizen_id TEXT,
-        license TEXT,
-        name TEXT,
+        citizen_id VARCHAR(11) NOT NULL UNIQUE,
+        license VARCHAR(255),
+        name VARCHAR(255),
         money TEXT,
         character_info TEXT,
         job TEXT,

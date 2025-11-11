@@ -4,22 +4,33 @@ DAO.player = {}
 ---@return PlayerData | nil
 DAO.player.get = function(citizen_id)
     local result = DAO.DB.Select('SELECT * FROM players where citizen_id = ?', { citizen_id })
-    local playerData = result[1] and result[1].Columns:ToTable()
+    ---@type PlayerData | nil
+    local playerData = nil
+    local rowData = result[1] and result[1].Columns:ToTable()
 
     -- Validate PlayerData
-    if playerData then
-        playerData.money = JSON.parse(playerData.money)
-        playerData.character_info = JSON.parse(playerData.character_info)
-        playerData.job = JSON.parse(playerData.job)
-        playerData.gang = JSON.parse(playerData.gang)
-        playerData.position = JSON.parse(playerData.position)
-        playerData.metadata = JSON.parse(playerData.metadata)
-
+    if rowData then
         ---@type PlayerData
+        playerData = {
+            characterId = rowData.character_id,
+            license = rowData.license,
+            name = rowData.name,
+            money = JSON.parse(rowData.money),
+            characterInfo = JSON.parse(rowData.character_info),
+            job = JSON.parse(rowData.job),
+            gang = JSON.parse(rowData.gang),
+            position = JSON.parse(rowData.position),
+            metadata = JSON.parse(rowData.metadata),
+            citizenId = rowData.citizen_id,
+        }
+
         return playerData
     end
     -- Fallback to default playerData if user didn't have yet
-    return SHARED.DEFAULT.PLAYER
+    ---@type PlayerData
+    playerData = SHARED.DEFAULT.PLAYER
+    playerData.citizenId = citizen_id
+    return playerData
 end
 
 ---Save player
@@ -47,11 +58,11 @@ DAO.player.save = function(player)
             metadata = excluded.metadata;
         ]],
         {
-            playerData.citizen_id,
+            playerData.citizenId,
             playerData.license,
             playerData.name,
             JSON.stringify(playerData.money),
-            JSON.stringify(playerData.character_info),
+            JSON.stringify(playerData.characterInfo),
             JSON.stringify(playerData.job),
             JSON.stringify(playerData.gang),
             JSON.stringify(pCoords),
@@ -59,10 +70,10 @@ DAO.player.save = function(player)
             JSON.stringify(playerData.metadata),
         })
     if result then
-        print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+        print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
         return true
     end
-    print(('[ERROR] DAO.player.save: Failed to save player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+    print(('[ERROR] DAO.player.save: Failed to save player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
     return false
 end
 
@@ -92,9 +103,9 @@ DAO.player.getCharacters = function(license)
             for CName, CValue in pairs(rowData) do
                 row[CName] = CValue
             end
-            row.charinfo            = JSON.parse(row.charinfo)
-            row.money               = JSON.parse(row.money)
-            row.job                 = JSON.parse(row.job)
+            row.characterInfo = JSON.parse(row.character_info)
+            row.money = JSON.parse(row.money)
+            row.job = JSON.parse(row.job)
 
             characters[#characters + 1] = row
         end
@@ -122,11 +133,11 @@ DAO.player.createCharacter = function(license, playerData)
             metadata = excluded.metadata;
         ]],
         {
-            playerData.citizen_id,
+            playerData.citizenId,
             license,
             playerData.name,
             JSON.stringify(playerData.money),
-            JSON.stringify(playerData.character_info),
+            JSON.stringify(playerData.characterInfo),
             JSON.stringify(playerData.job),
             JSON.stringify(playerData.gang),
             JSON.stringify(SHARED.DEFAULT.SPAWN.POSITION),
@@ -134,9 +145,9 @@ DAO.player.createCharacter = function(license, playerData)
             JSON.stringify(playerData.metadata),
         })
     if result then
-        print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+        print(('[LOG] Saved player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
         return true
     end
-    print(('[ERROR] DAO.player.save: Failed to save player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+    print(('[ERROR] DAO.player.save: Failed to save player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
     return false
 end

@@ -1,11 +1,11 @@
 ---@class PlayerData
 ---@field source number|nil
----@field character_id number
----@field citizen_id string
+---@field characterId number
+---@field citizenId string
 ---@field license string
 ---@field name string
 ---@field money table
----@field character_info table
+---@field characterInfo table
 ---@field job table
 ---@field gang table
 ---@field position Vector3
