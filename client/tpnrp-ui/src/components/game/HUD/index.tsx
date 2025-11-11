@@ -23,8 +23,8 @@ export const HUD = () => {
     showStaminaBadgeWhenSmallerThan
   } = useGameSettingStore()
 
-  useWebUIMessage<[number]>('setHealth', (args) => {
-    setHealth(args[0])
+  useWebUIMessage<[number]>('setHealth', ([health]) => {
+    setHealth(health)
   })
 
   const hudVariants = {

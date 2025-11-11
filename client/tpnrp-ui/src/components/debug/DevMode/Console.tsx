@@ -5,8 +5,8 @@ import { useWebUIMessage } from "@/hooks/use-hevent"
 export const Console = () => {
     const { consoleMessages, appendConsoleMessage } = useDevModeStore()
 
-    useWebUIMessage<[string, number]>('onLogMessage', (args) => {
-        appendConsoleMessage({ message: args[0], index: args[1] })
+    useWebUIMessage<[string, number]>('onLogMessage', ([message, index]) => {
+        appendConsoleMessage({ message, index })
     })
 
     return (

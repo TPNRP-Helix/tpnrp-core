@@ -19,15 +19,15 @@ export const DevMode = () => {
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
 
-    useWebUIMessage<[boolean]>('setConsoleOpen', (args) => {
-        setConsoleOpen(args[0])
+    useWebUIMessage<[boolean]>('setConsoleOpen', ([isOpenConsole]) => {
+        setConsoleOpen(isOpenConsole)
     })
-    useWebUIMessage<[boolean]>('setDevModeOpen', (args) => {
-        setDevModeOpen(args[0])
+    useWebUIMessage<[boolean]>('setDevModeOpen', ([isOpenDevMode]) => {
+        setDevModeOpen(isOpenDevMode)
     })
 
-    useWebUIMessage<[string]>('setPermission', (args) => {
-        setPermission(args[0])
+    useWebUIMessage<[string]>('setPermission', ([permission]) => {
+        setPermission(permission)
     })
 
     useEffect(() => {

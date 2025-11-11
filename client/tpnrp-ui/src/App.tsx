@@ -4,12 +4,13 @@ import { HUD } from "./components/game/HUD"
 import { ThemeProvider } from "./components/theme-provider"
 import { Settings } from "./components/game/Settings"
 import { CreateCharacter } from "./components/game/CreateCharacter";
+import { Toaster } from "./components/ui/sonner";
 
 declare global {
   interface Window {
     onLogMessage: (message: string, index: number) => void;
     onToggleConsole: () => void;
-    hEvent: (event: string) => void;
+    hEvent: (event: string, data?: Record<string, unknown>) => void;
   }
 }
 
@@ -21,6 +22,7 @@ function App() {
         <HUD />
         <Settings />
         <CreateCharacter />
+        <Toaster />
       </ThemeProvider>
     </>
   )

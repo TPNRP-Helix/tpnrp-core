@@ -22,10 +22,11 @@ import { RadioGroup } from "@/components/ui/radio-group"
 import { RadioGroupItem } from "@/components/ui/radio-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Calendar } from "@/components/ui/calendar"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
 import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
+import { toast } from "sonner"
 
 type TCharacter = {
     name: string
@@ -33,6 +34,20 @@ type TCharacter = {
     level: number
     money: number
     gender: 'male' | 'female'
+}
+
+type TCreateCharacterResponse = {
+    name: string
+    citizenId: string
+    level: number
+    money: {
+        cash: number
+        bank: number
+    }
+    characterInfo: {
+        gender: 'male' | 'female'
+        birthday: string
+    }
 }
 
 export const CreateCharacter = () => {
@@ -56,6 +71,7 @@ export const CreateCharacter = () => {
         setLastName,
     } = useCreateCharacterStore()
     
+    const [error, setError] = useState<{ type: string, message: string } | null>(null)
     const [playerCharacters, setPlayerCharacters] = useState<TCharacter[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -80,15 +96,63 @@ export const CreateCharacter = () => {
         setShowSelectCharacter(true)
     })
 
+    useWebUIMessage<[{ playerData: TCreateCharacterResponse }]>('onCreateCharacterSuccess', ([{ playerData }]) => {
+        console.log('onCreateCharacterSuccess', playerData)
+        appendConsoleMessage({ message: `Character created successfully: ${JSON.stringify(playerData)}`, index: 0 })
+        // Set preview character info
+        setPlayerCharacters([...playerCharacters, {
+            name: playerData?.name ?? '',
+            citizenId: playerData?.citizenId ?? 'ERR',
+            level: playerData?.level ?? 1,
+            money: playerData?.money?.cash ?? 0,
+            gender: playerData?.characterInfo?.gender ?? 'male',
+        }])
+        // Hide create character dialog
+        setShowCreateCharacter(false)
+        // Show Select Character Sheet
+        setShowSelectCharacter(true)
+        // Show toast for create character success
+        toast("Character created successfully", {
+            description: `Welcome ${playerData?.name} to the game!`,
+        })
+    })
+
     const onClickCreateCharacter = useCallback(() => {
         setShowSelectCharacter(false)
         setShowCreateCharacter(true)
     }, [setShowCreateCharacter, setShowSelectCharacter])
 
-    const onSubmitCreateCharacter = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        console.log('submit')
-    }, [])
+    const onSubmitCreateCharacter = useCallback(() => {
+        if (isSubmitting) {
+            return
+        }
+        setIsSubmitting(true)
+        if (!firstName || firstName.trim() === '') {
+            console.log('First name is required', firstName)
+            appendConsoleMessage({ message: 'First name is required', index: 0 })
+            setError({ type: 'firstName', message: 'First name is required' })
+            setIsSubmitting(false)
+            return
+        }
+        if (!lastName || lastName.trim() === '') {
+            appendConsoleMessage({ message: 'Last name is required', index: 0 })
+            setError({ type: 'lastName', message: 'Last name is required' })
+            setIsSubmitting(false)
+            return
+        }
+        if (!dateOfBirth) {
+            appendConsoleMessage({ message: 'Date of birth is required', index: 0 })
+            setError({ type: 'dateOfBirth', message: 'Date of birth is required' })
+            setIsSubmitting(false)
+            return
+        }
+        window.hEvent('createCharacter', {
+            firstName,
+            lastName,
+            gender,
+            dateOfBirth,
+        })
+    }, [firstName, lastName, dateOfBirth, gender, isSubmitting])
     
     return (
         <>
@@ -162,7 +226,7 @@ export const CreateCharacter = () => {
                                 <SelectContent>
                                     <SelectGroup>
                                         <SelectItem value="en"> <UnitedStateFlag /> English</SelectItem>
-                                        <SelectItem value="vi"> <VietnamFlag /> Vietnamese</SelectItem>
+                                        <SelectItem value="vi"> <VietnamFlag /> Tiếng Việt</SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
@@ -189,13 +253,25 @@ export const CreateCharacter = () => {
                             <div className="flex gap-2">
                                 <div className="grid gap-3 w-full">
                                     <Label htmlFor="firstName">First Name</Label>
-                                    <Input id="firstName" name="firstName" defaultValue="" />
+                                    <Input id="firstName" name="firstName" value={firstName} onChange={(e) => {
+                                        setFirstName(e.target.value)
+                                        setError(null)
+                                    }} />
                                 </div>
                                 <div className="grid gap-3 w-full">
                                     <Label htmlFor="lastName">Last Name</Label>
-                                    <Input id="lastName" name="lastName" defaultValue="" />
+                                    <Input id="lastName" name="lastName" value={lastName} onChange={(e) => {
+                                        setLastName(e.target.value)
+                                        setError(null)
+                                    }} />
                                 </div>
                             </div>
+                            {error && (error.type === 'firstName' || error.type === 'lastName') && (
+                                <Alert variant="destructive">
+                                    <AlertCircleIcon />
+                                    <AlertTitle>{error.message}</AlertTitle>
+                                </Alert>
+                            )}
                             <FieldGroup>
                                 <FieldSet>
                                     <FieldLabel htmlFor="compute-environment-p8w">
@@ -249,17 +325,32 @@ export const CreateCharacter = () => {
                                         onSelect={(date) => {
                                             setDateOfBirth(date)
                                             setIsOpenCalendar(false)
+                                            setError(null)
                                         }}
                                     />
                                     </PopoverContent>
                                 </Popover>
                             </div>
+                            {error && (error.type === 'dateOfBirth') && (
+                                <Alert variant="destructive">
+                                    <AlertCircleIcon />
+                                    <AlertTitle>{error.message}</AlertTitle>
+                                </Alert>
+                            )}
                         </div>
                         <DialogFooter>
                             <Button variant="secondary" type="reset" disabled={isSubmitting}>Reset</Button>
-                            <Button type="submit" disabled={isSubmitting}>{isSubmitting ? <>
-                                <Spinner /> Creating...
-                            </> : 'Create'} </Button>
+                            <Button type="submit" disabled={isSubmitting} onClick={(e) => {
+                                e.preventDefault()
+                                onSubmitCreateCharacter()
+                            }}>{isSubmitting ? (
+                                <>
+                                    <Spinner /> Creating...
+                                </>
+                            ) : (
+                                'Create'
+                            )}
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </form>
