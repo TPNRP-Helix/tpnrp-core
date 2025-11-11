@@ -18,6 +18,8 @@ function CWebUI.new(core)
     self.nucleus = nil
     self.lastLogIndex = 0
 
+
+
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
@@ -28,10 +30,55 @@ function CWebUI.new(core)
         self._webUI:BringToFront()
         -- Hide default UI
         self:hideDefaultUI()
-        -- Bind log tool
+        -- Bind game input
+        self:bindInput()
+
+        -- [DEV] Bind log tool
         self:bindLog()
 
-        -- On pressed `F7` to open dev mode
+        ---+-----------------------------------------------+
+        -- | Listen event                                  |
+        ---+-----------------------------------------------/
+   
+        -- out focus UI
+        self:registerEventHandler('doOutFocus', function()
+            self:outFocus()
+        end)
+
+        ---+-----------------------------------------------+
+        -- | Bind callback                                 |
+        ---+-----------------------------------------------/
+
+        -- Get player's permission for WebUI
+        TriggerCallback('getPermissions', function(result)
+            self:sendEvent('setPermission', result)
+        end)
+    end
+
+
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
+
+    function self:bindInput()
+        -- [GAME] [F1] Toggle focus with mouse
+        Input.BindKey('F1', function()
+            if self._isFocusing then
+                -- Close focus 
+                self:outFocus()
+                return
+            end
+            -- Open focus and open console
+            self._webUI:SetInputMode(EWebUIInputMode.UI)
+            self._isFocusing = true
+        end, 'Pressed')
+
+        -- [GAME] [F3] Toggle toast expand
+        Input.BindKey('F3', function()
+            self:sendEvent('toggleToastExpand')
+        end, 'Pressed')
+
+        -- [ADMIN] [F7] Dev Mode menu
         Input.BindKey('F7', function()
             TriggerCallback('getPermissions', function(result)
                 if result ~= 'admin' then
@@ -51,7 +98,7 @@ function CWebUI.new(core)
             end)
         end, 'Pressed')
 
-        -- On pressed `F8` to open console
+        -- [ADMIN] [F8] Console
         Input.BindKey('F8', function()
             TriggerCallback('getPermissions', function(result)
                 if result ~= 'admin' then
@@ -71,23 +118,8 @@ function CWebUI.new(core)
             end)
             
         end, 'Pressed')
-
-        -- out focus UI
-        self:registerEventHandler('doOutFocus', function()
-            self:outFocus()
-        end)
-        
-        -- Get player's permission for WebUI
-        TriggerCallback('getPermissions', function(result)
-            self:sendEvent('setPermission', result)
-        end)
     end
 
-
-    ---/********************************/
-    ---/*          Functions           */
-    ---/********************************/
-    
     ---Hide default UI
     function self:hideDefaultUI()
         local actors = UE.TArray(UE.AActor)
@@ -99,7 +131,7 @@ function CWebUI.new(core)
         actors[1]:SetHUDVisibility(false, false, true, true, false)
         return true
     end
-    
+
     ---Destroy webUI entity
     function self:destroy()
         if not self._webUI then return end

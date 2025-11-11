@@ -11,6 +11,7 @@ import { useGameSettingStore } from "@/stores/useGameSetting"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { UIPreview } from "./UIPreview"
+import { toast } from "sonner"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
@@ -70,6 +71,10 @@ export const DevMode = () => {
                     <SheetDescription>
                         DevMode Tools support for testing inventory features
                     </SheetDescription>
+                    <Button onClick={() => toast.success('Test toast', {
+                                description: 'Test toast description',
+                                duration: 3000
+                            })}>Test toast</Button>
                     <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
                     <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
                     <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
