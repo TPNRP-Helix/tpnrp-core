@@ -27,6 +27,8 @@ import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
 import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
 import { toast } from "sonner"
+import { useI18n } from "@/i18n"
+import { useGameSettingStore } from "@/stores/useGameSetting"
 
 type TCharacter = {
     name: string
@@ -52,6 +54,8 @@ type TCreateCharacterResponse = {
 
 export const CreateCharacter = () => {
     const { appendConsoleMessage } = useDevModeStore()
+    const { t } = useI18n()
+    const { language, setLanguage } = useGameSettingStore()
     const {
         isShowCreateCharacter,
         isShowSelectCharacter,
@@ -112,8 +116,8 @@ export const CreateCharacter = () => {
         // Show Select Character Sheet
         setShowSelectCharacter(true)
         // Show toast for create character success
-        toast("Character created successfully", {
-            description: `Welcome ${playerData?.name} to the game!`,
+        toast(t("toast.create.success.title"), {
+            description: t("toast.create.success.desc", { name: playerData?.name ?? "" }),
         })
     })
 
@@ -128,21 +132,21 @@ export const CreateCharacter = () => {
         }
         setIsSubmitting(true)
         if (!firstName || firstName.trim() === '') {
-            console.log('First name is required', firstName)
-            appendConsoleMessage({ message: 'First name is required', index: 0 })
-            setError({ type: 'firstName', message: 'First name is required' })
+            console.log(t('error.firstNameRequired'), firstName)
+            appendConsoleMessage({ message: t('error.firstNameRequired'), index: 0 })
+            setError({ type: 'firstName', message: t('error.firstNameRequired') })
             setIsSubmitting(false)
             return
         }
         if (!lastName || lastName.trim() === '') {
-            appendConsoleMessage({ message: 'Last name is required', index: 0 })
-            setError({ type: 'lastName', message: 'Last name is required' })
+            appendConsoleMessage({ message: t('error.lastNameRequired'), index: 0 })
+            setError({ type: 'lastName', message: t('error.lastNameRequired') })
             setIsSubmitting(false)
             return
         }
         if (!dateOfBirth) {
-            appendConsoleMessage({ message: 'Date of birth is required', index: 0 })
-            setError({ type: 'dateOfBirth', message: 'Date of birth is required' })
+            appendConsoleMessage({ message: t('error.dobRequired'), index: 0 })
+            setError({ type: 'dateOfBirth', message: t('error.dobRequired') })
             setIsSubmitting(false)
             return
         }
@@ -165,7 +169,7 @@ export const CreateCharacter = () => {
                     isShowCloseButton={false}
                 >
                     <SheetHeader>
-                        <SheetTitle>Select Character</SheetTitle>
+                        <SheetTitle>{t("selectCharacter.title")}</SheetTitle>
                     </SheetHeader>
                     <div className="grid gap-4 p-4">
                         {Array.from({ length: maxCharacters }).map((_, index) => {
@@ -185,26 +189,26 @@ export const CreateCharacter = () => {
                                                     
                                                 </>
                                             ) : (
-                                                <>{`Empty slot ${index + 1}`}</>
+                                                <>{t("selectCharacter.emptySlot", { n: index + 1 })}</>
                                             )}
                                         </ItemTitle>
                                         <ItemDescription>
                                             {character ? (
                                                 <ul>
-                                                    <li>Citizen ID: {character.citizenId}</li>
-                                                    <li>Money: ${character.money}</li>
+                                                    <li>{t("selectCharacter.citizenId")}: {character.citizenId}</li>
+                                                    <li>{t("selectCharacter.money")}: ${character.money}</li>
                                                 </ul>
-                                            ) : <>Create new character</>}
+                                            ) : <>{t("selectCharacter.createNew")}</>}
                                         </ItemDescription>
                                     </ItemContent>
                                     <ItemActions className="opacity-0 group-hover/item:opacity-100 transition-opacity">
                                         {character ? (
                                             <Button variant="default" size="sm">
-                                                Join
+                                                {t("selectCharacter.join")}
                                             </Button>
                                         ) : (
                                             <Button variant="default" size="sm" onClick={onClickCreateCharacter}>
-                                                Create
+                                                {t("selectCharacter.create")}
                                             </Button>
                                         )}
                                     </ItemActions>
@@ -213,15 +217,15 @@ export const CreateCharacter = () => {
                         })}
                         <Alert>
                             <AlertCircleIcon />
-                            <AlertTitle>Info</AlertTitle>
+                            <AlertTitle>{t("selectCharacter.infoTitle")}</AlertTitle>
                             <AlertDescription>
-                                <p>Select your character or create a new one to start your journey.</p>
+                                <p>{t("selectCharacter.infoDesc")}</p>
                             </AlertDescription>
                         </Alert>
                         <div className="absolute bottom-4 left-4">
-                            <Select>
+                            <Select value={language} onValueChange={(val) => setLanguage(val)}>
                                 <SelectTrigger className="w-[180px]">
-                                    <SelectValue placeholder="Select Language" />
+                                    <SelectValue placeholder={t("selectCharacter.language.placeholder")} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
@@ -244,22 +248,22 @@ export const CreateCharacter = () => {
                 <form onSubmit={onSubmitCreateCharacter}>
                     <DialogContent className="sm:max-w-[425px] ">
                         <DialogHeader>
-                            <DialogTitle>Create Character</DialogTitle>
+                            <DialogTitle>{t("createCharacter.title")}</DialogTitle>
                             <DialogDescription>
-                                Create a new character to start your journey.
+                                {t("createCharacter.description")}
                             </DialogDescription>
                         </DialogHeader>
                         <div className="grid gap-4 p-4">
                             <div className="flex gap-2">
                                 <div className="grid gap-3 w-full">
-                                    <Label htmlFor="firstName">First Name</Label>
+                                    <Label htmlFor="firstName">{t("createCharacter.firstName")}</Label>
                                     <Input id="firstName" name="firstName" value={firstName} onChange={(e) => {
                                         setFirstName(e.target.value)
                                         setError(null)
                                     }} />
                                 </div>
                                 <div className="grid gap-3 w-full">
-                                    <Label htmlFor="lastName">Last Name</Label>
+                                    <Label htmlFor="lastName">{t("createCharacter.lastName")}</Label>
                                     <Input id="lastName" name="lastName" value={lastName} onChange={(e) => {
                                         setLastName(e.target.value)
                                         setError(null)
@@ -275,7 +279,7 @@ export const CreateCharacter = () => {
                             <FieldGroup>
                                 <FieldSet>
                                     <FieldLabel htmlFor="compute-environment-p8w">
-                                        Gender
+                                        {t("createCharacter.gender")}
                                     </FieldLabel>
                                     <RadioGroup
                                         className="flex gap-2"
@@ -286,7 +290,7 @@ export const CreateCharacter = () => {
                                         <FieldLabel htmlFor="male">
                                             <Field orientation="horizontal">
                                                 <FieldContent>
-                                                    <FieldTitle> <Mars className="size-4" /> Male</FieldTitle>
+                                                    <FieldTitle> <Mars className="size-4" /> {t("createCharacter.gender.male")}</FieldTitle>
                                                 </FieldContent>
                                                 <RadioGroupItem value="male" id="male" />
                                             </Field>
@@ -294,7 +298,7 @@ export const CreateCharacter = () => {
                                         <FieldLabel htmlFor="female">
                                             <Field orientation="horizontal">
                                                 <FieldContent>
-                                                    <FieldTitle> <Venus className="size-4" /> Female</FieldTitle>
+                                                    <FieldTitle> <Venus className="size-4" /> {t("createCharacter.gender.female")}</FieldTitle>
                                                 </FieldContent>
                                                 <RadioGroupItem value="female" id="female" />
                                             </Field>
@@ -304,7 +308,7 @@ export const CreateCharacter = () => {
                             </FieldGroup>
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="date" className="px-1">
-                                    Date of birth
+                                    {t("createCharacter.dob")}
                                 </Label>
                                 <Popover open={isOpenCalendar} onOpenChange={setIsOpenCalendar}>
                                     <PopoverTrigger asChild>
@@ -313,7 +317,7 @@ export const CreateCharacter = () => {
                                         id="date"
                                         className="w-full justify-between font-normal"
                                     >
-                                        {dateOfBirth ? dateOfBirth.toLocaleDateString() : "Select date"}
+                                        {dateOfBirth ? dateOfBirth.toLocaleDateString() : t("createCharacter.selectDate")}
                                         <ChevronDownIcon />
                                     </Button>
                                     </PopoverTrigger>
@@ -339,16 +343,16 @@ export const CreateCharacter = () => {
                             )}
                         </div>
                         <DialogFooter>
-                            <Button variant="secondary" type="reset" disabled={isSubmitting}>Reset</Button>
+                            <Button variant="secondary" type="reset" disabled={isSubmitting}>{t("createCharacter.reset")}</Button>
                             <Button type="submit" disabled={isSubmitting} onClick={(e) => {
                                 e.preventDefault()
                                 onSubmitCreateCharacter()
                             }}>{isSubmitting ? (
                                 <>
-                                    <Spinner /> Creating...
+                                    <Spinner /> {t("createCharacter.submitting")}
                                 </>
                             ) : (
-                                'Create'
+                                t("createCharacter.submit")
                             )}
                             </Button>
                         </DialogFooter>

@@ -2,6 +2,11 @@ import { useGameSettingStore } from "@/stores/useGameSetting"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
+import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
+import { useI18n } from "@/i18n"
+
 export const Settings = () => {
     const {
         isSettingsOpen,
@@ -16,36 +21,53 @@ export const Settings = () => {
         setShowHungerBadgeWhenSmallerThan,
         setShowThirstBadgeWhenSmallerThan,
         setShowStaminaBadgeWhenSmallerThan,
+        language,
+        setLanguage,
     } = useGameSettingStore()
+    const { t } = useI18n()
 
     return (
         <Sheet open={isSettingsOpen} onOpenChange={setSettingsOpen}>
             <SheetContent side="left" className="w-[800px] sm:max-w-[800px]">
                 <SheetHeader>
-                    <SheetTitle>Settings</SheetTitle>
+                    <SheetTitle>{t("settings.title")}</SheetTitle>
                     <SheetDescription>
-                        Settings for the game
+                        {t("settings.description")}
                     </SheetDescription>
                 </SheetHeader>
                 <div className="grid gap-4 p-4">
                     <div className="grid gap-2">
-                        <Label>Show Health Badge When Smaller Than</Label>
+                        <Label>{t("selectCharacter.language.placeholder")}</Label>
+                        <Select value={language} onValueChange={(val) => setLanguage(val)}>
+                            <SelectTrigger className="w-[240px]">
+                                <SelectValue placeholder={t("selectCharacter.language.placeholder")} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectGroup>
+                                    <SelectItem value="en"> <UnitedStateFlag /> English</SelectItem>
+                                    <SelectItem value="vi"> <VietnamFlag /> Tiếng Việt</SelectItem>
+                                </SelectGroup>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="grid gap-2">
+                        <Label>{t("settings.showHealth")}</Label>
                         <Input type="number" value={showHealthBadgeWhenSmallerThan} onChange={(e) => setShowHealthBadgeWhenSmallerThan(Number(e.target.value))} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Show Armor Badge When Smaller Than</Label>
+                        <Label>{t("settings.showArmor")}</Label>
                         <Input type="number" value={showArmorBadgeWhenSmallerThan} onChange={(e) => setShowArmorBadgeWhenSmallerThan(Number(e.target.value))} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Show Hunger Badge When Smaller Than</Label>
+                        <Label>{t("settings.showHunger")}</Label>
                         <Input type="number" value={showHungerBadgeWhenSmallerThan} onChange={(e) => setShowHungerBadgeWhenSmallerThan(Number(e.target.value))} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Show Thirst Badge When Smaller Than</Label>
+                        <Label>{t("settings.showThirst")}</Label>
                         <Input type="number" value={showThirstBadgeWhenSmallerThan} onChange={(e) => setShowThirstBadgeWhenSmallerThan(Number(e.target.value))} />
                     </div>
                     <div className="grid gap-2">
-                        <Label>Show Stamina Badge When Smaller Than</Label>
+                        <Label>{t("settings.showStamina")}</Label>
                         <Input type="number" value={showStaminaBadgeWhenSmallerThan} onChange={(e) => setShowStaminaBadgeWhenSmallerThan(Number(e.target.value))} />
                     </div>
                 </div>

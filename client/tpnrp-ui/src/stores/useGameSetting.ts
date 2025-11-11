@@ -25,8 +25,13 @@ export const useGameSettingStore = create<GameSettingState>((set) => ({
   showHungerBadgeWhenSmallerThan: 100,
   showThirstBadgeWhenSmallerThan: 100,
   showStaminaBadgeWhenSmallerThan: 100,
-  language: 'en',
-  setLanguage: (value) => set({ language: value }),
+  language: typeof window !== 'undefined' ? (localStorage.getItem('tpnrp_language') || 'en') : 'en',
+  setLanguage: (value) => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('tpnrp_language', value)
+    }
+    set({ language: value })
+  },
   setShowHealthBadgeWhenSmallerThan: (value) => set({ showHealthBadgeWhenSmallerThan: value }),
   setShowArmorBadgeWhenSmallerThan: (value) => set({ showArmorBadgeWhenSmallerThan: value }),
   setShowHungerBadgeWhenSmallerThan: (value) => set({ showHungerBadgeWhenSmallerThan: value }),
