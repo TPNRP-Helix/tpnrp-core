@@ -1,0 +1,42 @@
+{
+  "settings.title": "Cài đặt",
+  "settings.description": "Cài đặt cho trò chơi",
+  "settings.showHealth": "Hiện Máu khi nhỏ hơn",
+  "settings.showArmor": "Hiện Giáp khi nhỏ hơn",
+  "settings.showHunger": "Hiện Đói khi nhỏ hơn",
+  "settings.showThirst": "Hiện Khát khi nhỏ hơn",
+  "settings.showStamina": "Hiện Thể lực khi nhỏ hơn",
+
+  "selectCharacter.title": "Chọn nhân vật",
+  "selectCharacter.emptySlot": "Ô trống {n}",
+  "selectCharacter.citizenId": "CCCD",
+  "selectCharacter.money": "Tiền",
+  "selectCharacter.createNew": "Tạo nhân vật mới",
+  "selectCharacter.join": "Vào",
+  "selectCharacter.create": "Tạo",
+  "selectCharacter.infoTitle": "Thông tin",
+  "selectCharacter.infoDesc": "Chọn nhân vật của bạn hoặc tạo nhân vật mới để bắt đầu.",
+  "selectCharacter.language.placeholder": "Chọn ngôn ngữ",
+
+  "createCharacter.title": "Tạo nhân vật",
+  "createCharacter.description": "Tạo nhân vật mới để bắt đầu hành trình của bạn.",
+  "createCharacter.firstName": "Tên",
+  "createCharacter.lastName": "Họ",
+  "createCharacter.gender": "Giới tính",
+  "createCharacter.gender.male": "Nam",
+  "createCharacter.gender.female": "Nữ",
+  "createCharacter.dob": "Ngày sinh",
+  "createCharacter.selectDate": "Chọn ngày",
+  "createCharacter.reset": "Làm lại",
+  "createCharacter.submit": "Tạo",
+  "createCharacter.submitting": "Đang tạo...",
+
+  "toast.create.success.title": "Tạo nhân vật thành công",
+  "toast.create.success.desc": "Chào mừng {name} đến với Thành Phố Ngầm!",
+
+  "error.firstNameRequired": "Tên là bắt buộc",
+  "error.lastNameRequired": "Họ là bắt buộc",
+  "error.dobRequired": "Ngày sinh là bắt buộc"
+}
+
+

@@ -61,9 +61,9 @@ function SheetContent({
         className={cn(
           "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-300 data-[state=open]:duration-500 rounded-tr",
           side === "right" &&
-            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 border-l sm:max-w-sm [clip-path:polygon(0_0,100%_0,100%_100%,8px_100%,0_calc(100%-8px))]",
           side === "left" &&
-            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm",
+            "data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left inset-y-0 left-0 h-full w-3/4 border-r sm:max-w-sm [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!",
           side === "top" &&
             "data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top inset-x-0 top-0 h-auto border-b",
           side === "bottom" &&
@@ -93,6 +93,16 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-header"
+      className={cn("relative flex flex-col gap-1.5 p-0 mt-4 mx-4 min-h-7 border-b border-white/10", className)}
+      {...props}
+    />
+  )
+}
+
+function SheetBody({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="sheet-body"
       className={cn("flex flex-col gap-1.5 p-4", className)}
       {...props}
     />
@@ -116,9 +126,16 @@ function SheetTitle({
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn("text-foreground font-semibold", className)}
+      className={cn("absolute text-black text-sm font-medium uppercase inline-flex items-center gap-1.5 pl-2 pr-4 py-1", className)}
       {...props}
-    />
+    >
+      <span className="relative z-10 flex items-center gap-1.5">
+        {props.children}
+      </span>
+      <svg className="absolute -z-1 inset-0 w-full min-w-[156px]" viewBox="0 0 162 29" fill="none">
+          <path d="M0 28.0332H162V14.6376C162 13.4903 161.507 12.3983 160.647 11.639L148.635 1.03454C147.904 0.389288 146.963 0.0331955 145.988 0.0331955H3C1.34314 0.0331955 0 1.37634 0 3.0332V28.0332Z" fill="var(--foreground)" fill-opacity="0.32"></path>
+      </svg>
+    </SheetPrimitive.Title>
   )
 }
 
@@ -129,7 +146,7 @@ function SheetDescription({
   return (
     <SheetPrimitive.Description
       data-slot="sheet-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      className={cn("text-muted-foreground text-sm ", className)}
       {...props}
     />
   )
@@ -141,6 +158,7 @@ export {
   SheetClose,
   SheetContent,
   SheetHeader,
+  SheetBody,
   SheetFooter,
   SheetTitle,
   SheetDescription,

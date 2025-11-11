@@ -1,0 +1,42 @@
+{
+  "settings.title": "Settings",
+  "settings.description": "Settings for the game",
+  "settings.showHealth": "Show Health Badge When Smaller Than",
+  "settings.showArmor": "Show Armor Badge When Smaller Than",
+  "settings.showHunger": "Show Hunger Badge When Smaller Than",
+  "settings.showThirst": "Show Thirst Badge When Smaller Than",
+  "settings.showStamina": "Show Stamina Badge When Smaller Than",
+
+  "selectCharacter.title": "Select Character",
+  "selectCharacter.emptySlot": "Empty slot {n}",
+  "selectCharacter.citizenId": "Citizen ID",
+  "selectCharacter.money": "Money",
+  "selectCharacter.createNew": "Create new character",
+  "selectCharacter.join": "Join",
+  "selectCharacter.create": "Create",
+  "selectCharacter.infoTitle": "Info",
+  "selectCharacter.infoDesc": "Select your character or create a new one to start your journey.",
+  "selectCharacter.language.placeholder": "Select Language",
+
+  "createCharacter.title": "Create Character",
+  "createCharacter.description": "Create a new character to start your journey.",
+  "createCharacter.firstName": "First Name",
+  "createCharacter.lastName": "Last Name",
+  "createCharacter.gender": "Gender",
+  "createCharacter.gender.male": "Male",
+  "createCharacter.gender.female": "Female",
+  "createCharacter.dob": "Date of birth",
+  "createCharacter.selectDate": "Select date",
+  "createCharacter.reset": "Reset",
+  "createCharacter.submit": "Create",
+  "createCharacter.submitting": "Creating...",
+
+  "toast.create.success.title": "Character created successfully",
+  "toast.create.success.desc": "Welcome {name} to the Underground City!",
+
+  "error.firstNameRequired": "First name is required",
+  "error.lastNameRequired": "Last name is required",
+  "error.dobRequired": "Date of birth is required"
+}
+
+

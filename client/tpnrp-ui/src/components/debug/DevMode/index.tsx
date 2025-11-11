@@ -10,31 +10,38 @@ import { useGameStore } from "@/stores/useGameStore"
 import { useGameSettingStore } from "@/stores/useGameSetting"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
+import { UIPreview } from "./UIPreview"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
     const [enableDevMode, setEnableDevMode] = useState(true)
-    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen } = useDevModeStore()
+    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
-    const { toggleSelectCharacter, toggleCreateCharacter } = useCreateCharacterStore()
+    const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
 
-    useWebUIMessage<[boolean]>('setConsoleOpen', (args) => {
-        setConsoleOpen(args[0])
+    useWebUIMessage<[boolean]>('setConsoleOpen', ([isOpenConsole]) => {
+        setConsoleOpen(isOpenConsole)
     })
-    useWebUIMessage<[boolean]>('setDevModeOpen', (args) => {
-        setDevModeOpen(args[0])
+    useWebUIMessage<[boolean]>('setDevModeOpen', ([isOpenDevMode]) => {
+        setDevModeOpen(isOpenDevMode)
+    })
+
+    useWebUIMessage<[string]>('setPermission', ([permission]) => {
+        setPermission(permission)
     })
 
     useEffect(() => {
         const isInBrowser = window.location.href.includes("http://localhost:")
         if (isInBrowser) {
             setEnableDevMode(true)
+            setPermission('admin')
         }
     }, [])
     
     // Don't render the dev mode tools if not in browser
-    if (!enableDevMode) return null
+    // Or if the permission is not admin
+    if (!enableDevMode || permission !== 'admin') return null
 
     return (
         <>
@@ -58,13 +65,14 @@ export const DevMode = () => {
             <SheetContent side="left">
                 <SheetHeader>
                     <SheetTitle>Dev Mode Tools</SheetTitle>
+                </SheetHeader>
+                <div className="grid gap-4 p-4">
                     <SheetDescription>
                         DevMode Tools support for testing inventory features
                     </SheetDescription>
-                </SheetHeader>
-                <div className="grid gap-4 p-4">
                     <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
                     <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
+                    <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-2">
                             <TabsTrigger value="inventory">Inventory</TabsTrigger>
@@ -77,6 +85,7 @@ export const DevMode = () => {
                             <Button onClick={() => {
                                 setDevModeOpen(false)
                                 toggleSelectCharacter()
+                                setMaxCharacters(5)
                             }}>Select Character</Button>
                             <Button onClick={() => toggleCreateCharacter()}>Create Character</Button>
                         </TabsContent>
@@ -105,6 +114,7 @@ export const DevMode = () => {
                 </div>
             </SheetContent>
         </Sheet>
+        <UIPreview />
     </>
     )
 }

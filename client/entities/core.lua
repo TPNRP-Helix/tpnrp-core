@@ -57,13 +57,22 @@ function TPNRPClient.new()
             self.player = nil
         end)
         
-        RegisterClientEvent('TPN:core:setCharacters', function(result)
+        RegisterClientEvent('TPN:client:setCharacters', function(result)
             -- TODO: Teleport player to Select character Room
 
             -- Lock game input (Focus input on UI)
             self.webUI:focus()
             -- Show Select Character UI
             self.webUI:sendEvent('setPlayerCharacters', result)
+        end)
+        
+        -- On create character
+        self.webUI:registerEventHandler('createCharacter', function(data)
+            TriggerCallback('createCharacter', function(result)
+                if not result.success then return end
+                print(JSON.stringify(result.playerData))
+                self.webUI:sendEvent('onCreateCharacterSuccess', result.playerData)
+            end, data)
         end)
     end
 

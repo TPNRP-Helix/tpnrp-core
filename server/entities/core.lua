@@ -75,6 +75,18 @@ function TPNRPServer.new()
         return nil
     end
 
+    ---Get license by source
+    ---@param source PlayerController player controller
+    ---@return string | nil license
+    function self:getLicenseBySource(source)
+        local playerState = source:GetLyraPlayerState()
+        if not playerState then
+            print('[ERROR] TPNRPServer.getLicenseBySource - Player state not found!')
+            return nil
+        end
+        return playerState:GetHelixUserId() or nil
+    end
+
     ---/********************************/
     ---/*          Functions           */
     ---/********************************/
@@ -135,14 +147,14 @@ function TPNRPServer.new()
         local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
         local result = DAO.player.getCharacters(license)
         if not result then
-            TriggerClientEvent(source, 'TPN:core:setCharacters', {
+            TriggerClientEvent(source, 'TPN:client:setCharacters', {
                 maxCharacters = maxCharacters,
                 characters = {},
             })
             return
         end
 
-        TriggerClientEvent(source, 'TPN:core:setCharacters', {
+        TriggerClientEvent(source, 'TPN:client:setCharacters', {
             maxCharacters = maxCharacters,
             characters = result,
         })
@@ -155,6 +167,73 @@ function TPNRPServer.new()
     ---Bind callback events
     function self:bindCallbackEvents()
         print('[TPN][SERVER] bindCallbackEvents - register callback')
+        -- Get player's role
+        ---@param source PlayerController player controller
+        ---@return string role
+        RegisterCallback('getPermissions', function(source)
+            -- Get player's role
+            return SHARED.getPermission(source)
+        end)
+
+        -- Get player's language
+        ---@param source PlayerController player controller
+        ---@return string language
+        RegisterCallback('getLanguage', function(source)
+            -- TODO: Get Player's language from database
+            
+            -- Return default language by server's config
+            return SHARED.CONFIG.LANGUAGE
+        end)
+        
+        -- Create character
+        ---@param source PlayerController player controller
+        ---@param data table data
+        ---@return table result
+        RegisterCallback('createCharacter', function(source, data)
+            local license = self:getLicenseBySource(source)
+            if not license then
+                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
+                return {
+                    success = false,
+                    message = 'Failed to get license by source',
+                    playerData = nil
+                }
+            end
+            local playerData = {
+                citizenId = SHARED.createCitizenId(),
+                license = license,
+                name = data.firstName .. ' ' .. data.lastName,
+                money = SHARED.DEFAULT.PLAYER.money,
+                characterInfo = {
+                    firstName = data.firstName,
+                    lastName = data.lastName,
+                    gender = data.gender,
+                    birthday = data.dateOfBirth,
+                },
+                job = SHARED.DEFAULT.PLAYER.job,
+                gang = SHARED.DEFAULT.PLAYER.gang,
+                position = SHARED.DEFAULT.SPAWN.POSITION,
+                heading = SHARED.DEFAULT.SPAWN.HEADING,
+                metadata = SHARED.DEFAULT.PLAYER.metadata,
+                level = SHARED.DEFAULT.LEVEL,
+            }
+            -- Create character
+            local result = DAO.player.createCharacter(license, playerData)
+            if not result then
+                print(('[ERROR] TPNRPServer.bindCallbackEvents - Failed to create character for %s (License: %s)'):format(playerData.name, license))
+                return {
+                    success = false,
+                    message = 'Failed to create character',
+                    playerData = nil
+                }
+            end
+            -- Return success
+            return {
+                success = true,
+                message = 'Character created successfully',
+                playerData = playerData,
+            }
+        end)
     end
 
 

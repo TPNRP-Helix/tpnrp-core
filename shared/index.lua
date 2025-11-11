@@ -262,6 +262,30 @@ SHARED.createCitizenId = function()
     return tostring(SHARED.randomStr(3) .. SHARED.randomInt(10000, 99999)):upper()
 end
 
+----------------------------------------------------------------------
+--- Get Permission
+----------------------------------------------------------------------
+---Get player's role
+---@param source PlayerController player controller
+---@return string role
+SHARED.getPermission = function(source)
+    if type(source) ~= 'PlayerController' then
+        return 'player'
+    end
+    local playerState = source:GetLyraPlayerState()
+    if not playerState then
+        return 'player'
+    end
+    local license = playerState:GetHelixUserId()
+    for _, value in ipairs(SHARED.CONFIG.PERMISSIONS) do
+        if value.license == license then
+            return value.role or 'player' -- fallback default role is player
+        end
+    end
+    -- Default role is player
+    return 'player'
+end
+
 -----------------------------------------------------------------------
 --- Locale initialization (server-config driven)
 -----------------------------------------------------------------------
