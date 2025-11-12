@@ -16,7 +16,7 @@ const IS_SHOW_BG = false
 
 export const DevMode = () => {
     const [enableDevMode, setEnableDevMode] = useState(true)
-    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen } = useDevModeStore()
+    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen, appendConsoleMessage } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
@@ -45,6 +45,7 @@ export const DevMode = () => {
 
     const playAnimation = useCallback(() => {
         window.hEvent("playAnimation", { animationName })
+        appendConsoleMessage({ message: `Playing animation: ${animationName}`, index: 0 })
     }, [animationName])
     
     // Don't render the dev mode tools if not in browser

@@ -33,6 +33,23 @@ function TPNRPServer.new()
         
         -- TPN events
         RegisterServerEvent('TPN:player:syncPlayer', function(playerController) self:onPlayerSync(playerController) end)
+        RegisterServerEvent('playAnim', function(source, animationName)
+            print('[TPN][SERVER] playAnim ' .. animationName)
+            local char = source:K2_GetPawn()
+            if not char then
+                print('[TPN][SERVER] playAnim - Failed to get character!')
+                return
+            end
+            print('[TPN][SERVER] playAnim - Character found!')
+            local AnimParams = UE.FHelixPlayAnimParams()
+            AnimParams.LoopCount = 1
+            AnimParams.bIgnoreMovementInput = true
+            print('[TPN][SERVER] playAnim - AnimParams.')
+            Animation.Play(char, '/Game/Addon_KpopDances/OMG/A_OMG.A_OMG', AnimParams, function()
+                print('Animation Ended')
+            end)
+        end)
+
         -- Bind callback events
         self:bindCallbackEvents()
     end
@@ -151,7 +168,7 @@ function TPNRPServer.new()
         local license = playerState:GetHelixUserId()
         local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
         local result = DAO.player.getCharacters(license)
-        print('[TPN][SERVER] onPlayerPossessed - characters: ' .. license)
+        
         if not result then
             TriggerClientEvent(source, 'TPN:client:setCharacters', {
                 maxCharacters = maxCharacters,
@@ -159,7 +176,6 @@ function TPNRPServer.new()
             })
             return
         end
-
         TriggerClientEvent(source, 'TPN:client:setCharacters', {
             maxCharacters = maxCharacters,
             characters = result,
@@ -309,7 +325,6 @@ function TPNRPServer.new()
             }
         end)
     end
-
 
     _contructor()
     return self

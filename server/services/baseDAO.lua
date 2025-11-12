@@ -2,6 +2,22 @@ Database.Initialize('TPNRP.sqlite')
 
 DAO = {}
 DAO.DB = Database
+DAO.Action = function(ActionType, ...)
+    if not ActionType then return end
+
+    local _, result = pcall(function(...)
+        return Database[ActionType](...)
+    end, ...)
+
+    local ResultSet = {}
+    if type(result) == 'userdata' and result.__name == 'TArray' then
+        local Rows = result:ToTable()
+        for k, v in pairs(Rows) do
+            ResultSet[k] = v.Columns:ToTable()
+        end
+    end
+    return #ResultSet ~= 0 and ResultSet or result:ToTable()
+end
 
 ---/********************************/
 ---/*         Init table           */

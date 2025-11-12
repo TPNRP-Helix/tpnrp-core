@@ -92,7 +92,7 @@ export const CreateCharacter = () => {
                 citizenId: value.citizenId,
                 level: parseInt(value.level) ?? 1,
                 money: parseInt(value.money) ?? 0,
-                gender: value.gender === 1 ? 'male' : 'female',
+                gender: value.gender,
             }
         })
         setPlayerCharacters(formattedCharacters)
