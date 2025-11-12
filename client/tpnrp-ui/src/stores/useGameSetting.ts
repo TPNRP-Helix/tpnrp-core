@@ -15,11 +15,16 @@ type GameSettingState = {
     hunger: number    // Will show badge if value smaller than this
     thirst: number    // Will show badge if value smaller than this
     stamina: number   // Will show badge if value smaller than this
-    
+    isShowBeatAnimation: boolean
+    isShowColorFill: boolean
+  }
+  uiConfig: {
+    isShowGuideHelper: boolean
   }
   setLanguage: (value: string) => void
   setToastConfig: (value: { visibleToasts: number, isExpand: boolean }) => void
   setBasicNeedHUDConfig: (value: { health?: number, armor?: number, hunger?: number, thirst?: number, stamina?: number }) => void
+  setUiConfig: (value: { isShowGuideHelper: boolean }) => void
   setSettingsOpen: (value: boolean) => void
   toggleSettings: () => void
 }
@@ -36,6 +41,11 @@ export const useGameSettingStore = create<GameSettingState>((set) => ({
     hunger: 100,
     thirst: 100,
     stamina: 100,
+    isShowBeatAnimation: true,
+    isShowColorFill: true,
+  },
+  uiConfig: {
+    isShowGuideHelper: true,
   },
   language: typeof window !== 'undefined' ? (localStorage.getItem('tpnrp_language') || 'en') : 'en',
   setLanguage: (value: string) => {
@@ -46,6 +56,7 @@ export const useGameSettingStore = create<GameSettingState>((set) => ({
   },
   setToastConfig: (value: { visibleToasts: number, isExpand: boolean }) => set({ toastConfig: value }),
   setBasicNeedHUDConfig: (value: { health?: number, armor?: number, hunger?: number, thirst?: number, stamina?: number }) => set((state) => ({ basicNeedHUDConfig: { ...state.basicNeedHUDConfig, ...value } })),
+  setUiConfig: (value: { isShowGuideHelper: boolean }) => set({ uiConfig: value }),
   setSettingsOpen: (value) => set({ isSettingsOpen: value }),
   toggleSettings: () => set((state) => ({ isSettingsOpen: !state.isSettingsOpen })),
 }))
