@@ -32,6 +32,8 @@ export const HUD = () => {
     exit: { opacity: 0, x: 500 },
   }
 
+  const phoneUnreadNotifications = notifications.filter((notification) => !notification.isRead)
+
   const stats = [
     {
       key: "health",
@@ -80,10 +82,10 @@ export const HUD = () => {
     },
     {
       key: "phone",
-      value: notifications.filter((notification) => !notification.isRead).length, // Phone notifications count
+      value: phoneUnreadNotifications.length, // Phone notifications count
       Icon: MotionPhone,
       fillColor: '#9333ea',
-      showBadge: notifications.filter((notification) => !notification.isRead).length > 0,
+      showBadge: phoneUnreadNotifications.length > 0,
       iconClassName: "h-12 outline-none!",
       isShowColorFill: false // Phone only have notification then it shouldn't have fill color
     }
