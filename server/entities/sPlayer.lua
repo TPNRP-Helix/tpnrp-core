@@ -6,15 +6,20 @@
 SPlayer = {}
 SPlayer.__index = SPlayer
 
+--- Creates a new instance of SPlayer.
+---@param core TPNRPServer core entity
+---@param playerController PlayerController player controller
+---@param playerData PlayerData player data
 ---@return SPlayer
-function SPlayer.new(playerController)
+function SPlayer.new(core, playerController, playerData)
     ---@class SPlayer
     local self = setmetatable({}, SPlayer)
 
+    self.core = core
     -- Player's controller
     self.playerController = playerController
     -- Player's data
-    self.playerData = nil
+    self.playerData = playerData
     -- Player's level
     self.level = nil
     -- Player's inventory
@@ -34,7 +39,7 @@ function SPlayer.new(playerController)
     ---Contructor function
     local function _contructor()
         -- Get player data
-        self.playerData = DAO.player.get(self.playerData.citizenId)
+        self:login()
         -- Get player's level
         self.level = SLevel.new(self)
         -- Get player's inventory
@@ -113,26 +118,20 @@ function SPlayer.new(playerController)
     end
 
     ---On Player logged in
+    ---@return PlayerData player data
     function self:login()
         -- Get player state
         local PlayerState = self.playerController:GetLyraPlayerState()
         -- Get player data from database
         local playerData = DAO.player.get(self.playerData.citizenId)
-        if not playerData then
-            -- User first time login, create new player data
-            playerData = SHARED.DEFAULT.PLAYER
-            playerData.citizenId = SHARED.createCitizenId()
-            playerData.source = self.playerController
-            playerData.license = PlayerState:GetHelixUserId()
-            playerData.name = PlayerState:GetPlayerName()
-        end
         -- Assign playerData
         self.playerData = playerData
-        self.playerData.source = self.playerController
         -- Assign Helix data to playerData
         self.playerData.netId = PlayerState:GetPlayerId()
         self.playerData.license = PlayerState:GetHelixUserId()
         self.playerData.name = PlayerState:GetPlayerName()
+
+        return self.playerData
     end
 
     ---Logout player
@@ -170,10 +169,10 @@ function SPlayer.new(playerController)
     ---Set metadata value
     ---@param key string metadata key
     ---@param value any metadata value
-    ---@param isSyncToClient boolean|nil is sync to client (optional, defaults to false)
+    ---@param isSyncToClient boolean|nil is sync to client (optional, defaults to true)
     function self:setMetaData(key, value, isSyncToClient)
         if isSyncToClient == nil then
-            isSyncToClient = false
+            isSyncToClient = true
         end
         -- hunger and thirst must be between 0 and 100
         if key == 'hunger' or key == 'thirst' then
@@ -196,10 +195,9 @@ function SPlayer.new(playerController)
         -- Assign new hunger and thirst
         -- Don't sync to client because we will sync at next line
         -- This strategy is to optimize packet sending
-        self:setMetaData('hunger', newHunger)
+        self:setMetaData('hunger', newHunger, false)
+        -- Set metadata and sync to client
         self:setMetaData('thirst', newThirst)
-        -- Sync to client
-        self:updatePlayerData()
         -- Update hunger and thirst in client-side UI
         TriggerClientEvent(self.playerController, 'TPN:ui:updateBasicNeeds', newHunger, newThirst)
     end

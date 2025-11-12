@@ -1,9 +1,9 @@
 DAO.player = {}
 ---Get player by citizen id
----@param citizen_id string
----@return PlayerData | nil
-DAO.player.get = function(citizen_id)
-    local result = DAO.DB.Select('SELECT * FROM players where citizen_id = ?', { citizen_id })
+---@param citizenId string
+---@return PlayerData
+DAO.player.get = function(citizenId)
+    local result = DAO.DB.Select('SELECT * FROM players where citizen_id = ?', { citizenId })
     ---@type PlayerData | nil
     local playerData = nil
     local rowData = result[1] and result[1].Columns:ToTable()
@@ -29,7 +29,7 @@ DAO.player.get = function(citizen_id)
     -- Fallback to default playerData if user didn't have yet
     ---@type PlayerData
     playerData = SHARED.DEFAULT.PLAYER
-    playerData.citizenId = citizen_id
+    playerData.citizenId = citizenId
     return playerData
 end
 

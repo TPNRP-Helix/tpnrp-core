@@ -24,3 +24,21 @@
 ---@field RegisterEventHandler fun(self: WebUI, event: string, callback: function): nil
 ---@field SetInputMode fun(self: WebUI, mode: EWebUIInputMode): nil
 ---@field BringToFront fun(self: WebUI): nil
+
+---/********************************/
+---/*          TPN's Class         */
+---/********************************/
+
+---@class TNotification
+---@field title string notification title
+---@field message? string notification message
+---@field type? 'success' | 'error' | 'warning' | 'info' notification type
+---@field duration? number notification duration
+
+---@class TLogCheatParams
+---@field action string action name
+---@field content string content of log
+---@field license string License of player
+---@field citizenId? string CitizenId of player
+---@field player? SPlayer Player entity
+---@field name? string player name

@@ -17,12 +17,15 @@ function TPNRPServer.new()
     self.shared = SHARED    -- Bind shared for other resources to use it via exports
     self.useableItems = {}  -- Useable items table
 
+    ---@type SCheatDetector cheat detector entity
+    self.cheatDetector = nil
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
 
     ---Contructor function
     local function _contructor()
+        self.cheatDetector = SCheatDetector.new(self)
         --- Base-game event
         RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) self:onPlayerUnloaded(playerController) end)
         RegisterServerEvent('HEvent:PlayerPossessed', function(playerController) self:onPlayerPossessed(playerController) end)
@@ -218,7 +221,7 @@ function TPNRPServer.new()
                 print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
                 return {
                     success = false,
-                    message = 'Failed to get license by source',
+                    message = 'error.failedToGetLicense',
                     playerData = nil
                 }
             end
@@ -246,14 +249,61 @@ function TPNRPServer.new()
                 print(('[ERROR] TPNRPServer.bindCallbackEvents - Failed to create character for %s (License: %s)'):format(playerData.name, license))
                 return {
                     success = false,
-                    message = 'Failed to create character',
+                    message = 'error.createCharacter.failedToCreateCharacter',
                     playerData = nil
                 }
             end
             -- Return success
             return {
                 success = true,
-                message = 'Character created successfully',
+                message = 'success.createCharacter',
+                playerData = playerData,
+            }
+        end)
+        
+        -- On Player join game
+        ---@param source PlayerController player controller
+        ---@param citizenId string citizen id
+        ---@return table result
+        RegisterCallback('callbackOnPlayerJoinGame', function(source, citizenId)
+            local license = self:getLicenseBySource(source)
+            if not license then
+                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
+                return {
+                    success = false,
+                    message = 'error.failedToGetLicense',
+                    playerData = nil
+                }
+            end
+            local playerData = DAO.player.get(citizenId)
+            if playerData.license ~= license then
+                print('[ERROR] TPNRPServer.bindCallbackEvents - Player license mismatch!')
+                -- TODO: Cheat detect!!
+                -- TODO: Consider to ban this player by diconnected and add to blacklist
+                self.cheatDetector:logCheater({
+                    action = 'joinGame',
+                    citizenId = citizenId,
+                    license = license,
+                    content = ('[ERROR] TPNRPServer.bindCallbackEvents - Player license mismatch!')
+                })
+                -- This player trying to login with character of other player
+                return {
+                    success = false,
+                    message = 'error.joinGame.playerNotFound',
+                    playerData = nil
+                }
+            end
+            -- Create player
+            local player = SPlayer.new(self, source, playerData)
+            -- Assign back playerData with other properties
+            playerData = player:login()
+            -- Push player into array
+            self.players[#self.players + 1] = player
+
+            -- Return success
+            return {
+                success = true,
+                message = 'success.joinGame',
                 playerData = playerData,
             }
         end)

@@ -13,6 +13,7 @@ function SEquipment.new(player)
 
     -- Public
     self.player = player
+    self.core = player.core
     self.items = {}
 
     ---/********************************/
@@ -22,7 +23,7 @@ function SEquipment.new(player)
     ---Contructor function
     local function _contructor()
         -- Load player's equipment for this player
-        local equipment = DAO.equipment.get(self.player.playerData.citizen_id)
+        local equipment = DAO.equipment.get(self.player.playerData.citizenId)
         if equipment then
             self.items = equipment
         end
@@ -70,20 +71,41 @@ function SEquipment.new(player)
         end
         local item = self.player.inventory:findItemBySlot(slotNumber)
         if not item then
-            print(('[ERROR] sEquipment.equipItem: Item %s not found in inventory!'):format(itemName))
             -- [CHEAT] possible event cheat
+            self.core.cheatDetector:logCheater({
+                action = 'equipItem',
+                player = self.player or nil,
+                citizenId = self.player.playerData.citizenId or '',
+                license = self.player.playerData.license or '',
+                name = self.player.playerData.name or '',
+                content = ('[ERROR] sEquipment.equipItem: Item %s not found in inventory!'):format(itemName)
+            })
             return { status = false, message = 'Item not found in inventory!' }
         end
         -- Verify that the item in the slot matches the provided itemName
         if item.name:lower() ~= itemName:lower() then
-            print(('[ERROR] sEquipment.equipItem: Item %s does not match item %s in slot %s!'):format(itemName, item.name, slotNumber))
             -- [CHEAT] possible event cheat
+            self.core.cheatDetector:logCheater({
+                action = 'equipItem',
+                player = self.player or nil,
+                citizenId = self.player.playerData.citizenId or '',
+                license = self.player.playerData.license or '',
+                name = self.player.playerData.name or '',
+                content = ('[ERROR] sEquipment.equipItem: Item %s does not match item %s in slot %s!'):format(itemName, item.name, slotNumber)
+            })
             return { status = false, message = 'Item mismatch!' }
         end
         local clothItemType = SHARED.getClothItemTypeByName(itemName)
         if not clothItemType then
-            print(('[ERROR] sEquipment.equipItem: Item %s is not a cloth item!'):format(itemName))
             -- [CHEAT] possible event cheat
+            self.core.cheatDetector:logCheater({
+                action = 'equipItem',
+                player = self.player or nil,
+                citizenId = self.player.playerData.citizenId or '',
+                license = self.player.playerData.license or '',
+                name = self.player.playerData.name or '',
+                content = ('[ERROR] sEquipment.equipItem: Item %s is not a cloth item!'):format(itemName)
+            })
             return { status = false, message = 'Item is not a cloth item!' }
         end
         -- Remove item from inventory
@@ -91,6 +113,14 @@ function SEquipment.new(player)
         if not removeResult.status then
             print(('[ERROR] sEquipment.equipItem: Failed to remove item %s from inventory!'):format(itemName))
             -- [CHEAT] possible event cheat
+            self.core.cheatDetector:logCheater({
+                action = 'equipItem',
+                player = self.player or nil,
+                citizenId = self.player.playerData.citizenId or '',
+                license = self.player.playerData.license or '',
+                name = self.player.playerData.name or '',
+                content = ('[ERROR] sEquipment.equipItem: Item %s is not a cloth item!'):format(itemName)
+            })
             return { status = false, message = removeResult.message }
         end
 

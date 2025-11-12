@@ -38,6 +38,15 @@
   "error.lastNameRequired": "Họ là bắt buộc",
   "error.dobRequired": "Ngày sinh là bắt buộc",
   
+  "error.joinGameFailed": "Không thể vào game",
+  "error.failedToGetLicense": "Không tìm thấy license. Liên hệ admin để được hỗ trợ.",
+  "error.joinGame.playerNotFound": "Không tìm thấy nhân vật!",
+
+  "error.createCharacter.failedToCreateCharacter": "Không thể tạo nhân vật!",
+
+  "success.joinGame": "Đã vào game thành công",
+  "success.createCharacter": "Tạo nhân vật thành công!",
+
   "helper.toggleGuideHelper": "Bật/tắt trợ giúp",
   "helper.toggleFocus": "Bật/tắt con trỏ",
   "helper.toggleToastExpand": "Bật/tắt thông báo",

@@ -1,10 +1,10 @@
 MODEL.player = {}
 
----Get characters of this player
+--- Join game
+---@param citizenId string player citizen id
 ---@param callback function callback function
-MODEL.player.getCharacters = function(callback)
-    ---@param characters { maxCharacters: number, characters: table<number, PlayerData> } data characters of this player
-    TriggerCallback('TPN:player:callback:getCharacters', function(characters)
-        callback(characters)
-    end)
+MODEL.player.joinGame = function(citizenId, callback)
+    TriggerCallback('callbackOnPlayerJoinGame', function(result)
+        callback(result)
+    end, citizenId)
 end

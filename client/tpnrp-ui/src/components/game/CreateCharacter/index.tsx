@@ -26,7 +26,6 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
 import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
-import { toast } from "sonner"
 import { useI18n } from "@/i18n"
 import { useGameSettingStore } from "@/stores/useGameSetting"
 
@@ -115,10 +114,6 @@ export const CreateCharacter = () => {
         setShowCreateCharacter(false)
         // Show Select Character Sheet
         setShowSelectCharacter(true)
-        // Show toast for create character success
-        toast(t("toast.create.success.title"), {
-            description: t("toast.create.success.desc", { name: playerData?.name ?? "" }),
-        })
     })
 
     const onClickCreateCharacter = useCallback(() => {
@@ -157,6 +152,10 @@ export const CreateCharacter = () => {
             dateOfBirth,
         })
     }, [firstName, lastName, dateOfBirth, gender, isSubmitting])
+
+    const onClickJoinGame = useCallback((character: TCharacter) => {
+        window.hEvent('joinGame', { citizenId: character.citizenId })
+    }, [])
     
     return (
         <>
@@ -203,7 +202,7 @@ export const CreateCharacter = () => {
                                     </ItemContent>
                                     <ItemActions className="opacity-0 group-hover/item:opacity-100 transition-opacity">
                                         {character ? (
-                                            <Button variant="default" size="sm">
+                                            <Button variant="default" size="sm" onClick={() => onClickJoinGame(character)}>
                                                 {t("selectCharacter.join")}
                                             </Button>
                                         ) : (

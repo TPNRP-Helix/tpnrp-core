@@ -23,12 +23,13 @@ function TPNRPClient.new()
         self.webUI = CWebUI.new(self)
         self:bindHelixEvents()
         self:bindTPNEvents()
+        self:bindWebUIEvents()
     end
 
     ---/********************************/
     ---/*          Functions           */
     ---/********************************/
-    
+
     ---Bind Helix events
     function self:bindHelixEvents()
         -- Helix event
@@ -47,16 +48,11 @@ function TPNRPClient.new()
 
     ---Bind TPN events
     function self:bindTPNEvents()
-        -- On Player Loaded
-        RegisterClientEvent('TPN:client:onPlayerLoaded', function(source)
-            self.player = CPlayer.new(source)
-        end)
-
         -- On Player Unloaded
         RegisterClientEvent('TPN:client:onPlayerUnloaded', function()
             self.player = nil
         end)
-        
+
         RegisterClientEvent('TPN:client:setCharacters', function(result)
             -- TODO: Teleport player to Select character Room
 
@@ -65,14 +61,44 @@ function TPNRPClient.new()
             -- Show Select Character UI
             self.webUI:sendEvent('setPlayerCharacters', result)
         end)
-        
+    end
+
+    ---Bind WebUI events (Called from WebUI)
+    function self:bindWebUIEvents()
         -- On create character
         self.webUI:registerEventHandler('createCharacter', function(data)
             TriggerCallback('createCharacter', function(result)
                 if not result.success then return end
-                print(JSON.stringify(result.playerData))
+                -- Show notification
+                self:showNotification({
+                    title = result.message,
+                    type = 'success',
+                    duration = 5000,
+                })
+                -- Send event to WebUI
                 self.webUI:sendEvent('onCreateCharacterSuccess', result.playerData)
             end, data)
+        end)
+
+        -- On Player click join game
+        self.webUI:registerEventHandler('joinGame', function(data)
+            print('[CLIENT] On Player click join game ' .. data.citizenId)
+            -- Get player data
+            MODEL.player.joinGame(data.citizenId, function(result)
+                if not result.success then
+                    self:showNotification({
+                        title = 'error.joinGameFailed',
+                        message = result.message,
+                        type = 'error',
+                        duration = 5000,
+                    })
+                    return
+                end
+                print('[INFO] CPlayer.new - Joined game successfully!')
+                self.playerData = result.playerData
+                -- TODO: Set spawn point
+                self.player = CPlayer.new(self, result.playerData)
+            end)
         end)
     end
 
@@ -81,6 +107,17 @@ function TPNRPClient.new()
         if not self.webUI then return end
         self.webUI:destroy()
         self.webUI = nil
+    end
+
+    ---/********************************/
+    ---/*          Functions           */
+    ---/********************************/
+
+    ---Show Notification in UI
+    ---@param notification TNotification Notification data
+    function self:showNotification(notification)
+        -- Show notification in UI
+        self.webUI:sendEvent('showNotification', notification)
     end
 
     _contructor()

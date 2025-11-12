@@ -5,13 +5,16 @@
 CPlayer = {}
 CPlayer.__index = CPlayer
 
+--- Creates a new instance of CPlayer.
+---@param core TPNRPClient core entity
+---@param playerData PlayerData player data
 ---@return CPlayer
-function CPlayer.new(core)
+function CPlayer.new(core, playerData)
     ---@class CPlayer
     local self = setmetatable({}, CPlayer)
 
     self.core = core
-    self.playerData = nil
+    self.playerData = playerData
     -- Player's inventory
     self.inventory = nil
     -- Player's custom properties
