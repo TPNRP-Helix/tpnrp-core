@@ -50,7 +50,7 @@ function SInventory.new(player, type)
         -- Assign type
         self.type = type
         -- Get inventory items
-        local inventories = DAO.inventory.get(self.player.playerData.citizen_id, self.type)
+        local inventories = DAO.inventory.get(self.player.playerData.citizenId, self.type)
         if inventories then
             self.items = inventories
         end

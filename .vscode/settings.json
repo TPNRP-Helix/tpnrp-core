@@ -20,6 +20,8 @@
         "GetActorsWithTag",
         "Input",
         "UE",
-        "HWorld"
+        "HWorld",
+        "HPlayer",
+        "Animation"
     ]
 }

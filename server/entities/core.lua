@@ -151,6 +151,7 @@ function TPNRPServer.new()
         local license = playerState:GetHelixUserId()
         local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
         local result = DAO.player.getCharacters(license)
+        print('[TPN][SERVER] onPlayerPossessed - characters: ' .. license)
         if not result then
             TriggerClientEvent(source, 'TPN:client:setCharacters', {
                 maxCharacters = maxCharacters,
@@ -221,7 +222,7 @@ function TPNRPServer.new()
                 print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
                 return {
                     success = false,
-                    message = 'error.failedToGetLicense',
+                    message = SHARED.t('error.failedToGetLicense'),
                     playerData = nil
                 }
             end
@@ -249,14 +250,14 @@ function TPNRPServer.new()
                 print(('[ERROR] TPNRPServer.bindCallbackEvents - Failed to create character for %s (License: %s)'):format(playerData.name, license))
                 return {
                     success = false,
-                    message = 'error.createCharacter.failedToCreateCharacter',
+                    message = SHARED.t('error.createCharacter.failedToCreateCharacter'),
                     playerData = nil
                 }
             end
             -- Return success
             return {
                 success = true,
-                message = 'success.createCharacter',
+                message = SHARED.t('success.createCharacter'),
                 playerData = playerData,
             }
         end)
@@ -271,7 +272,7 @@ function TPNRPServer.new()
                 print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
                 return {
                     success = false,
-                    message = 'error.failedToGetLicense',
+                    message = SHARED.t('error.failedToGetLicense'),
                     playerData = nil
                 }
             end
@@ -289,7 +290,7 @@ function TPNRPServer.new()
                 -- This player trying to login with character of other player
                 return {
                     success = false,
-                    message = 'error.joinGame.playerNotFound',
+                    message = SHARED.t('error.joinGame.playerNotFound'),
                     playerData = nil
                 }
             end
@@ -303,7 +304,7 @@ function TPNRPServer.new()
             -- Return success
             return {
                 success = true,
-                message = 'success.joinGame',
+                message = SHARED.t('success.joinGame'),
                 playerData = playerData,
             }
         end)

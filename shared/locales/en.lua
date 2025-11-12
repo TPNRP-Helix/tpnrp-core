@@ -16,7 +16,21 @@ LOCALES.EN = {
         equipped = "Equipped {item}.",
         unequipped = "Unequipped {item}.",
         slot_occupied = "Slot is already occupied.",
-    }
+    },
+    error = {
+        createCharacter = {
+            failedToCreateCharacter = "Failed to create character!",
+        },
+        failedToGetLicense = "Failed to get license. Contact admin for support.",
+        joinGameFailed = "Failed to join game",
+        joinGame = {
+            playerNotFound = "Player not found!",
+        },
+    },
+    success = {
+        joinGame = "Joined game successfully",
+        createCharacter = "Character created successfully!",
+    },
 }
 
 

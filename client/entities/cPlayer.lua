@@ -32,6 +32,8 @@ function CPlayer.new(core, playerData)
         self:bindHelixEvents()
         -- Bind TPN events (Custom events of TPNRP-Core)
         self:bindTPNEvents()
+        -- Bind WebUI events (Custom events of WebUI)
+        self:bindWebUIEvents()
         -- Get player's inventory
         self.inventory = CInventory.new(self)
         -- Update
@@ -91,6 +93,26 @@ function CPlayer.new(core, playerData)
         RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
             self.playerData = playerData
             self.properties = properties or {}
+        end)
+    end
+
+    function self:bindWebUIEvents()
+        -- On Play animation
+        self.core.webUI:registerEventHandler('playAnimation', function(data)
+            local character = HPlayer:GetControlledCharacter()
+            ---@diagnostic disable-next-line: undefined-field
+            local AnimParams = UE.FHelixPlayAnimParams()
+            -- character:PlayAnimation(data.animationName)
+            coroutine.resume(
+                coroutine.create(function(delayTime)
+                ---@diagnostic disable-next-line: undefined-field
+                    UE.UKismetSystemLibrary.Delay(_G.HWorld, delayTime)
+
+                    local result = Animation.Play(character, data.animationName, AnimParams, function() print('Animation Ended') end)
+                    print('Animation play result: ', result)
+                end),
+                1.0
+            )
         end)
     end
 

@@ -93,6 +93,7 @@ DAO.player.getCharacters = function(license)
     local result = DAO.DB.Select('SELECT * FROM players WHERE license = ?', { license })
     if not result then return {} end
     local resultData = result and result:ToTable()
+    print('[TPN][SERVER] DAO.player.getCharacters - result: ' .. JSON.stringify(resultData))
     -- Format characters
     ---@type table<number, PlayerData>
     local characters = {}

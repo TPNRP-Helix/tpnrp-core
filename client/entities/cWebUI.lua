@@ -34,7 +34,7 @@ function CWebUI.new(core)
         self:bindInput()
 
         -- [DEV] Bind log tool
-        self:bindLog()
+        -- self:bindLog()
 
         ---+-----------------------------------------------+
         -- | Listen event                                  |

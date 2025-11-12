@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
 import { useDevModeStore } from "@/stores/useDevModeStore"
@@ -11,6 +11,7 @@ import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { UIPreview } from "./UIPreview"
 import { toast } from "sonner"
+import { Input } from "@/components/ui/input"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
@@ -20,9 +21,12 @@ export const DevMode = () => {
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
 
+    const [animationName, setAnimationName] = useState('')
+
     useWebUIMessage<[boolean]>('setConsoleOpen', ([isOpenConsole]) => {
         setConsoleOpen(isOpenConsole)
     })
+
     useWebUIMessage<[boolean]>('setDevModeOpen', ([isOpenDevMode]) => {
         setDevModeOpen(isOpenDevMode)
     })
@@ -38,6 +42,10 @@ export const DevMode = () => {
             setPermission('admin')
         }
     }, [])
+
+    const playAnimation = useCallback(() => {
+        window.hEvent("playAnimation", { animationName })
+    }, [animationName])
     
     // Don't render the dev mode tools if not in browser
     // Or if the permission is not admin
@@ -62,7 +70,7 @@ export const DevMode = () => {
                     Dev Mode Tools
                 </Button>
             </SheetTrigger> */}
-            <SheetContent side="left">
+            <SheetContent side="left" className="w-[400px] sm:max-w-[400px]">
                 <SheetHeader>
                     <SheetTitle>Dev Mode Tools</SheetTitle>
                 </SheetHeader>
@@ -78,10 +86,21 @@ export const DevMode = () => {
                     <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
                     <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
                     <Tabs defaultValue="inventory" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="character">Character</TabsTrigger>
                             <TabsTrigger value="inventory">Inventory</TabsTrigger>
                             <TabsTrigger value="menu">Menu</TabsTrigger>
                         </TabsList>
+                        <TabsContent value="character">
+                            <div className="grid grid-cols-3 gap-2">
+                                <div className="col-span-2">
+                                    <Input type="text" placeholder="Animation name" value={animationName} onChange={(e) => setAnimationName(e.target.value)} />
+                                </div>
+                                <div className="col-span-1">
+                                    <Button onClick={() => playAnimation()}>Play</Button>
+                                </div>
+                            </div>
+                        </TabsContent>
                         <TabsContent value="inventory">
                             inventory
                         </TabsContent>

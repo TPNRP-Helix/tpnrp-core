@@ -17,6 +17,8 @@ const MotionGlassWater = motion(GlassWater)
 const MotionZap = motion(Zap)
 const MotionPhone = motion(Smartphone)
 
+const LIMIT_DESTRUCTIVE_COLOR = 10 // Limit value to show destructive color
+
 export const HUD = () => {
   const { isHudVisible, basicNeeds, setBasicNeeds } = useGameStore()
   const { basicNeedHUDConfig } = useGameSettingStore()
@@ -110,7 +112,7 @@ export const HUD = () => {
                 className={`relative flex items-center justify-center w-12`.trim()}
               >
                 {isShowColorFill && basicNeedHUDConfig.isShowColorFill && (
-                  <div className="absolute w-6 h-5 top-0 left-0 right-0 bottom-0 mt-3.5 ml-2 z-0 overflow-hidden">
+                  <div className="absolute w-6 h-6 top-0 left-0 right-0 bottom-0 mt-3 ml-2 z-0 overflow-hidden">
                     <Icon
                       className={cn(iconClassName, "w-full h-full")}
                       fill={fillColor}
@@ -123,12 +125,12 @@ export const HUD = () => {
                 )}
                 <Icon
                   className={cn(iconClassName, "z-10 relative")}
-                  {...(showBadge && value > 0 && value < 20 && basicNeedHUDConfig.isShowBeatAnimation ? heartbeatAnimation : { animate: { scale: 1 }, transition: { duration: 0.2 } })}
+                  {...(showBadge && value > 0 && value <= LIMIT_DESTRUCTIVE_COLOR && basicNeedHUDConfig.isShowBeatAnimation ? heartbeatAnimation : { animate: { scale: 1 }, transition: { duration: 0.2 } })}
                 />
                 {showBadge && value > 0 && (
                   <Badge
                     className="text-xs! h-5 min-w-5 rounded-full px-1 font-mono tabular-nums absolute -top-1 -right-1"
-                    variant={value < 20 ? 'destructive' : 'secondary'}
+                    variant={value <= LIMIT_DESTRUCTIVE_COLOR ? 'destructive' : 'secondary'}
                   >
                     {value}
                   </Badge>

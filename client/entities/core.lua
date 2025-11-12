@@ -59,7 +59,7 @@ function TPNRPClient.new()
             -- Lock game input (Focus input on UI)
             self.webUI:focus()
             -- Show Select Character UI
-            self.webUI:sendEvent('setPlayerCharacters', result)
+            self.webUI:sendEvent('setPlayerCharacters', result.maxCharacters, result.characters)
         end)
     end
 
@@ -75,6 +75,7 @@ function TPNRPClient.new()
                     type = 'success',
                     duration = 5000,
                 })
+                print('[CLIENT] On create character success: ', JSON.stringify(result))
                 -- Send event to WebUI
                 self.webUI:sendEvent('onCreateCharacterSuccess', result.playerData)
             end, data)
@@ -82,22 +83,23 @@ function TPNRPClient.new()
 
         -- On Player click join game
         self.webUI:registerEventHandler('joinGame', function(data)
-            print('[CLIENT] On Player click join game ' .. data.citizenId)
-            -- Get player data
             MODEL.player.joinGame(data.citizenId, function(result)
                 if not result.success then
                     self:showNotification({
-                        title = 'error.joinGameFailed',
+                        title = SHARED.t('error.joinGameFailed'),
                         message = result.message,
                         type = 'error',
                         duration = 5000,
                     })
                     return
                 end
-                print('[INFO] CPlayer.new - Joined game successfully!')
                 self.playerData = result.playerData
-                -- TODO: Set spawn point
+                -- Create client player entity
                 self.player = CPlayer.new(self, result.playerData)
+                -- Send event to WebUI
+                self.webUI:sendEvent('joinGameSuccess', result.playerData)
+                -- Out focus from WebUI to focus on game
+                self.webUI:outFocus()
             end)
         end)
     end

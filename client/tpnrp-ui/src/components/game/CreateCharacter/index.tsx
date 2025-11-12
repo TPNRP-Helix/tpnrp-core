@@ -28,6 +28,7 @@ import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
 import { useI18n } from "@/i18n"
 import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameStore } from "@/stores/useGameStore"
 
 type TCharacter = {
     name: string
@@ -77,8 +78,8 @@ export const CreateCharacter = () => {
     const [error, setError] = useState<{ type: string, message: string } | null>(null)
     const [playerCharacters, setPlayerCharacters] = useState<TCharacter[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
-
-    useWebUIMessage<[{ maxCharacters: number, characters: unknown[] }]>('setPlayerCharacters', ([{ maxCharacters, characters }]) => {
+    const { toggleHud } = useGameStore()
+    useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
         // TPN Log
         appendConsoleMessage({ message: `Max char: ${maxCharacters} - characters ${JSON.stringify(characters)}`, index: 0 })
 
@@ -99,7 +100,7 @@ export const CreateCharacter = () => {
         setShowSelectCharacter(true)
     })
 
-    useWebUIMessage<[{ playerData: TCreateCharacterResponse }]>('onCreateCharacterSuccess', ([{ playerData }]) => {
+    useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
         console.log('onCreateCharacterSuccess', playerData)
         appendConsoleMessage({ message: `Character created successfully: ${JSON.stringify(playerData)}`, index: 0 })
         // Set preview character info
@@ -114,6 +115,14 @@ export const CreateCharacter = () => {
         setShowCreateCharacter(false)
         // Show Select Character Sheet
         setShowSelectCharacter(true)
+    })
+
+    useWebUIMessage<[TCreateCharacterResponse]>('joinGameSuccess', ([playerData]) => {
+        console.log('joinGameSuccess', playerData)
+        appendConsoleMessage({ message: `Character joined successfully: ${JSON.stringify(playerData)}`, index: 0 })
+        setShowSelectCharacter(false)
+        setShowCreateCharacter(false)
+        toggleHud()
     })
 
     const onClickCreateCharacter = useCallback(() => {
