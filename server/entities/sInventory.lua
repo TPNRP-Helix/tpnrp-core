@@ -307,7 +307,12 @@ function SInventory.new(player, type)
         end
         -- Tell player that item is added to inventory
         TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, self.items[targetSlot])
-
+        -- Trigger mission action
+        self.player.missionManager:triggerAction('add_item', {
+            name = itemName,
+            amount = amount,
+            info = info or {}
+        })
         return { status = true, message = 'Item added to inventory!', slot = targetSlot }
     end
 
@@ -374,6 +379,11 @@ function SInventory.new(player, type)
         local remainingAmount = item.amount - amount
         -- Tell player that item is remove from inventory
         TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'remove', amount, itemName)
+        -- Trigger mission action
+        self.player.missionManager:triggerAction('remove_item', {
+            name = itemName,
+            amount = amount,
+        })
         -- If remaining amount is 0 or less, remove the item entirely from the slot
         if remainingAmount <= 0 then
             self.items[targetSlot] = nil

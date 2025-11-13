@@ -105,6 +105,19 @@ function SMissionManager.new(player)
         return true
     end
 
+    ---[PRIVATE] Validate and update NPC take item progress
+    ---@param progress TMissionProgress progress entry
+    ---@param requirement TMissionRequirement requirement
+    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
+    ---@return boolean success
+    local function updateNpcTakeItemProgress(progress, requirement, data)
+        if not requirement.npcName or not data.npcName or requirement.npcName ~= data.npcName then
+            return false
+        end
+        incrementProgressAmount(progress, data.amount or 1)
+        return true
+    end
+
     ---[PRIVATE] Validate and update NPC kill progress
     ---@param progress TMissionProgress progress entry
     ---@param requirement TMissionRequirement requirement
@@ -129,6 +142,22 @@ function SMissionManager.new(player)
         end
         incrementProgressAmount(progress, 1)
         progress.isTalkedToNPC = true
+        return true
+    end
+
+    ---[PRIVATE] Validate and update money progress
+    ---@param progress TMissionProgress progress entry
+    ---@param requirement TMissionRequirement requirement
+    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
+    ---@return boolean success
+    local function updateMoneyProgress(progress, requirement, data)
+        if not requirement.type or requirement.type ~= 'spend' or requirement.type ~= 'receive' then
+            return false
+        end
+        if not data.amount or type(data.amount) ~= 'number' or data.amount <= 0 then
+            return false
+        end
+        incrementProgressAmount(progress, data.amount)
         return true
     end
 
@@ -175,6 +204,11 @@ function SMissionManager.new(player)
         use = updateItemProgress,
         kill_npc = updateKillNpcProgress,
         talk_npc = updateTalkNpcProgress,
+        npc_take_item = updateNpcTakeItemProgress,
+        add_item = updateItemProgress,
+        remove_item = updateItemProgress,
+        spend = updateMoneyProgress,
+        receive = updateMoneyProgress,
     }
 
     ---/********************************/
@@ -251,14 +285,14 @@ function SMissionManager.new(player)
     function self:givePlayerReward()
         local reward = self:getMissionReward()
         if not reward then return false end
-        
+
         for _, reward in pairs(reward) do
             if reward.type == 'item' then
                 self.player.inventory:addItem(reward.name, reward.amount, nil, reward.info)
             elseif reward.type == 'cash' then
-                self.player:addCash(reward.amount)
+                self.player:addMoney('cash', reward.amount)
             elseif reward.type == 'bank' then
-                self.player:addBank(reward.amount)
+                self.player:addMoney('bank', reward.amount)
             elseif reward.type == 'exp' then
                 self.player.level:addExp(reward.exp)
             elseif reward.type == 'skill' then

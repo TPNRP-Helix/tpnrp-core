@@ -146,7 +146,7 @@ function SEquipment.new(player)
         end
         -- Unequip item from slot
         self.items[clothItemType] = nil
-        -- TODO: Find empty slot
+        -- Find empty slot
         if not toSlotNumber then
             toSlotNumber = self.player.inventory:getEmptySlot()
             if not toSlotNumber then

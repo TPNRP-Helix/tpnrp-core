@@ -33,6 +33,16 @@ function SCheatDetector.new(core)
         -- TODO: Warning to discord via webhook
     end
 
+    function self:log(data)
+        local playerName = 'Unknown'
+        if data.player ~= nil then
+            playerName = data.player.playerData.name or 'Unknown'
+        end
+        print('[SERVER] [LOG] "' .. data.action .. '" | "' .. playerName .. '" | "' .. data.content .. '"')
+        -- TODO: Save cheater to database
+        -- TODO: Warning to discord via webhook
+    end
+
     _contructor()
     ---- END ----
     return self

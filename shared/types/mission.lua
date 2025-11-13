@@ -1,4 +1,4 @@
----@alias TMissionActionType 'buy' | 'sell' | 'drop' | 'craft' | 'use' | 'kill_npc' | 'talk_npc' | 'npc_take_item'
+---@alias TMissionActionType 'buy' | 'sell' | 'drop' | 'craft' | 'use' | 'kill_npc' | 'talk_npc' | 'npc_take_item' | 'add_item' | 'remove_item' | 'spend' | 'receive'
 
 ---@class TMissionRequirement
 ---@field type TMissionActionType

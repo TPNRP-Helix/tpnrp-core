@@ -3,7 +3,7 @@
 ---@field inventory SInventory|nil
 ---@field equipment SEquipment|nil
 ---@field level SLevel|nil
----@field missions SMissionManager|nil
+---@field missionManager SMissionManager|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -28,7 +28,7 @@ function SPlayer.new(core, playerController, playerData)
     -- Player's equipment
     self.equipment = nil
     -- Player's missions
-    self.missions = nil
+    self.missionManager = nil
 
     -- Player's custom properties
     self.properties = {}
@@ -50,7 +50,7 @@ function SPlayer.new(core, playerController, playerData)
         -- Get player's equipment
         self.equipment = SEquipment.new(self)
         -- Get player's missions
-        self.missions = SMissionManager.new(self)
+        self.missionManager = SMissionManager.new(self)
     end
 
     ---/********************************/
@@ -211,31 +211,57 @@ function SPlayer.new(core, playerController, playerData)
         TriggerClientEvent(self.playerController, 'TPN:ui:updateBasicNeeds', newHunger, newThirst)
     end
 
-    ---Add cash
+    ---Add Money
+    ---@param type 'cash' | 'bank' money type
     ---@param amount number amount to add
     ---@return boolean success
-    function self:addCash(amount)
+    function self:addMoney(type, amount)
+        if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
+            print('[ERROR] SPLAYER.ADD_MONEY - Invalid type!')
+            return false
+        end
         if not amount or type(amount) ~= 'number' or amount <= 0 then
             print('[ERROR] SPLAYER.ADD_CASH - Invalid amount!')
             return false
         end
-        -- Add cash to player
-        self.playerData.money.cash = self.playerData.money.cash + amount
+        if type == 'cash' then
+            -- Add cash to player
+            self.playerData.money.cash = self.playerData.money.cash + amount
+        elseif type == 'bank' then
+            self.playerData.money.bank = self.playerData.money.bank + amount
+        end
+        -- Trigger mission action
+        self.missionManager:triggerAction('receive', {
+            name = type,
+            amount = amount
+        })
         -- Sync to client
         self:updatePlayerData()
         return true
     end
 
-    ---Add bank
-    ---@param amount number amount to add
-    ---@return boolean success
-    function self:addBank(amount)
-        if not amount or type(amount) ~= 'number' or amount <= 0 then
-            print('[ERROR] SPLAYER.ADD_BANK - Invalid amount!')
+    function self:removeMoney(type, amount)
+        if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
+            print('[ERROR] SPLAYER.REMOVE_MONEY - Invalid type!')
             return false
         end
-        -- Add bank to player
-        self.playerData.money.bank = self.playerData.money.bank + amount
+        if not amount or type(amount) ~= 'number' or amount <= 0 then
+            print('[ERROR] SPLAYER.REMOVE_MONEY - Invalid amount!')
+            return false
+        end
+        if type == 'cash' then
+            -- Remove cash from player
+            self.playerData.money.cash = self.playerData.money.cash - amount
+        elseif type == 'bank' then
+            -- Remove bank from player
+            self.playerData.money.bank = self.playerData.money.bank - amount
+        end
+
+        -- Trigger mission action
+        self.missionManager:triggerAction('spend', {
+            name = type,
+            amount = amount
+        })
         -- Sync to client
         self:updatePlayerData()
         return true
