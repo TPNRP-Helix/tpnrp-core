@@ -16,7 +16,21 @@ LOCALES.VI = {
         equipped = "Đã trang bị {item}.",
         unequipped = "Đã tháo {item}.",
         slot_occupied = "Ô trang bị đã được sử dụng.",
-    }
+    },
+    error = {
+        createCharacter = {
+            failedToCreateCharacter = "Không thể tạo nhân vật!",
+        },
+        failedToGetLicense = "Không tìm thấy license. Liên hệ admin để được hỗ trợ.",
+        joinGameFailed = "Không thể vào game",
+        joinGame = {
+            playerNotFound = "Không tìm thấy nhân vật!",
+        },
+    },
+    success = {
+        joinGame = "Đã vào game thành công",
+        createCharacter = "Tạo nhân vật thành công!",
+    },
 }
 
 

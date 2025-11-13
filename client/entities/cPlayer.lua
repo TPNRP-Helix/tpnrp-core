@@ -5,13 +5,16 @@
 CPlayer = {}
 CPlayer.__index = CPlayer
 
+--- Creates a new instance of CPlayer.
+---@param core TPNRPClient core entity
+---@param playerData PlayerData player data
 ---@return CPlayer
-function CPlayer.new(core)
+function CPlayer.new(core, playerData)
     ---@class CPlayer
     local self = setmetatable({}, CPlayer)
 
     self.core = core
-    self.playerData = nil
+    self.playerData = playerData
     -- Player's inventory
     self.inventory = nil
     -- Player's custom properties
@@ -29,6 +32,8 @@ function CPlayer.new(core)
         self:bindHelixEvents()
         -- Bind TPN events (Custom events of TPNRP-Core)
         self:bindTPNEvents()
+        -- Bind WebUI events (Custom events of WebUI)
+        self:bindWebUIEvents()
         -- Get player's inventory
         self.inventory = CInventory.new(self)
         -- Update
@@ -88,6 +93,14 @@ function CPlayer.new(core)
         RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
             self.playerData = playerData
             self.properties = properties or {}
+        end)
+    end
+
+    function self:bindWebUIEvents()
+        -- On Play animation
+        self.core.webUI:registerEventHandler('playAnimation', function(data)
+            print('[TPN][CLIENT] playAnimation ' .. JSON.stringify(data))
+            TriggerServerEvent('playAnim', data.animationName)
         end)
     end
 

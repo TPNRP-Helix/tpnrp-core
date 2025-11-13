@@ -269,9 +269,6 @@ end
 ---@param source PlayerController player controller
 ---@return string role
 SHARED.getPermission = function(source)
-    if type(source) ~= 'PlayerController' then
-        return 'player'
-    end
     local playerState = source:GetLyraPlayerState()
     if not playerState then
         return 'player'

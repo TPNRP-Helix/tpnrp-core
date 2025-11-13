@@ -26,9 +26,9 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
 import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
-import { toast } from "sonner"
 import { useI18n } from "@/i18n"
 import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameStore } from "@/stores/useGameStore"
 
 type TCharacter = {
     name: string
@@ -78,8 +78,8 @@ export const CreateCharacter = () => {
     const [error, setError] = useState<{ type: string, message: string } | null>(null)
     const [playerCharacters, setPlayerCharacters] = useState<TCharacter[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
-
-    useWebUIMessage<[{ maxCharacters: number, characters: unknown[] }]>('setPlayerCharacters', ([{ maxCharacters, characters }]) => {
+    const { toggleHud } = useGameStore()
+    useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
         // TPN Log
         appendConsoleMessage({ message: `Max char: ${maxCharacters} - characters ${JSON.stringify(characters)}`, index: 0 })
 
@@ -92,7 +92,7 @@ export const CreateCharacter = () => {
                 citizenId: value.citizenId,
                 level: parseInt(value.level) ?? 1,
                 money: parseInt(value.money) ?? 0,
-                gender: value.gender === 1 ? 'male' : 'female',
+                gender: value.gender,
             }
         })
         setPlayerCharacters(formattedCharacters)
@@ -100,7 +100,7 @@ export const CreateCharacter = () => {
         setShowSelectCharacter(true)
     })
 
-    useWebUIMessage<[{ playerData: TCreateCharacterResponse }]>('onCreateCharacterSuccess', ([{ playerData }]) => {
+    useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
         console.log('onCreateCharacterSuccess', playerData)
         appendConsoleMessage({ message: `Character created successfully: ${JSON.stringify(playerData)}`, index: 0 })
         // Set preview character info
@@ -115,10 +115,14 @@ export const CreateCharacter = () => {
         setShowCreateCharacter(false)
         // Show Select Character Sheet
         setShowSelectCharacter(true)
-        // Show toast for create character success
-        toast(t("toast.create.success.title"), {
-            description: t("toast.create.success.desc", { name: playerData?.name ?? "" }),
-        })
+    })
+
+    useWebUIMessage<[TCreateCharacterResponse]>('joinGameSuccess', ([playerData]) => {
+        console.log('joinGameSuccess', playerData)
+        appendConsoleMessage({ message: `Character joined successfully: ${JSON.stringify(playerData)}`, index: 0 })
+        setShowSelectCharacter(false)
+        setShowCreateCharacter(false)
+        toggleHud()
     })
 
     const onClickCreateCharacter = useCallback(() => {
@@ -157,6 +161,10 @@ export const CreateCharacter = () => {
             dateOfBirth,
         })
     }, [firstName, lastName, dateOfBirth, gender, isSubmitting])
+
+    const onClickJoinGame = useCallback((character: TCharacter) => {
+        window.hEvent('joinGame', { citizenId: character.citizenId })
+    }, [])
     
     return (
         <>
@@ -203,7 +211,7 @@ export const CreateCharacter = () => {
                                     </ItemContent>
                                     <ItemActions className="opacity-0 group-hover/item:opacity-100 transition-opacity">
                                         {character ? (
-                                            <Button variant="default" size="sm">
+                                            <Button variant="default" size="sm" onClick={() => onClickJoinGame(character)}>
                                                 {t("selectCharacter.join")}
                                             </Button>
                                         ) : (

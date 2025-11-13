@@ -36,7 +36,22 @@
 
   "error.firstNameRequired": "First name is required",
   "error.lastNameRequired": "Last name is required",
-  "error.dobRequired": "Date of birth is required"
+  "error.dobRequired": "Date of birth is required",
+
+  "error.createCharacter.failedToCreateCharacter": "Failed to create character!",
+
+  "error.failedToGetLicense": "Failed to get license. Contact admin for support.",
+  "error.joinGameFailed": "Failed to join game",
+  "error.joinGame.playerNotFound": "Player not found!",
+
+  "success.joinGame": "Joined game successfully",
+  "success.createCharacter": "Character created successfully!",
+
+  "helper.toggleGuideHelper": "Toggle Guide",
+  "helper.toggleFocus": "Toggle focus",
+  "helper.toggleToastExpand": "Toggle toast expand",
+  "helper.toggleDevMode": "Toggle dev mode",
+  "helper.toggleConsole": "Toggle console"
 }
 
 

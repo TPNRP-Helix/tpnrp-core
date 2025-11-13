@@ -23,6 +23,11 @@ function CInventory.new(player)
         RegisterClientEvent('TPN:inventory:sync', function(type, amount, item)
             self:onSyncInventory(type, amount, item)
         end)
+        -- Bind key
+        -- [Player] [TAB] Inventory
+        Input.BindKey('TAB', function()
+            self:openInventory()
+        end, 'Pressed')
     end
 
 
@@ -48,6 +53,12 @@ function CInventory.new(player)
             amount = amount,
             item = item
         })
+    end
+
+    ---Open inventory
+    function self:openInventory()
+        -- TODO: open inventory
+        -- self.core.webUI:sendEvent('OPEN_INVENTORY')
     end
 
     _contructor()
