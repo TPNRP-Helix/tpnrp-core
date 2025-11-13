@@ -8,7 +8,11 @@ DAO.inventory.save = function(inventory)
         print('[ERROR] DAO.inventory.save: Invalid inventory or player data!')
         return false
     end
-    local citizen_id = inventory.player.playerData.citizen_id
+    local citizenId = inventory.player.playerData.citizenId
+    if not citizenId then
+        print('[ERROR] DAO.inventory.save: Invalid citizen id!')
+        return false
+    end
     local items = inventory.items
     local formattedItems = {}
     for _, item in pairs(items) do
@@ -33,30 +37,30 @@ DAO.inventory.save = function(inventory)
     ]]
     local params = {
         inventory.type,
-        citizen_id,
+        citizenId,
         JSON.stringify(formattedItems),
     }
     local result = DAO.DB.Execute(sql, params)
     if result then
         DAO.DB.Execute('COMMIT;')
-        print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
+        print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizenId))
         return true
     end
-    print(('[ERROR] DAO.inventory.save: Failed to save inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizen_id))
+    print(('[ERROR] DAO.inventory.save: Failed to save inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizenId))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end
 
 ---Get player's inventory (type = 'player' | 'stack')
----@param citizen_id string
+---@param citizenId string
 ---@param type 'player' | 'stack' | ''
 ---@return table<number, SInventoryItemType> | nil
-DAO.inventory.get = function(citizen_id, type)
+DAO.inventory.get = function(citizenId, type)
     if not type then
         type = 'player'
     end
     -- Query inventory items
-    local result = DAO.DB.Select('SELECT * FROM inventories where citizen_id = ? and type = ?', { citizen_id, type })
+    local result = DAO.DB.Select('SELECT * FROM inventories where citizen_id = ? and type = ?', { citizenId, type })
     local inventory = result[1] and result[1].Columns:ToTable()
     if not inventory then
         return nil

@@ -70,6 +70,7 @@ function SPlayer.new(core, playerController, playerData)
         local isInventoriesSaved = self.inventory:save()
         local isEquipmentsSaved = self.equipment:save()
         local isLevelSaved = self.level:save()
+        local isMissionsSaved = self.missionManager:save()
         if not isSaved then
             print('[ERROR] SPLAYER.SAVE - Failed to save player!')
         end
@@ -85,8 +86,11 @@ function SPlayer.new(core, playerController, playerData)
         if not isLevelSaved then
             print('[ERROR] SPLAYER.SAVE - Failed to save player level!')
         end
+        if not isMissionsSaved then
+            print('[ERROR] SPLAYER.SAVE - Failed to save player missions!')
+        end
         -- Return true if all save success
-        return isSaved and isInventoriesSaved and isEquipmentsSaved and isLevelSaved
+        return isSaved and isInventoriesSaved and isEquipmentsSaved and isLevelSaved and isMissionsSaved
     end
 
     ---Get player coords

@@ -26,12 +26,15 @@ end
 ---@return boolean success
 DAO.level.save = function(level)
 	-- Validate data
-	if not level or not level.playerController or not level.playerController.playerData then
+	if not level or not level.player.playerController or not level.player.playerData then
 		print('[ERROR] DAO.level.save: Invalid level or player data!')
 		return false
 	end
-	local playerData = level.playerController.playerData
-	local citizen_id = playerData.citizen_id
+	local playerData = level.player.playerData
+	if not playerData then
+		return false
+	end
+	local citizen_id = playerData.citizenId or ''
 	-- Begin transaction
 	DAO.DB.Execute('BEGIN TRANSACTION;')
 	local sql = [[
@@ -51,10 +54,10 @@ DAO.level.save = function(level)
 	local result = DAO.DB.Execute(sql, params)
 	if result then
 		DAO.DB.Execute('COMMIT;')
-		print(('[LOG] Saved level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+		print(('[LOG] Saved level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
 		return true
 	end
-	print(('[ERROR] DAO.level.save: Failed to save level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+	print(('[ERROR] DAO.level.save: Failed to save level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
 	DAO.DB.Execute('ROLLBACK;')
 	return false
 end
