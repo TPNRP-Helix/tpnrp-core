@@ -75,7 +75,7 @@ export const DevMode = () => {
                 <SheetHeader>
                     <SheetTitle>Dev Mode Tools</SheetTitle>
                 </SheetHeader>
-                <div className="grid gap-4 p-4">
+                <div className="grid gap-4 p-4 pt-0">
                     <SheetDescription>
                         DevMode Tools support for testing inventory features
                     </SheetDescription>

@@ -29,6 +29,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { useI18n } from "@/i18n"
 import { useGameSettingStore } from "@/stores/useGameSetting"
 import { useGameStore } from "@/stores/useGameStore"
+import { Separator } from "@/components/ui/separator"
 
 type TCharacter = {
     name: string
@@ -223,6 +224,7 @@ export const CreateCharacter = () => {
                                 </Item>
                             )
                         })}
+                        <Separator className="mt-4" />
                         <Alert>
                             <AlertCircleIcon />
                             <AlertTitle>{t("selectCharacter.infoTitle")}</AlertTitle>
