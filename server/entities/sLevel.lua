@@ -5,13 +5,14 @@
 SLevel = {}
 SLevel.__index = SLevel
 
+---@param player SPlayer player entity
 ---@return SLevel
-function SLevel.new(playerController)
+function SLevel.new(player)
     ---@class SLevel
     local self = setmetatable({}, SLevel)
 
-    -- Player's controller
-    self.playerController = playerController
+    -- Player entity
+    self.player = player
     -- Current player level
     self.level = SHARED.DEFAULT.LEVEL
     -- Current player experience
@@ -26,7 +27,7 @@ function SLevel.new(playerController)
     ---Contructor function
     local function _contructor()
         -- Get level by citizen id
-        local levelData = DAO.level.get(self.playerController.playerData.citizen_id)
+        local levelData = DAO.level.get(self.player.playerData.citizenId)
         -- Assign level data
         self.level = levelData.level or SHARED.DEFAULT.LEVEL
         self.exp = levelData.exp or 0
@@ -81,13 +82,13 @@ function SLevel.new(playerController)
             self.level = self.level + 1
             isLevelUp = true
             -- Boardcast event levelUp to all other server's script
-            TriggerLocalServerEvent('TPN:level:onLevelUp', self.playerData.citizen_id, 'level', self.level)
+            TriggerLocalServerEvent('TPN:level:onLevelUp', self.playerData.citizenId, 'level', self.level)
         end
         -- Assign new experience
         self.exp = newExp
         local levelPercent = self:calculateLevelPercent(newExp, self.level)
         -- Sync exp to client
-        TriggerClientEvent(self.playerController, 'TPN:level:sync', 'add', '', newExp, expGain, isLevelUp, levelPercent)
+        TriggerClientEvent(self.player.playerController, 'TPN:level:sync', 'add', '', newExp, expGain, isLevelUp, levelPercent)
     end
 
     ---Add skill experience
@@ -103,13 +104,13 @@ function SLevel.new(playerController)
             self.skills[skillName].level = self.skills[skillName].level + 1
             isSkillLevelUp = true
             -- Boardcast event levelUp to all other server's script
-            TriggerLocalServerEvent('TPN:level:onLevelUp', self.playerData.citizen_id, skillName, self.skills[skillName].level)
+            TriggerLocalServerEvent('TPN:level:onLevelUp', self.playerData.citizenId, skillName, self.skills[skillName].level)
         end
         -- Assign new skill experience
         self.skills[skillName].exp = newSkillExp
         local skillPercent = self:calculateLevelPercent(newSkillExp, self.skills[skillName].level)
         -- Sync skill exp to client
-        TriggerClientEvent(self.playerController, 'TPN:level:sync', 'add', skillName, newSkillExp, skillExpGain, isSkillLevelUp, skillPercent)
+        TriggerClientEvent(self.player.playerController, 'TPN:level:sync', 'add', skillName, newSkillExp, skillExpGain, isSkillLevelUp, skillPercent)
     end
 
     _contructor()

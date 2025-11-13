@@ -23,10 +23,18 @@ end
 ---/*         Init table           */
 ---/********************************/
 
+--- Init table 'missions'
+DAO.DB.Execute([[
+    CREATE TABLE IF NOT EXISTS player_missions (
+        citizen_id VARCHAR(11),
+        missions TEXT
+    );
+]])
+
 --- Init table 'equipments'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS equipments (
-        citizen_id TEXT,
+        citizen_id VARCHAR(11),
         items TEXT
     );
 ]])
@@ -34,7 +42,7 @@ DAO.DB.Execute([[
 --- Init table 'inventories'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS inventories (
-        citizen_id TEXT,
+        citizen_id VARCHAR(11),
         "type" TEXT,
         items TEXT
     );
@@ -43,7 +51,7 @@ DAO.DB.Execute([[
 --- Init table 'levels'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS levels (
-        citizen_id TEXT,
+        citizen_id VARCHAR(11),
         "level" INTEGER,
         "exp" INTEGER,
         skills TEXT

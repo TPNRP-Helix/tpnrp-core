@@ -1,7 +1,10 @@
+local DEFAULT_POSITION = { x = -274.27, y = 6641.01, z = 7.45 }
+local DEFAULT_HEADING = 270.0
+
 SHARED.DEFAULT = {
     SPAWN = {
-        POSITION = { x = -274.27, y = 6641.01, z = 7.45 },
-        HEADING = 270.0,
+        POSITION = DEFAULT_POSITION,
+        HEADING = DEFAULT_HEADING,
     },
     LEVEL = 1,
     SKILLS = {
@@ -62,8 +65,8 @@ SHARED.DEFAULT = {
             grade = 0,
         },
         gang = {},
-        position = { x = -274.27, y = 6641.01, z = 7.45 },
-        heading = 270.0,
+        position = DEFAULT_POSITION,
+        heading = DEFAULT_HEADING,
         metadata = {
             hunger = 100,
             thirst = 100,
