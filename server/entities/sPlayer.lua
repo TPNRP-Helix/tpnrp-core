@@ -3,6 +3,7 @@
 ---@field inventory SInventory|nil
 ---@field equipment SEquipment|nil
 ---@field level SLevel|nil
+---@field missions SMissionManager|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -26,6 +27,8 @@ function SPlayer.new(core, playerController, playerData)
     self.inventory = nil
     -- Player's equipment
     self.equipment = nil
+    -- Player's missions
+    self.missions = nil
 
     -- Player's custom properties
     self.properties = {}
@@ -46,6 +49,8 @@ function SPlayer.new(core, playerController, playerData)
         self.inventory = SInventory.new(self, 'player')
         -- Get player's equipment
         self.equipment = SEquipment.new(self)
+        -- Get player's missions
+        self.missions = SMissionManager.new(self)
     end
 
     ---/********************************/
@@ -114,7 +119,11 @@ function SPlayer.new(core, playerController, playerData)
     --
     ---Sync playerData to client-side
     function self:updatePlayerData()
+        -- Sync player data
         TriggerClientEvent(self.playerController, 'TPN:player:updatePlayerData', self.playerData, self.properties)
+        -- Sync player inventory
+        -- Inventory already sync by each addItem, removeItem
+        -- Player level already sync at each addExp, addSkillExp
     end
 
     ---On Player logged in
@@ -200,6 +209,36 @@ function SPlayer.new(core, playerController, playerData)
         self:setMetaData('thirst', newThirst)
         -- Update hunger and thirst in client-side UI
         TriggerClientEvent(self.playerController, 'TPN:ui:updateBasicNeeds', newHunger, newThirst)
+    end
+
+    ---Add cash
+    ---@param amount number amount to add
+    ---@return boolean success
+    function self:addCash(amount)
+        if not amount or type(amount) ~= 'number' or amount <= 0 then
+            print('[ERROR] SPLAYER.ADD_CASH - Invalid amount!')
+            return false
+        end
+        -- Add cash to player
+        self.playerData.money.cash = self.playerData.money.cash + amount
+        -- Sync to client
+        self:updatePlayerData()
+        return true
+    end
+
+    ---Add bank
+    ---@param amount number amount to add
+    ---@return boolean success
+    function self:addBank(amount)
+        if not amount or type(amount) ~= 'number' or amount <= 0 then
+            print('[ERROR] SPLAYER.ADD_BANK - Invalid amount!')
+            return false
+        end
+        -- Add bank to player
+        self.playerData.money.bank = self.playerData.money.bank + amount
+        -- Sync to client
+        self:updatePlayerData()
+        return true
     end
 
     _contructor()

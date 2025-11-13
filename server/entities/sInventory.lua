@@ -1,4 +1,5 @@
 ---@class SInventory
+---@field core TPNRPServer
 ---@field player SPlayer
 ---@field items table<number, SInventoryItemType>
 ---@field type 'player' | 'stack' | ''
@@ -12,7 +13,9 @@ function SInventory.new(player, type)
     ---@class SInventory
     local self = setmetatable({}, SInventory)
 
-    -- Public
+    -- Core
+    self.core = player.core
+    -- Player's entity
     self.player = player
     self.type = type
     self.items = {}
