@@ -7,6 +7,17 @@
   "settings.showThirst": "Show Thirst Badge When Smaller Than",
   "settings.showStamina": "Show Stamina Badge When Smaller Than",
 
+  "settings.audio.title": "Audio",
+  "settings.audio.description": "Audio settings for the game",
+
+  "settings.basicNeedsHUD.title": "Basic Needs HUD",
+  "settings.basicNeedsHUD.description": "Basic needs HUD settings for the game",
+  "settings.basicNeedsHUD.showHealth": "Show Health Badge When Smaller Than",
+  "settings.basicNeedsHUD.showArmor": "Show Armor Badge When Smaller Than",
+  "settings.basicNeedsHUD.showHunger": "Show Hunger Badge When Smaller Than",
+  "settings.basicNeedsHUD.showThirst": "Show Thirst Badge When Smaller Than",
+  "settings.basicNeedsHUD.showStamina": "Show Stamina Badge When Smaller Than",
+
   "selectCharacter.title": "Select Character",
   "selectCharacter.emptySlot": "Empty slot {n}",
   "selectCharacter.citizenId": "Citizen ID",

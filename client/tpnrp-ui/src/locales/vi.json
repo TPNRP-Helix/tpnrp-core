@@ -7,6 +7,17 @@
   "settings.showThirst": "Hiện Khát khi nhỏ hơn",
   "settings.showStamina": "Hiện Thể lực khi nhỏ hơn",
 
+  "settings.audio.title": "Âm thanh",
+  "settings.audio.description": "Cài đặt âm thanh cho trò chơi",
+
+  "settings.basicNeedsHUD.title": "HUD góc phải",
+  "settings.basicNeedsHUD.description": "Cài đặt HUD cần thiết cho trò chơi",
+  "settings.basicNeedsHUD.showHealth": "Hiện Máu khi nhỏ hơn",
+  "settings.basicNeedsHUD.showArmor": "Hiện Giáp khi nhỏ hơn",
+  "settings.basicNeedsHUD.showHunger": "Hiện Đói khi nhỏ hơn",
+  "settings.basicNeedsHUD.showThirst": "Hiện Khát khi nhỏ hơn",
+  "settings.basicNeedsHUD.showStamina": "Hiện Thể lực khi nhỏ hơn",
+
   "selectCharacter.title": "Chọn nhân vật",
   "selectCharacter.emptySlot": "Ô trống {n}",
   "selectCharacter.citizenId": "CCCD",

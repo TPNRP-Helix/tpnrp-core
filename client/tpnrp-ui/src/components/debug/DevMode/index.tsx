@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCallback, useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
@@ -75,7 +75,10 @@ export const DevMode = () => {
                                 duration: 3000
                             })}>Test toast</Button>
                     <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
-                    <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
+                    <Button onClick={() => {
+                        toggleSettings()
+                        setDevModeOpen(false)
+                    }}>Toggle Settings</Button>
                     <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-3">

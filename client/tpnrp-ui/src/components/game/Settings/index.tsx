@@ -21,19 +21,16 @@ export const Settings = () => {
 
     return (
         <Sheet open={isSettingsOpen} onOpenChange={setSettingsOpen}>
-            <SheetContent side="left" className="w-[800px] sm:max-w-[800px]">
-                <SheetHeader>
-                    <SheetTitle>{t("settings.title")}</SheetTitle>
-                    
-                </SheetHeader>
+            <SheetContent side="left" className="w-[800px] sm:max-w-[800px]" title={t("settings.title")}>
                 <div className="grid gap-4 p-4 pt-0">
                     <SheetDescription>
                         {t("settings.description")}
                     </SheetDescription>
                     <Tabs defaultValue="General" className="w-full">
-                        <TabsList>
+                        <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="General">General</TabsTrigger>
-                            <TabsTrigger value="HUD">HUD</TabsTrigger>
+                            <TabsTrigger value="HUD">{t("settings.basicNeedsHUD.title")}</TabsTrigger>
+                            <TabsTrigger value="Audio">{t("settings.audio.title")}</TabsTrigger>
                         </TabsList>
                         <TabsContent value="General">
                             <div className="grid gap-2">
