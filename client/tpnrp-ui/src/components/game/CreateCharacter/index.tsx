@@ -2,7 +2,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { useDevModeStore } from "@/stores/useDevModeStore"
@@ -256,14 +256,11 @@ export const CreateCharacter = () => {
                 }
             }}>
                 <form onSubmit={onSubmitCreateCharacter}>
-                    <DialogContent className="sm:max-w-[425px] ">
-                        <DialogHeader>
-                            <DialogTitle>{t("createCharacter.title")}</DialogTitle>
+                    <DialogContent className="sm:max-w-[425px]" title={t("createCharacter.title")}>
+                        <div className="grid gap-4 p-4">
                             <DialogDescription>
                                 {t("createCharacter.description")}
                             </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 p-4">
                             <div className="flex gap-2">
                                 <div className="grid gap-3 w-full">
                                     <Label htmlFor="firstName">{t("createCharacter.firstName")}</Label>
