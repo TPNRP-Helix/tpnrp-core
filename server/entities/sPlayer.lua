@@ -212,7 +212,7 @@ function SPlayer.new(core, playerController, playerData)
         -- Set metadata and sync to client
         self:setMetaData('thirst', newThirst)
         -- Update hunger and thirst in client-side UI
-        TriggerClientEvent(self.playerController, 'TPN:ui:updateBasicNeeds', newHunger, newThirst)
+        TriggerClientEvent(self.playerController, 'TPN:player:updateBasicNeeds', newHunger, newThirst)
     end
 
     ---Add Money

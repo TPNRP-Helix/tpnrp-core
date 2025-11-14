@@ -28,8 +28,14 @@ export const GuideHelper = () => {
         { id: 'toast', label: "helper.toggleToastExpand", shortcut: "F3", onClick: () => setToastConfig({ ...toastConfig, isExpand: !toastConfig.isExpand }) },
     ]
     if (permission === 'admin') {
-        helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => toggleDevMode() })
-        helperItems.push({ id: 'console', label: "helper.toggleConsole", shortcut: "F8", onClick: () => toggleConsole() })
+        helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => {
+            toggleDevMode()
+            setOpen(false)
+        } })
+        helperItems.push({ id: 'console', label: "helper.toggleConsole", shortcut: "F8", onClick: () => {
+            toggleConsole()
+            setOpen(false)
+        } })
     }
 
     useWebUIMessage<[boolean]>('toggleGuideHelper', () => {

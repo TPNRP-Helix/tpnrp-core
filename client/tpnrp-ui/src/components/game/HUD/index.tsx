@@ -28,6 +28,14 @@ export const HUD = () => {
     setBasicNeeds({ health })
   })
 
+  useWebUIMessage<[number]>('setArmor', ([armor]) => {
+    setBasicNeeds({ armor })
+  })
+
+  useWebUIMessage<[number, number]>('setBasicNeeds', ([hunger, thirst]) => {
+    setBasicNeeds({ hunger, thirst })
+  })
+
   const hudVariants = {
     open: { opacity: 1, x: 0 },
     closed: { opacity: 0, x: 500 },

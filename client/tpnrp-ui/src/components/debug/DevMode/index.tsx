@@ -65,17 +65,8 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            {/* <SheetTrigger asChild>
-                <Button className="relative top-1 left-1">
-                    <Kbd>F7</Kbd>
-                    Dev Mode Tools
-                </Button>
-            </SheetTrigger> */}
-            <SheetContent side="left" className="w-[400px] sm:max-w-[400px]">
-                <SheetHeader>
-                    <SheetTitle>Dev Mode Tools</SheetTitle>
-                </SheetHeader>
-                <div className="grid gap-4 p-4 pt-0">
+            <SheetContent side="left" className="w-[400px] sm:max-w-[400px]" title="Dev Mode Tools">
+                <div className="grid gap-4 p-4">
                     <SheetDescription>
                         DevMode Tools support for testing inventory features
                     </SheetDescription>
@@ -123,17 +114,8 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            {/* <SheetTrigger asChild>
-                <Button className="relative top-1 left-1 ml-2 bg-primary! text-primary-foreground!">
-                    <Kbd>F8</Kbd>
-                    Console
-                </Button>
-            </SheetTrigger> */}
-            <SheetContent className="w-[800px] sm:max-w-[800px]">
-                <SheetHeader>
-                    <SheetTitle>Console</SheetTitle>
-                </SheetHeader>
-                <div className="grid gap-4 p-4">
+            <SheetContent title="Console" className="w-[800px] sm:max-w-[800px]">
+                <div className="flex flex-col gap-4 p-4 h-full">
                     <Console />
                 </div>
             </SheetContent>

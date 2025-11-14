@@ -42,6 +42,12 @@ function CPlayer.new(core, playerData)
         Timer.SetInterval(function()
             TriggerServerEvent('TPN:player:syncPlayer')
         end, (1000 * 60) * SHARED.CONFIG.UPDATE_INTERVAL)
+
+        -- Update basic needs
+        self.core.webUI:sendEvent('setBasicNeeds', {
+            hunger = self.playerData.metadata['hunger'] or 100,
+            thirst = self.playerData.metadata['thirst'] or 100,
+        })
     end
 
     ---/********************************/
@@ -95,6 +101,14 @@ function CPlayer.new(core, playerData)
         RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
             self.playerData = playerData
             self.properties = properties or {}
+        end)
+
+        -- On Update basic needs
+        RegisterClientEvent('TPN:player:updateBasicNeeds', function(newHunger, newThirst)
+            self.core.webUI:sendEvent('setBasicNeeds', {
+                hunger = newHunger,
+                thirst = newThirst,
+            })
         end)
     end
 
