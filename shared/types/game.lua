@@ -1,10 +1,15 @@
 ---@class Vector3
----@field X number
----@field Y number
----@field Z number
+---@field x number
+---@field y number
+---@field z number
 
 ---@class Quaternion
 ---@field Yaw number
+
+---@class Rotator
+---@field Pitch number
+---@field Yaw number
+---@field Roll number
 
 ---/********************************/
 ---/*          HELIX Class         */
@@ -42,3 +47,27 @@
 ---@field citizenId? string CitizenId of player
 ---@field player? SPlayer Player entity
 ---@field name? string player name
+
+---@class TSpawnStaticMeshParams
+---@field entityPath string Path to entity (Ex: '/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag)
+---@field position Vector3 position to spawn
+---@field scale Vector3 Scale of mesh
+---@field rotation Rotator Rotation of mesh
+
+---@alias TInteractAction fun(actor: unknown, instigator: PlayerController)
+
+---@class TInteractableOption
+---@field text string Display text for this option
+---@field subText string Sub text for this option
+---@field input string InputAction? (TODO: MORE DOCUMENTATION NEEDED!) Ex: '/Game/Input/Actions/IA_Interact.IA_Interact'
+---@field action TInteractAction callback function when player click
+---@field ability string|nil (TODO: MORE DOCUMENTATION NEEDED!)
+
+---@class TAddInteractableParams
+---@field entity unknown Entity (TODO: MORE DOCUMENTATION NEEDED!)
+---@field options TInteractableOption[] List of option
+
+---@class TEntity Manage by sGame
+---@field id string Entity id
+---@field entity unknown Entity (TODO: MORE DOCUMENTATION NEEDED!)
+---@field isInteractable boolean Is this entity interactable

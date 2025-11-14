@@ -19,6 +19,9 @@ function TPNRPServer.new()
 
     ---@type SCheatDetector cheat detector entity
     self.cheatDetector = nil
+    ---@type SGame game manager entity
+    self.gameManager = nil
+
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
@@ -26,7 +29,7 @@ function TPNRPServer.new()
     ---Contructor function
     local function _contructor()
         self.cheatDetector = SCheatDetector.new(self)
-        
+        self.gameManager = SGame.new(self)
         -- Bind Helix events (Default events of game)
         self:bindHelixEvents()
         -- Bind TPN's events (Custom events of TPNRP-Core)
@@ -124,24 +127,6 @@ function TPNRPServer.new()
     function self:bindTPNEvents()
         -- TPN events
         RegisterServerEvent('TPN:player:syncPlayer', function(playerController) self:onPlayerSync(playerController) end)
-
-        -- [TODO] Test event and should be removed later
-        RegisterServerEvent('playAnim', function(source, animationName)
-            print('[TPN][SERVER] playAnim ' .. animationName)
-            local char = source:K2_GetPawn()
-            if not char then
-                print('[TPN][SERVER] playAnim - Failed to get character!')
-                return
-            end
-            print('[TPN][SERVER] playAnim - Character found!')
-            local AnimParams = UE.FHelixPlayAnimParams()
-            AnimParams.LoopCount = 1
-            AnimParams.bIgnoreMovementInput = true
-            print('[TPN][SERVER] playAnim - AnimParams.')
-            Animation.Play(char, '/Game/Addon_KpopDances/OMG/A_OMG.A_OMG', AnimParams, function()
-                print('Animation Ended')
-            end)
-        end)
     end
 
     ---On Player Unloaded

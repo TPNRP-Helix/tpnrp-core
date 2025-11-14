@@ -35,8 +35,6 @@ function SMissionManager.new(player)
             self.activeMissionName = mission.id
         end
        end
-
-       self:bindTPNEvents()
     end
 
     ---/********************************/
@@ -47,11 +45,6 @@ function SMissionManager.new(player)
     ---@return boolean success
     function self:save()
         return DAO.mission.save(self.player)
-    end
-
-    ---Bind TPN events
-    function self:bindTPNEvents()
-      
     end
 
     ---Trigger an action to update mission required

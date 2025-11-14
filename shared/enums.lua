@@ -28,3 +28,12 @@ EWebUIInputMode = {
     UI = 1,     -- Focus on UI only
     Both = 2    -- Focus on game world and UI
 }
+
+---@enum ECollisionType
+ECollisionType = {
+    Normal = CollisionType.Normal, -- Standard collision based on channel settings
+    StaticOnly = CollisionType.StaticOnly, -- Only collides with static objects
+    NoCollision = CollisionType.NoCollision, -- Ignores all collisions
+    IgnoreOnlyPawn = CollisionType.IgnoreOnlyPawn, -- Ignores player and NPCs, but collides with everything else
+    Auto = CollisionType.Auto, -- Chooses the best setting automatically
+}

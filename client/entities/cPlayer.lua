@@ -15,6 +15,7 @@ function CPlayer.new(core, playerData)
 
     self.core = core
     self.playerData = playerData
+    self.playerController = nil
     -- Player's inventory
     self.inventory = nil
     -- Player's custom properties
@@ -28,6 +29,7 @@ function CPlayer.new(core, playerData)
 
     ---Contructor function
     local function _contructor()
+        self.playerController = UE.UGameplayStatics.GetPlayerController(HWorld, 0)
         -- Bind Helix events (Default events of game)
         self:bindHelixEvents()
         -- Bind TPN events (Custom events of TPNRP-Core)
@@ -97,10 +99,22 @@ function CPlayer.new(core, playerData)
     end
 
     function self:bindWebUIEvents()
-        -- On Play animation
+        -- [TEST] Test function only, it should not be exist on production
         self.core.webUI:registerEventHandler('playAnimation', function(data)
             print('[TPN][CLIENT] playAnimation ' .. JSON.stringify(data))
-            TriggerServerEvent('playAnim', data.animationName)
+            local char = self.playerController:K2_GetPawn()
+            if not char then
+                print('[TPN][CLIENT] playAnim - Failed to get character!')
+                return
+            end
+            print('[TPN][CLIENT] playAnim - Character found!')
+            local AnimParams = UE.FHelixPlayAnimParams()
+            AnimParams.LoopCount = 1
+            AnimParams.bIgnoreMovementInput = true
+            print('[TPN][CLIENT] playAnim - AnimParams.')
+            Animation.Play(char, data.animationName, AnimParams, function()
+                print('Animation Ended')
+            end)
         end)
     end
 
