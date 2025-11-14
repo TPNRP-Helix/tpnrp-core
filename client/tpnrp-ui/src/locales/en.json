@@ -62,7 +62,11 @@
   "helper.toggleFocus": "Toggle focus",
   "helper.toggleToastExpand": "Toggle toast expand",
   "helper.toggleDevMode": "Toggle dev mode",
-  "helper.toggleConsole": "Toggle console"
+  "helper.toggleConsole": "Toggle console",
+
+  "inventory.title": "Inventory",
+  "inventory.backpack.title": "Backpack",
+  "inventory.other.ground": "Ground"
 }
 
 

@@ -1,4 +1,4 @@
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -22,7 +22,7 @@ export const Settings = () => {
     return (
         <Sheet open={isSettingsOpen} onOpenChange={setSettingsOpen}>
             <SheetContent side="left" className="w-[800px] sm:max-w-[800px]" title={t("settings.title")}>
-                <div className="grid gap-4 p-4 pt-0">
+                <div className="grid gap-4 p-4">
                     <SheetDescription>
                         {t("settings.description")}
                     </SheetDescription>

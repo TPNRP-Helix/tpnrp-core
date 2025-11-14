@@ -27,7 +27,7 @@ import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
 import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
 import { useI18n } from "@/i18n"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useGameStore } from "@/stores/useGameStore"
 import { Separator } from "@/components/ui/separator"
 

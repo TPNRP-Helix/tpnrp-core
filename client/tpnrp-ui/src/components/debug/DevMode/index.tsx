@@ -6,12 +6,13 @@ import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { useGameStore } from "@/stores/useGameStore"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { UIPreview } from "./UIPreview"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
+import { useInventoryStore } from "@/stores/useInventoryStore"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
@@ -20,6 +21,7 @@ export const DevMode = () => {
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
+    const { setOpenInventory } = useInventoryStore()
 
     const [animationName, setAnimationName] = useState('')
 
@@ -98,6 +100,10 @@ export const DevMode = () => {
                         </TabsContent>
                         <TabsContent value="inventory">
                             inventory
+                            <Button onClick={() => {
+                                setOpenInventory(true)
+                                setDevModeOpen(false)
+                            }}>Open Inventory</Button>
                         </TabsContent>
                         <TabsContent value="menu" className="grid gap-2">
                             <Button onClick={() => {

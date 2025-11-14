@@ -127,6 +127,15 @@ function CWebUI.new(core)
 
     ---Hide default UI
     function self:hideDefaultUI()
+        local actors = UE.TArray(UE.AActor)
+        UE.UGameplayStatics.GetAllActorsWithTag(HWorld, 'HWebUI', actors)
+        if not actors[1] then
+            print('[ERROR] CWebUI.HIDE_DEFAULT_UI - HWebUI actor not found')
+            return false
+        end
+        print('[INFO] CWebUI.HIDE_DEFAULT_UI - HWebUI actor found => Hide UI')
+        actors[1]:SetHUDVisibility(false, false, true, true, false)
+        
         if not SetHUDVisibility then return end
         SetHUDVisibility({
             Healthbar = false,

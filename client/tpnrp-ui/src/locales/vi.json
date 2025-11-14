@@ -62,7 +62,11 @@
   "helper.toggleFocus": "Bật/tắt con trỏ",
   "helper.toggleToastExpand": "Bật/tắt thông báo",
   "helper.toggleDevMode": "Bật/Tắt DevMode",
-  "helper.toggleConsole": "Bật/Tắt Console"
+  "helper.toggleConsole": "Bật/Tắt Console",
+
+  "inventory.title": "Túi đồ",
+  "inventory.backpack.title": "Ba lô",
+  "inventory.other.ground": "Đất"
 }
 
 

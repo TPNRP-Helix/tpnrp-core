@@ -1,6 +1,6 @@
 import { Toaster } from "@/components/ui/sonner"
 import { useWebUIMessage } from "@/hooks/use-hevent"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import type { TNotification } from "@/types/game"
 import { toast, type ExternalToast } from "sonner"
 
@@ -47,7 +47,7 @@ export const ToasterController = () => {
     return (
         <Toaster
             position="top-right"
-            visibleToasts={toastConfig.visibleToasts ?? 5}
+            visibleToasts={toastConfig.visibleToasts ?? 3}
             expand={toastConfig.isExpand ?? true}
             toastOptions={{
                 classNames: {

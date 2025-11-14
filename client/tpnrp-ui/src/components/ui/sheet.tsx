@@ -137,7 +137,7 @@ function SheetTitle({
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn("absolute text-black text-sm font-medium uppercase inline-flex items-center gap-1.5 pl-2 pr-4 py-1", className)}
+      className={cn("relative text-black text-sm font-medium uppercase inline-flex items-center gap-1.5 pl-2 pr-4 py-1", className)}
       {...props}
     >
       <span className="relative z-10 flex items-center gap-1.5">

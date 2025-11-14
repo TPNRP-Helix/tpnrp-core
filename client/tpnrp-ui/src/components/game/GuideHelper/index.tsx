@@ -4,7 +4,7 @@ import { useWebUIMessage } from "@/hooks/use-hevent";
 import { useI18n } from "@/i18n";
 import { verticalStackAnim } from "@/lib/animation";
 import { useDevModeStore } from "@/stores/useDevModeStore";
-import { useGameSettingStore } from "@/stores/useGameSetting";
+import { useGameSettingStore } from "@/stores/useGameSettingStore";
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
