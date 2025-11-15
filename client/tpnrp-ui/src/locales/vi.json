@@ -66,7 +66,57 @@
 
   "inventory.title": "Túi đồ",
   "inventory.backpack.title": "Ba lô",
-  "inventory.other.ground": "Đất"
+  "inventory.backpack.slotCount": "Số ô",
+  "inventory.backpack.empty": "Bạn không có ba lô",
+  "inventory.backpack.emptyDescription": "Mua ba lô từ cửa hàng để tăng số lượng ô trong túi đồ.",
+
+  "inventory.other.ground": "Đất",
+  "inventory.other.player": "Ba lô",
+  "inventory.other.stack": "Túi",
+
+  "inventory.weight": "Trọng lượng",
+  "inventory.slot": "Số ô",
+  "inventory.durability": "Độ bền",
+  "inventory.maxWeight": "Trọng lượng tối đa",
+  "inventory.description": "Mô tả",
+  "inventory.amount": "Số lượng",
+  "inventory.rareLevel": "Độ hiếm",
+  "inventory.weightPerUnit": "Trọng lượng mỗi đơn vị",
+  "inventory.canCarry": "Có thể mang",
+  "inventory.noDescription": "Không có mô tả",
+
+  "inventory.amountDialog.title": "Bạn muốn {type} bao nhiêu {item}?",
+  "inventory.amountDialog.description": "Bạn có thể chọn số lượng từ 1 đến {amount}",
+  "inventory.amountDialog.quantity": "Số lượng",
+  "inventory.amountDialog.cancel": "Không",
+  "inventory.amountDialog.confirm": "Xác nhận",
+  "inventory.amountDialog.give": "Cho",
+  "inventory.amountDialog.drop": "Vứt",
+  "inventory.amountDialog.invalidQuantity": "Số lượng không hợp lệ",
+  "inventory.amountDialog.other": "Khác",
+
+  "inventory.use": "Dùng",
+  "inventory.split": "Tách",
+  "inventory.give": "Cho",
+  "inventory.drop": "Vứt",
+  "inventory.half": "Một nửa",
+  "inventory.one": "Một",
+  "inventory.all": "Tất cả",
+  "inventory.other": "Khác",
+
+  "inventory.item.label.id_card": "CCCD",
+  "inventory.item.label.driver_license": "Giấy phép lái xe",
+  "inventory.item.label.beer": "Bia",
+  "inventory.item.label.bandage": "Băng gạc",
+  "inventory.item.label.wood_log": "Gỗ",
+  "inventory.item.label.sandwich": "Sandwich",
+  "inventory.item.label.painkillers": "Thuốc giảm đau",
+
+  "inventory.rare.common": "Thường",
+  "inventory.rare.uncommon": "Ít phổ biến",
+  "inventory.rare.rare": "Hiếm",
+  "inventory.rare.epic": "Cực hiếm",
+  "inventory.rare.legendary": "Huyền thoại"
 }
 
 

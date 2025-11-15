@@ -66,7 +66,56 @@
 
   "inventory.title": "Inventory",
   "inventory.backpack.title": "Backpack",
-  "inventory.other.ground": "Ground"
+  "inventory.backpack.slotCount": "Slot Count",
+  "inventory.backpack.empty": "You don't have backpack",
+  "inventory.backpack.emptyDescription": "Buy a backpack from store to increase your inventory capacity.",
+
+  "inventory.other.ground": "Ground",
+  "inventory.other.player": "Player",
+  "inventory.other.stack": "Stack",
+  "inventory.weight": "Weight",
+  "inventory.slot": "Slot",
+  "inventory.durability": "Durability",
+  "inventory.maxWeight": "Max Weight",
+  "inventory.description": "Description",
+  "inventory.amount": "Amount",
+  "inventory.rareLevel": "Rare Level",
+  "inventory.weightPerUnit": "Weight per unit",
+  "inventory.canCarry": "Can carry",
+  "inventory.noDescription": "No description",
+
+  "inventory.amountDialog.title": "You want to {type} how many {item}?",
+  "inventory.amountDialog.description": "You can choose the quantity from 1 to {amount}",
+  "inventory.amountDialog.quantity": "Quantity",
+  "inventory.amountDialog.cancel": "Cancel",
+  "inventory.amountDialog.confirm": "Confirm",
+  "inventory.amountDialog.give": "Give",
+  "inventory.amountDialog.drop": "Drop",
+  "inventory.amountDialog.invalidQuantity": "Invalid quantity",
+  "inventory.amountDialog.other": "Other",
+
+  "inventory.use": "Use",
+  "inventory.split": "Split",
+  "inventory.give": "Give",
+  "inventory.drop": "Drop",
+  "inventory.half": "Half",
+  "inventory.one": "One",
+  "inventory.all": "All",
+  "inventory.other": "Other",
+
+  "inventory.item.label.id_card": "ID Card",
+  "inventory.item.label.driver_license": "Drivers License",
+  "inventory.item.label.beer": "Beer",
+  "inventory.item.label.bandage": "Bandage",
+  "inventory.item.label.wood_log": "Wood Log",
+  "inventory.item.label.sandwich": "Sandwich",
+  "inventory.item.label.painkillers": "Painkiller",
+
+  "inventory.rare.common": "Common",
+  "inventory.rare.uncommon": "Uncommon",
+  "inventory.rare.rare": "Rare",
+  "inventory.rare.epic": "Epic",
+  "inventory.rare.legendary": "Legendary"
 }
 
 

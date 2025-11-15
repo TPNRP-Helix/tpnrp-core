@@ -89,7 +89,7 @@ function SheetContent({
             <svg className="w-8 h-8" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
               <g transform="scale(-1,1) translate(-64,0)">
                   <path d="M8 0H56C60.4183 0 64 3.58172 64 8V48L48 64H8C3.58172 64 0 60.4183 0 56V8C0 3.58172 3.58172 0 8 0Z" fill="#E53935"/>
-                  <path d="M21 21L43 43M43 21L21 43" stroke="white" stroke-width="5" stroke-linecap="round"/>
+                  <path d="M21 21L43 43M43 21L21 43" stroke="white" strokeWidth="5" strokeLinecap="round"/>
               </g>
             </svg>
             <span className="sr-only">Close</span>

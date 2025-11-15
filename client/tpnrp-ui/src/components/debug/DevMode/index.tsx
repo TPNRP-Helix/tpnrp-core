@@ -13,14 +13,25 @@ import { UIPreview } from "./UIPreview"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { useInventoryStore } from "@/stores/useInventoryStore"
+import type { TInventoryItem } from "@/types/inventory"
 const IS_SHOW_BG = false
+
+const FAKE_INVENTORY_ITEMS: TInventoryItem[] = [
+    {
+        amount: 10,
+        name: 'wood_log',
+        label: 'Wood Log',
+        weight: 100,
+        slot: 1
+    }
+]
 
 export const DevMode = () => {
     const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen, appendConsoleMessage, isEnableDevMode, setEnableDevMode } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
-    const { setOpenInventory } = useInventoryStore()
+    const { setOpenInventory, setInventoryItems, inventoryItems } = useInventoryStore()
 
     const [animationName, setAnimationName] = useState('')
 
@@ -41,6 +52,8 @@ export const DevMode = () => {
         if (isInBrowser) {
             setEnableDevMode(true)
             setPermission('admin')
+            // Set some fake inventory item for debugging
+            setInventoryItems([...inventoryItems, ...FAKE_INVENTORY_ITEMS])
         }
     }, [])
 
