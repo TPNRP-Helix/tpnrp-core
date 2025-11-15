@@ -7,6 +7,17 @@
   "settings.showThirst": "Hiện Khát khi nhỏ hơn",
   "settings.showStamina": "Hiện Thể lực khi nhỏ hơn",
 
+  "settings.audio.title": "Âm thanh",
+  "settings.audio.description": "Cài đặt âm thanh cho trò chơi",
+
+  "settings.basicNeedsHUD.title": "HUD góc phải",
+  "settings.basicNeedsHUD.description": "Cài đặt HUD cần thiết cho trò chơi",
+  "settings.basicNeedsHUD.showHealth": "Hiện Máu khi nhỏ hơn",
+  "settings.basicNeedsHUD.showArmor": "Hiện Giáp khi nhỏ hơn",
+  "settings.basicNeedsHUD.showHunger": "Hiện Đói khi nhỏ hơn",
+  "settings.basicNeedsHUD.showThirst": "Hiện Khát khi nhỏ hơn",
+  "settings.basicNeedsHUD.showStamina": "Hiện Thể lực khi nhỏ hơn",
+
   "selectCharacter.title": "Chọn nhân vật",
   "selectCharacter.emptySlot": "Ô trống {n}",
   "selectCharacter.citizenId": "CCCD",
@@ -51,7 +62,11 @@
   "helper.toggleFocus": "Bật/tắt con trỏ",
   "helper.toggleToastExpand": "Bật/tắt thông báo",
   "helper.toggleDevMode": "Bật/Tắt DevMode",
-  "helper.toggleConsole": "Bật/Tắt Console"
+  "helper.toggleConsole": "Bật/Tắt Console",
+
+  "inventory.title": "Túi đồ",
+  "inventory.backpack.title": "Ba lô",
+  "inventory.other.ground": "Đất"
 }
 
 

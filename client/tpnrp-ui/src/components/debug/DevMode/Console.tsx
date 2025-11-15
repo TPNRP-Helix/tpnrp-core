@@ -11,8 +11,8 @@ export const Console = () => {
 
     return (
         <>
-            <div className="flex flex-col gap-2 border border-black rounded-md p-2 bg-black h-[calc(100vh-10rem)]">
-                <ScrollArea>
+            <div className="flex flex-col gap-2 border border-black rounded-md p-2 bg-accent h-full min-h-0">
+                <ScrollArea className="flex-1">
                     {consoleMessages.map((message) => (
                         <div key={message.index}>{message.message}</div>
                     ))}

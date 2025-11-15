@@ -36,6 +36,14 @@ SHARED.randomInt = function(min, max)
     return math.random(min, max)
 end
 
+SHARED.randomId = function(length)
+    local length = length or 6
+    if type(length) ~= "number" or length <= 0 then
+        return ""
+    end
+    return SHARED.randomStr(length)
+end
+
 ----------------------------------------------------------------------
 --- Split String
 ----------------------------------------------------------------------

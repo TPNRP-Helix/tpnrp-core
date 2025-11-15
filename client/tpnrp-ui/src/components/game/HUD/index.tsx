@@ -3,7 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { GlassWater, Ham, Heart, Shield, Smartphone, Zap } from "lucide-react"
 import { useGameStore } from "@/stores/useGameStore"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import defaultAvatar from "@/assets/images/default-avatar.png"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { usePhoneStore } from "@/stores/usePhoneStore"
@@ -26,6 +26,14 @@ export const HUD = () => {
 
   useWebUIMessage<[number]>('setHealth', ([health]) => {
     setBasicNeeds({ health })
+  })
+
+  useWebUIMessage<[number]>('setArmor', ([armor]) => {
+    setBasicNeeds({ armor })
+  })
+
+  useWebUIMessage<[number, number]>('setBasicNeeds', ([hunger, thirst]) => {
+    setBasicNeeds({ hunger, thirst })
   })
 
   const hudVariants = {

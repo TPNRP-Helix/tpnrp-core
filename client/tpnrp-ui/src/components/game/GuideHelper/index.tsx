@@ -4,7 +4,7 @@ import { useWebUIMessage } from "@/hooks/use-hevent";
 import { useI18n } from "@/i18n";
 import { verticalStackAnim } from "@/lib/animation";
 import { useDevModeStore } from "@/stores/useDevModeStore";
-import { useGameSettingStore } from "@/stores/useGameSetting";
+import { useGameSettingStore } from "@/stores/useGameSettingStore";
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
@@ -28,8 +28,14 @@ export const GuideHelper = () => {
         { id: 'toast', label: "helper.toggleToastExpand", shortcut: "F3", onClick: () => setToastConfig({ ...toastConfig, isExpand: !toastConfig.isExpand }) },
     ]
     if (permission === 'admin') {
-        helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => toggleDevMode() })
-        helperItems.push({ id: 'console', label: "helper.toggleConsole", shortcut: "F8", onClick: () => toggleConsole() })
+        helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => {
+            toggleDevMode()
+            setOpen(false)
+        } })
+        helperItems.push({ id: 'console', label: "helper.toggleConsole", shortcut: "F8", onClick: () => {
+            toggleConsole()
+            setOpen(false)
+        } })
     }
 
     useWebUIMessage<[boolean]>('toggleGuideHelper', () => {

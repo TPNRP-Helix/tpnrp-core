@@ -1,5 +1,5 @@
 import { createContext, useContext, useMemo } from "react"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import en from "@/locales/en.json"
 import vi from "@/locales/vi.json"
 

@@ -1,3 +1,4 @@
+---@type Vector3
 local DEFAULT_POSITION = { x = -274.27, y = 6641.01, z = 7.45 }
 local DEFAULT_HEADING = 270.0
 

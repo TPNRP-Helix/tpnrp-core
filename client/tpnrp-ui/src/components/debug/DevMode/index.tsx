@@ -1,17 +1,18 @@
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCallback, useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { useGameStore } from "@/stores/useGameStore"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { UIPreview } from "./UIPreview"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
+import { useInventoryStore } from "@/stores/useInventoryStore"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
@@ -20,6 +21,7 @@ export const DevMode = () => {
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
+    const { setOpenInventory } = useInventoryStore()
 
     const [animationName, setAnimationName] = useState('')
 
@@ -65,16 +67,7 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            {/* <SheetTrigger asChild>
-                <Button className="relative top-1 left-1">
-                    <Kbd>F7</Kbd>
-                    Dev Mode Tools
-                </Button>
-            </SheetTrigger> */}
-            <SheetContent side="left" className="w-[400px] sm:max-w-[400px]">
-                <SheetHeader>
-                    <SheetTitle>Dev Mode Tools</SheetTitle>
-                </SheetHeader>
+            <SheetContent side="left" className="w-[400px] sm:max-w-[400px]" title="Dev Mode Tools">
                 <div className="grid gap-4 p-4">
                     <SheetDescription>
                         DevMode Tools support for testing inventory features
@@ -84,7 +77,10 @@ export const DevMode = () => {
                                 duration: 3000
                             })}>Test toast</Button>
                     <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
-                    <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
+                    <Button onClick={() => {
+                        toggleSettings()
+                        setDevModeOpen(false)
+                    }}>Toggle Settings</Button>
                     <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-3">
@@ -104,6 +100,10 @@ export const DevMode = () => {
                         </TabsContent>
                         <TabsContent value="inventory">
                             inventory
+                            <Button onClick={() => {
+                                setOpenInventory(true)
+                                setDevModeOpen(false)
+                            }}>Open Inventory</Button>
                         </TabsContent>
                         <TabsContent value="menu" className="grid gap-2">
                             <Button onClick={() => {
@@ -123,17 +123,8 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            {/* <SheetTrigger asChild>
-                <Button className="relative top-1 left-1 ml-2 bg-primary! text-primary-foreground!">
-                    <Kbd>F8</Kbd>
-                    Console
-                </Button>
-            </SheetTrigger> */}
-            <SheetContent className="w-[800px] sm:max-w-[800px]">
-                <SheetHeader>
-                    <SheetTitle>Console</SheetTitle>
-                </SheetHeader>
-                <div className="grid gap-4 p-4">
+            <SheetContent title="Console" className="w-[800px] sm:max-w-[800px]">
+                <div className="flex flex-col gap-4 p-4 h-full">
                     <Console />
                 </div>
             </SheetContent>

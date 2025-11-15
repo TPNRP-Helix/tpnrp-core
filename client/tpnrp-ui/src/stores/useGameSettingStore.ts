@@ -32,7 +32,7 @@ type GameSettingState = {
 export const useGameSettingStore = create<GameSettingState>((set) => ({
   isSettingsOpen: false,
   toastConfig: {
-    visibleToasts: 5,
+    visibleToasts: 3,
     isExpand: true,
   },
   basicNeedHUDConfig: {

@@ -6,6 +6,7 @@ import { Settings } from "./components/game/Settings"
 import { CreateCharacter } from "./components/game/CreateCharacter"
 import { ToasterController } from "./components/game/HUD/ToasterController"
 import { GuideHelper } from "./components/game/GuideHelper"
+import { Inventory } from "./components/game/Inventory"
 
 declare global {
   interface Window {
@@ -23,6 +24,7 @@ function App() {
         <HUD />
         <GuideHelper />
         <Settings />
+        <Inventory />
         <CreateCharacter />
         <ToasterController />
       </ThemeProvider>

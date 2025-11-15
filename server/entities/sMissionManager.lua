@@ -26,12 +26,26 @@ function SMissionManager.new(player)
 
     ---Contructor function
     local function _contructor()
-       
+       local missions = DAO.mission.get(self.player.playerData.citizenId)
+       if not missions then return end
+       self.missions = missions
+       -- Find active mission
+       for _, mission in pairs(missions) do
+        if mission.isActive then
+            self.activeMissionName = mission.id
+        end
+       end
     end
 
     ---/********************************/
     ---/*          Functions           */
     ---/********************************/
+    
+    ---Save missions
+    ---@return boolean success
+    function self:save()
+        return DAO.mission.save(self.player)
+    end
 
     ---Trigger an action to update mission required
     ---@param actionName TMissionActionType action name 
