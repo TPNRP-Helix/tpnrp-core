@@ -11,9 +11,9 @@ function CWebUI.new(core)
     ---@class CWebUI
     local self = setmetatable({}, CWebUI)
 
-    self._core = core
+    self.core = core
     self._webUI = nil
-    self._isFocusing = false
+    self.isFocusing = false
     -- Log
     self.nucleus = nil
     self.lastLogIndex = 0
@@ -48,10 +48,13 @@ function CWebUI.new(core)
         ---+-----------------------------------------------+
         -- | Bind callback                                 |
         ---+-----------------------------------------------/
-
+        print('[INFO] CWebUI.NEW - binding callback')
         -- Get player's permission for WebUI
         TriggerCallback('getPermissions', function(result)
+            print('[INFO] CWebUI.NEW - permission callback received')
             self:sendEvent('setPermission', result)
+            self.core.permission = result
+            print('[INFO] CWebUI.NEW - permission set to ' .. result)
         end)
     end
 
@@ -63,23 +66,37 @@ function CWebUI.new(core)
     function self:bindInput()
         -- [GAME] [F1] Toggle guide helper
         Input.BindKey('F1', function()
+            if not self.core:isInGame() then
+                print('[INFO] CWebUI.NEW - not in game')
+                return
+            end
+            if self.core.permission ~= 'admin' then
+                print('[INFO] CWebUI.NEW - permission is not admin')
+                return
+            end
             self:sendEvent('toggleGuideHelper')
         end, 'Pressed')
 
         -- [GAME] [F2] Toggle focus with mouse
         Input.BindKey('F2', function()
-            if self._isFocusing then
+            if not self.core:isInGame() and self.core.permission ~= 'admin' then
+                return
+            end
+            if self.isFocusing then
                 -- Close focus 
                 self:outFocus()
                 return
             end
             -- Open focus and open console
             self._webUI:SetInputMode(EWebUIInputMode.UI)
-            self._isFocusing = true
+            self.isFocusing = true
         end, 'Pressed')
 
         -- [GAME] [F3] Toggle toast expand
         Input.BindKey('F3', function()
+            if not self.core:isInGame() then
+                return
+            end
             self:sendEvent('toggleToastExpand')
         end, 'Pressed')
 
@@ -90,7 +107,7 @@ function CWebUI.new(core)
                     return
                 end
                 -- Player is admin
-                if self._isFocusing then
+                if self.isFocusing then
                     -- Close focus 
                     self:outFocus()
                     self:sendEvent('setDevModeOpen', false)
@@ -99,7 +116,7 @@ function CWebUI.new(core)
                 -- Open focus and open console
                 self._webUI:SetInputMode(EWebUIInputMode.UI)
                 self:sendEvent('setDevModeOpen', true)
-                self._isFocusing = true
+                self.isFocusing = true
             end)
         end, 'Pressed')
 
@@ -110,7 +127,7 @@ function CWebUI.new(core)
                     return
                 end
                 -- Player is admin
-                if self._isFocusing then
+                if self.isFocusing then
                     -- Close focus and close console
                     self:outFocus()
                     self:sendEvent('setConsoleOpen', false)
@@ -119,7 +136,7 @@ function CWebUI.new(core)
                 -- Open focus and open console
                 self._webUI:SetInputMode(EWebUIInputMode.UI)
                 self:sendEvent('setConsoleOpen', true)
-                self._isFocusing = true
+                self.isFocusing = true
             end)
             
         end, 'Pressed')
@@ -190,7 +207,7 @@ function CWebUI.new(core)
             return false
         end
         self._webUI:SetInputMode(EWebUIInputMode.UI)
-        self._isFocusing = true
+        self.isFocusing = true
     end
 
     ---Out focus from webUI
@@ -200,7 +217,7 @@ function CWebUI.new(core)
             return false
         end
         self._webUI:SetInputMode(EWebUIInputMode.None)
-        self._isFocusing = false
+        self.isFocusing = false
     end
 
     function self:getActorsWithTag(tag)

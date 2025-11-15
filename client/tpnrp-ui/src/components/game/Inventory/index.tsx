@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { useI18n } from "@/i18n"
 import { InventoryItem } from "./Item"
@@ -7,10 +7,14 @@ import { SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEffect } from "react"
+import { useWebUIMessage } from "@/hooks/use-hevent"
 
 export const Inventory = () => {
     const { isOpenInventory, setOpenInventory } = useInventoryStore()
     const { t } = useI18n()
+
+    useWebUIMessage<[]>('openInventory', () => setOpenInventory(true))
+    useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
     
     useEffect(() => {
         // Only disable when menu is open
@@ -26,9 +30,15 @@ export const Inventory = () => {
     }, [open])
 
     return (
-        <Dialog open={isOpenInventory} onOpenChange={setOpenInventory}>
+        <Dialog open={isOpenInventory} onOpenChange={(open) => {
+            setOpenInventory(open)
+            if (!open) {
+                window.hEvent("onCloseInventory")
+            }
+        }}>
             <DialogContent
                 className="w-11/12 sm:max-w-11/12 h-4/5! sm:max-h-4/5 select-none"
+                isHaveBackdropFilter
                 title={t("inventory.title")}
                 onContextMenu={(e) => e.preventDefault()}
             >

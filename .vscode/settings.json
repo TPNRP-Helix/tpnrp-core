@@ -27,6 +27,7 @@
         "StaticMesh",
         "Vector",
         "CollisionType",
-        "Interactable"
+        "Interactable",
+        "Color"
     ]
 }

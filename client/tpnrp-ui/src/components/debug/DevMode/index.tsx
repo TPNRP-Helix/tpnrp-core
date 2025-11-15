@@ -16,8 +16,7 @@ import { useInventoryStore } from "@/stores/useInventoryStore"
 const IS_SHOW_BG = false
 
 export const DevMode = () => {
-    const [enableDevMode, setEnableDevMode] = useState(true)
-    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen, appendConsoleMessage } = useDevModeStore()
+    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen, appendConsoleMessage, isEnableDevMode, setEnableDevMode } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
@@ -52,7 +51,7 @@ export const DevMode = () => {
     
     // Don't render the dev mode tools if not in browser
     // Or if the permission is not admin
-    if (!enableDevMode || permission !== 'admin') return null
+    if (!isEnableDevMode || permission !== 'admin') return null
 
     return (
         <>
@@ -82,6 +81,12 @@ export const DevMode = () => {
                         setDevModeOpen(false)
                     }}>Toggle Settings</Button>
                     <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
+                    <div>
+                        {isEnableDevMode ? 'DevMode is enabled' : 'DevMode is disabled'}
+                    </div>
+                    <div>
+                        Permission: {permission}
+                    </div>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="character">Character</TabsTrigger>

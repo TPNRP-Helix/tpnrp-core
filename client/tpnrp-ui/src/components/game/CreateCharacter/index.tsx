@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter } from "@/compon
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { useDevModeStore } from "@/stores/useDevModeStore"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useCallback, useState } from "react"
 import {
     Item,
@@ -79,7 +79,8 @@ export const CreateCharacter = () => {
     const [error, setError] = useState<{ type: string, message: string } | null>(null)
     const [playerCharacters, setPlayerCharacters] = useState<TCharacter[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const { toggleHud } = useGameStore()
+    const { toggleHud, setIsInGame } = useGameStore()
+    
     useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
         // TPN Log
         appendConsoleMessage({ message: `Max char: ${maxCharacters} - characters ${JSON.stringify(characters)}`, index: 0 })
@@ -105,7 +106,7 @@ export const CreateCharacter = () => {
         console.log('onCreateCharacterSuccess', playerData)
         appendConsoleMessage({ message: `Character created successfully: ${JSON.stringify(playerData)}`, index: 0 })
         // Set preview character info
-        setPlayerCharacters([...playerCharacters, {
+        setPlayerCharacters(prev => [...prev, {
             name: playerData?.name ?? '',
             citizenId: playerData?.citizenId ?? 'ERR',
             level: playerData?.level ?? 1,
@@ -119,11 +120,15 @@ export const CreateCharacter = () => {
     })
 
     useWebUIMessage<[TCreateCharacterResponse]>('joinGameSuccess', ([playerData]) => {
-        console.log('joinGameSuccess', playerData)
         appendConsoleMessage({ message: `Character joined successfully: ${JSON.stringify(playerData)}`, index: 0 })
+        // Hide Select Character
         setShowSelectCharacter(false)
+        // Hide Create Character Dialog
         setShowCreateCharacter(false)
+        // Enable main HUD
         toggleHud()
+        // Enable in-game Guide 
+        setIsInGame(true)
     })
 
     const onClickCreateCharacter = useCallback(() => {
@@ -176,10 +181,8 @@ export const CreateCharacter = () => {
                     isShowOverlay={false}
                     side="left"
                     isShowCloseButton={false}
+                    title={t("selectCharacter.title")}
                 >
-                    <SheetHeader>
-                        <SheetTitle>{t("selectCharacter.title")}</SheetTitle>
-                    </SheetHeader>
                     <div className="grid gap-4 p-4">
                         {Array.from({ length: maxCharacters }).map((_, index) => {
                             const character = playerCharacters[index] ?? null

@@ -106,6 +106,7 @@ DAO.player.getCharacters = function(license)
             row.money               = JSON.parse(rowData.money).cash or 0
             row.job                 = JSON.parse(rowData.job)
             row.citizenId           = rowData.citizen_id
+            row.name                = row.characterInfo.firstName .. ' ' .. row.characterInfo.lastName
             local levelData = DAO.level.get(rowData.citizen_id)
             if levelData then
                 row.level = levelData.level

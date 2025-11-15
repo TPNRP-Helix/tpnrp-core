@@ -18,6 +18,9 @@ function TPNRPClient.new()
     self.shared = SHARED    -- Bind shared for other resources to use it via exports
     self.webUI = nil
 
+    -- Permission
+    self.permission = 'player'
+
     ---Contructor function
     local function _contructor()
         self.webUI = CWebUI.new(self)
@@ -33,9 +36,10 @@ function TPNRPClient.new()
     ---Bind Helix events
     function self:bindHelixEvents()
         -- Helix event
-        -- RegisterClientEvent('HEvent:PlayerLoggedIn', function()
-        --     print('[TPN][CLIENT] HEvent:PlayerLoggedIn')
-        -- end)
+        RegisterClientEvent('HEvent:PlayerLoggedIn', function()
+            print('[TPN][CLIENT] HEvent:PlayerLoggedIn')
+            HPlayer:StartCameraFade(0, 1, 0.1, Color(0, 0, 0, 1), true, true)
+        end)
         
         -- RegisterClientEvent('HEvent:PlayerLoaded', function()
         --     print('[TPN][CLIENT] HEvent:PlayerLoaded')
@@ -120,6 +124,12 @@ function TPNRPClient.new()
     function self:showNotification(notification)
         -- Show notification in UI
         self.webUI:sendEvent('showNotification', notification)
+    end
+    
+    ---Check if player is in game
+    ---@return boolean
+    function self:isInGame()
+        return self.player ~= nil
     end
 
     _contructor()

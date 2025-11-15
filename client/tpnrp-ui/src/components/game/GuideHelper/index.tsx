@@ -5,6 +5,7 @@ import { useI18n } from "@/i18n";
 import { verticalStackAnim } from "@/lib/animation";
 import { useDevModeStore } from "@/stores/useDevModeStore";
 import { useGameSettingStore } from "@/stores/useGameSettingStore";
+import { useGameStore } from "@/stores/useGameStore";
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
@@ -22,6 +23,7 @@ export const GuideHelper = () => {
     const [open, setOpen] = useState(false)
     const { permission, toggleDevMode, toggleConsole } = useDevModeStore()
     const { toastConfig, setToastConfig, uiConfig } = useGameSettingStore()
+    const { isInGame } = useGameStore()
     
     const helperItems: HelperItem[] = [
         { id: 'focus', label: "helper.toggleFocus", shortcut: "F2", onClick: () => {} },
@@ -71,7 +73,7 @@ export const GuideHelper = () => {
             </AnimatePresence>
 
             {/* Main Dock Button */}
-            {uiConfig.isShowGuideHelper && (
+            {uiConfig.isShowGuideHelper && isInGame && (
                 <Button
                     variant="secondary"
                     size="sm"

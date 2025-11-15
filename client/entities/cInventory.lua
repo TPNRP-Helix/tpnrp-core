@@ -26,8 +26,16 @@ function CInventory.new(player)
         -- Bind key
         -- [Player] [TAB] Inventory
         Input.BindKey('TAB', function()
+            if not self.core:isInGame() then
+                return
+            end
             self:openInventory()
         end, 'Pressed')
+
+        -- On close inventory
+        self.core.webUI:registerEventHandler('onCloseInventory', function()
+            self.core.webUI:outFocus()
+        end)
     end
 
 
@@ -58,7 +66,13 @@ function CInventory.new(player)
     ---Open inventory
     function self:openInventory()
         -- TODO: open inventory
-        -- self.core.webUI:sendEvent('OPEN_INVENTORY')
+        self.core.webUI:focus()
+        self.core.webUI:sendEvent('openInventory')
+    end
+
+    function self:doCloseInventory()
+        self.core.webUI:outFocus()
+        self.core.webUI:sendEvent('closeInventory')
     end
 
     _contructor()

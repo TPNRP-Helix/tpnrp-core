@@ -3,8 +3,7 @@ DAO.level = {}
 ---@param citizen_id string
 ---@return {level:number, exp:number, skills:any} level Level info
 DAO.level.get = function(citizen_id)
-    local result = DAO.DB.Select('SELECT level, exp, skills FROM levels where citizen_id = ?', { citizen_id })
-    local levelData = result[1] and result[1].Columns:ToTable()
+    local levelData = DAO.Action('Select', 'SELECT level, exp, skills FROM levels where citizen_id = ?', { citizen_id })
     if levelData then
         -- Format level data
         return {
