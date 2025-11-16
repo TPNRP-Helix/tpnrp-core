@@ -6,11 +6,12 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useEffect } from "react"
+import { useEffect, useMemo } from "react"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { AmountDialog } from "./AmountDialog"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { PackageOpen } from "lucide-react"
+import { EEquipmentSlot } from "@/constants/enum"
 
 export const Inventory = () => {
     const {
@@ -20,13 +21,19 @@ export const Inventory = () => {
         slotCount,
         isHaveOtherItems,
         otherItemsType,
-        otherItemsSlotCount
+        otherItemsSlotCount,
+        getEquipmentItem
     } = useInventoryStore()
     const { t } = useI18n()
     
     // Filter items with slot indices from 1 to 6
     const hotbarItems = inventoryItems.filter(item => item.slot >= 1 && item.slot <= 6).sort((a, b) => a.slot - b.slot)
     const backpackItems = inventoryItems.filter(item => item.slot >= 7).sort((a, b) => a.slot - b.slot)
+
+    const backpackItem = useMemo(() => {
+        return getEquipmentItem(EEquipmentSlot.Bag)
+    }, [])
+    console.log('Equipment backpack item', backpackItem)
 
     useWebUIMessage<[]>('openInventory', () => setOpenInventory(true))
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
@@ -54,17 +61,18 @@ export const Inventory = () => {
             }}>
                 <DialogContent
                     className="w-11/12 sm:max-w-11/12 h-4/5! sm:max-h-4/5 select-none"
+                    contentClassName="h-4/5!"
                     isHaveBackdropFilter
                     title={t("inventory.title")}
                     onContextMenu={(e) => e.preventDefault()}
                 >
-                    <div className="grid grid-cols-8 gap-6 p-4 h-4/5! sm:max-h-4/5">
+                    <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-0 overflow-hidden">
                         <div className="col-span-2">
                             Character info
                         </div>
-                        <div className="col-span-3">
-                            <div className="flex flex-col">
-                                <div className="relative">
+                        <div className="col-span-3 h-full overflow-hidden">
+                            <div className="flex flex-col h-full">
+                                <div className="relative shrink-0">
                                     <SheetTitle>{t("inventory.title")}</SheetTitle>
                                     <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">Weight: 100/100</div>
                                     <Separator className="relative mb-4 -top-[1px]" />
@@ -77,11 +85,11 @@ export const Inventory = () => {
                                         })}
                                     </div>
                                 </div>
-                                <div className="relative mt-4">
+                                <div className="relative mt-4 h-[calc(100%-154px)]">
                                     <SheetTitle>{t("inventory.backpack.title")}</SheetTitle>
                                     <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount}</div>
                                     <Separator className="relative mb-4 -top-[1px]" />
-                                    <ScrollArea className="h-122">
+                                    <ScrollArea className="h-full overflow-hidden">
                                         {slotCount > 0 ? (
                                             <div className="grid grid-cols-6 gap-4 grid-wrap">
                                                 {Array.from({ length: slotCount }, (_, i) => {

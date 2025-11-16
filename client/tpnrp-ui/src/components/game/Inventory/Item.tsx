@@ -67,7 +67,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
             <ContextMenuTrigger>
                 <HoverCard>
                     <HoverCardTrigger>
-                        <div className="w-full h-27 bg-accent rounded">
+                        <div className="w-full h-[116px] bg-accent rounded">
                             <Item className="relative gap-2 p-2">
                                 {slot !== null && slot <= 6 ? (
                                     <Badge className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
@@ -80,10 +80,10 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                             {item.amount}
                                         </div>
                                         <ItemMedia className="w-full object-cover p-1">
-                                            <img src={itemImage ?? ''} alt="Item" className="w-full h-full object-cover select-none pointer-events-none" />
+                                            <img src={itemImage ?? ''} alt="Item" className="w-11/12 h-11/12 object-cover select-none pointer-events-none" />
                                         </ItemMedia>
                                         <ItemContent className="items-center justify-center">
-                                            <ItemTitle>{itemLabel}</ItemTitle>
+                                            <ItemTitle className="truncate text-xs">{itemLabel}</ItemTitle>
                                         </ItemContent>
                                     </>
                                 )}

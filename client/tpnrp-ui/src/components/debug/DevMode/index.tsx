@@ -31,7 +31,7 @@ export const DevMode = () => {
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
-    const { setOpenInventory, setInventoryItems, inventoryItems } = useInventoryStore()
+    const { setOpenInventory, setInventoryItems, inventoryItems, setSlotCount } = useInventoryStore()
 
     const [animationName, setAnimationName] = useState('')
 
@@ -54,6 +54,7 @@ export const DevMode = () => {
             setPermission('admin')
             // Set some fake inventory item for debugging
             setInventoryItems([...inventoryItems, ...FAKE_INVENTORY_ITEMS])
+            setSlotCount(36)
         }
     }, [])
 
