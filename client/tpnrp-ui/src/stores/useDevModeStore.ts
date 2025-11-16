@@ -44,7 +44,7 @@ export const useDevModeStore = create<DevModeState>((set) => ({
     })),
   appendConsoleMessage: (message) =>
     set((state) => ({
-      consoleMessages: [...state.consoleMessages, message],
+      consoleMessages: [...state.consoleMessages, { message: `> ${new Date().toISOString()} - ${message.message}`, index: message.index }],
     })),
   resetConsole: () => set({ consoleMessages: [] }),
   setPermission: (value) => set({ permission: value }),

@@ -70,10 +70,6 @@ function CWebUI.new(core)
                 print('[INFO] CWebUI.NEW - not in game')
                 return
             end
-            if self.core.permission ~= 'admin' then
-                print('[INFO] CWebUI.NEW - permission is not admin')
-                return
-            end
             self:sendEvent('toggleGuideHelper')
         end, 'Pressed')
 

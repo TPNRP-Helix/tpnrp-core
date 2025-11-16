@@ -51,8 +51,7 @@ export const DevMode = () => {
         setOtherItemsType,
         setOtherItems,
         otherItems,
-        setOtherItemsSlotCount,
-        otherItemsSlotCount
+        setOtherItemsSlotCount
     } = useInventoryStore()
 
     const [animationName, setAnimationName] = useState('')
@@ -70,13 +69,15 @@ export const DevMode = () => {
     })
 
     useEffect(() => {
-        const isInBrowser = window.location.href.includes("http://localhost:")
+        const isInBrowser = window.location.port === '5173'
+        appendConsoleMessage({ message: `isInBrowser: ${isInBrowser.toString()}`, index: 0 })
+        appendConsoleMessage({ message: `window.location.href: ${window.location.href}`, index: 0 })
         if (isInBrowser) {
             setEnableDevMode(true)
             setPermission('admin')
             // Set some fake inventory item for debugging
             setInventoryItems([...inventoryItems, ...FAKE_INVENTORY_ITEMS])
-            setSlotCount(36)
+            setSlotCount(6)
         }
     }, [])
 
@@ -148,14 +149,21 @@ export const DevMode = () => {
                         <TabsContent value="inventory">
                             inventory
                             <Button onClick={() => {
-                                setSlotCount(42)
                                 setOpenInventory(true)
                                 setDevModeOpen(false)
                             }}>Open Inventory</Button>
 
                             <ButtonGroup>
-                                <Button onClick={onClickSetGroundItems}>Set Ground Items</Button>
-                                <Button>Button 2</Button>
+                                <Button onClick={() => {
+                                    onClickSetGroundItems()
+                                    setOpenInventory(true)
+                                    setDevModeOpen(false)
+                                }}>Set Ground Items</Button>
+                                <Button onClick={() => {
+                                    setSlotCount(42)
+                                    setOpenInventory(true)
+                                    setDevModeOpen(false)
+                                }}>Open (42 slots)</Button>
                             </ButtonGroup>
                         </TabsContent>
                         <TabsContent value="menu" className="grid gap-2">

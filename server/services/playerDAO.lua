@@ -91,9 +91,11 @@ end
 ---@return table<number, PlayerData> characters
 DAO.player.getCharacters = function(license)
     local result = DAO.Action('Select', 'SELECT * FROM players WHERE license = ?', { license })
+    print('[LOG] DAO.player.getCharacters 0: result', JSON.stringify(result))
     if not result or #result == 0 then
         return {}
     end
+    print('[LOG] DAO.player.getCharacters 1: result', JSON.stringify(result))
     -- Format characters
     ---@type table<number, PlayerData>
     local characters = {}
@@ -107,6 +109,7 @@ DAO.player.getCharacters = function(license)
             row.job                 = JSON.parse(rowData.job)
             row.citizenId           = rowData.citizen_id
             row.name                = row.characterInfo.firstName .. ' ' .. row.characterInfo.lastName
+            print('[LOG] DAO.player.getCharacters 2: citizenId', rowData.citizen_id)
             local levelData = DAO.level.get(rowData.citizen_id)
             if levelData then
                 row.level = levelData.level

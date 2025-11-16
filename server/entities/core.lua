@@ -164,7 +164,7 @@ function TPNRPServer.new()
     function self:onPlayerPossessed(source)
         local playerState = source:GetLyraPlayerState()
         local license = playerState:GetHelixUserId()
-        local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
+        local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 5 -- Maximum number of characters per player
         local result = DAO.player.getCharacters(license)
         
         if not result then

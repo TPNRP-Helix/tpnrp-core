@@ -10,7 +10,7 @@ SHARED.CONFIG = {
         HUNGER_RATE = 5, -- Hunger rate
         THIRST_RATE = 4, -- Thirst rate
     },
-    MAX_CHARACTERS = 3, -- Maximum number of characters per player
+    MAX_CHARACTERS = 5, -- Maximum number of characters per player
     PERMISSIONS = {
         [1] = {
             role = 'admin',

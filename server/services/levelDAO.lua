@@ -6,10 +6,21 @@ DAO.level.get = function(citizen_id)
     local levelData = DAO.Action('Select', 'SELECT level, exp, skills FROM levels where citizen_id = ?', { citizen_id })
     if levelData then
         -- Format level data
+		print('[LOG] DAO.level.get 0: levelData', JSON.stringify(levelData))
+		local level = SHARED.DEFAULT.LEVEL
+		if levelData.level ~= nil then
+			level = tonumber(levelData.level) or SHARED.DEFAULT.LEVEL
+		end
+		local exp = levelData.exp or 0
+		local skills = SHARED.DEFAULT.SKILLS
+		if levelData.skills ~= nil then
+			skills = JSON.parse(levelData.skills)
+		end
+		
         return {
-            level = tonumber(levelData.level),
-            exp = tonumber(levelData.exp),
-            skills = JSON.parse(levelData.skills),
+            level = level,
+            exp = exp,
+            skills = skills,
         }
     end
 

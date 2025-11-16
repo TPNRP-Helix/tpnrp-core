@@ -19,9 +19,6 @@ export const Inventory = () => {
         setOpenInventory,
         inventoryItems,
         slotCount,
-        isHaveOtherItems,
-        otherItemsType,
-        otherItemsSlotCount,
         getEquipmentItem
     } = useInventoryStore()
     const { t } = useI18n()
@@ -60,13 +57,13 @@ export const Inventory = () => {
                 }
             }}>
                 <DialogContent
-                    className="w-11/12 sm:max-w-11/12 h-4/5! max-h-4/5! select-none"
-                    contentClassName="h-4/6!"
+                    className="w-[90%] h-[80vh] max-h-[80vh] select-none"
+                    contentClassName=""
                     isHaveBackdropFilter
                     title={t("inventory.title")}
                     onContextMenu={(e) => e.preventDefault()}
                 >
-                    <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-0 overflow-hidden h-full">
+                    <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-full overflow-hidden h-full">
                         <div className="col-span-2">
                             Character info
                         </div>

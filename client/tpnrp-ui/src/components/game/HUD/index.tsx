@@ -171,7 +171,7 @@ export const HUD = () => {
       )}
       <Dialog open={isShowLoading} onOpenChange={setShowLoading}>
         <DialogContent
-          className="outline-none!"
+          className="outline-none! w-[400px]"
           showCloseButton={false}
           title="Loading"
           onInteractOutside={(e) => e.preventDefault()}  

@@ -79,7 +79,7 @@ export const CreateCharacter = () => {
     const [error, setError] = useState<{ type: string, message: string } | null>(null)
     const [playerCharacters, setPlayerCharacters] = useState<TCharacter[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const { toggleHud, setIsInGame } = useGameStore()
+    const { toggleHud, setIsInGame, setShowLoading } = useGameStore()
     
     useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
         // TPN Log
@@ -100,6 +100,8 @@ export const CreateCharacter = () => {
         setPlayerCharacters(formattedCharacters)
         // Show Select Character Sheet
         setShowSelectCharacter(true)
+        setShowLoading(false)
+        setIsInGame(true)
     })
 
     useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
