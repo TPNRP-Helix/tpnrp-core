@@ -38,16 +38,20 @@ function TPNRPClient.new()
         -- Helix event
         RegisterClientEvent('HEvent:PlayerLoggedIn', function()
             print('[TPN][CLIENT] HEvent:PlayerLoggedIn')
-            HPlayer:StartCameraFade(0, 1, 0.1, Color(0, 0, 0, 1), true, true)
+            
         end)
         
-        -- RegisterClientEvent('HEvent:PlayerLoaded', function()
-        --     print('[TPN][CLIENT] HEvent:PlayerLoaded')
-        -- end)    
-        -- -- On Player unpossessed
-        -- RegisterClientEvent('HEvent:PlayerUnPossessed', function()
-        --     print('[CLIENT] HEvent:PlayerUnPossessed')
-        -- end)
+        RegisterClientEvent('HEvent:PlayerLoaded', function()
+            print('[TPN][CLIENT] HEvent:PlayerLoaded')
+            
+        end)    
+        -- On Player unpossessed
+        RegisterClientEvent('HEvent:PlayerPossessed', function()
+            TriggerCallback('getPermissions', function(result)
+                self.webUI:sendEvent('setPermission', result)
+                self.permission = result
+            end, { citizenId = 'empty' })
+        end)
     end
 
     ---Bind TPN events

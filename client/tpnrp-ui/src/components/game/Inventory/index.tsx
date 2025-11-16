@@ -37,16 +37,27 @@ export const Inventory = () => {
     
     useEffect(() => {
         // Only disable when menu is open
-        if (!open) return
+        if (!isOpenInventory) return
     
         const prevent = (e: MouseEvent) => e.preventDefault()
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && isOpenInventory) {
+                setOpenInventory(false)
+                window.hEvent("onCloseInventory")
+            } else if (e.key === "Tab" && isOpenInventory) {
+                setOpenInventory(false)
+                window.hEvent("onCloseInventory")
+            }
+        }
     
         document.addEventListener("contextmenu", prevent)
+        document.addEventListener("keydown", onKeyDown)
     
         return () => {
           document.removeEventListener("contextmenu", prevent)
+          document.removeEventListener("keydown", onKeyDown)
         }
-    }, [open])
+    }, [isOpenInventory])
 
     return (
         <>

@@ -49,13 +49,6 @@ function CWebUI.new(core)
         -- | Bind callback                                 |
         ---+-----------------------------------------------/
         print('[INFO] CWebUI.NEW - binding callback')
-        -- Get player's permission for WebUI
-        TriggerCallback('getPermissions', function(result)
-            print('[INFO] CWebUI.NEW - permission callback received')
-            self:sendEvent('setPermission', result)
-            self.core.permission = result
-            print('[INFO] CWebUI.NEW - permission set to ' .. result)
-        end)
     end
 
 
@@ -99,7 +92,10 @@ function CWebUI.new(core)
         -- [ADMIN] [F7] Dev Mode menu
         Input.BindKey('F7', function()
             TriggerCallback('getPermissions', function(result)
+                print('[INFO] CWebUI.NEW - getPermissions callback received')
+                print('[INFO] CWebUI.NEW - result: ', JSON.stringify(result))
                 if result ~= 'admin' then
+                    print('[INFO] CWebUI.NEW - result is not admin')
                     return
                 end
                 -- Player is admin

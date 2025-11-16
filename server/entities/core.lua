@@ -211,9 +211,12 @@ function TPNRPServer.new()
         -- Get player's role
         ---@param source PlayerController player controller
         ---@return string role
-        RegisterCallback('getPermissions', function(source)
+        RegisterCallback('getPermissions', function(source, citizenId)
+            print('[TPN][SERVER] getPermissions - citizenId: ', citizenId)
             -- Get player's role
-            return SHARED.getPermission(source)
+            local permission = SHARED.getPermission(source)
+            print('[TPN][SERVER] getPermissions - permission: ', permission)
+            return permission
         end)
 
         -- Get player's language

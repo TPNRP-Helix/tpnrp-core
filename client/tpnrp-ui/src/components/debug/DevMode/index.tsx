@@ -65,6 +65,7 @@ export const DevMode = () => {
     })
 
     useWebUIMessage<[string]>('setPermission', ([permission]) => {
+        appendConsoleMessage({ message: `setPermission: ${permission}`, index: 0 })
         setPermission(permission)
     })
 
@@ -94,7 +95,7 @@ export const DevMode = () => {
     
     // Don't render the dev mode tools if not in browser
     // Or if the permission is not admin
-    if (!isEnableDevMode || permission !== 'admin') return null
+    if (permission !== 'admin') return null
 
     return (
         <>
