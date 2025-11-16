@@ -14,6 +14,7 @@ import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import type { TInventoryItem } from "@/types/inventory"
+import { ButtonGroup } from "@/components/ui/button-group"
 const IS_SHOW_BG = false
 
 const FAKE_INVENTORY_ITEMS: TInventoryItem[] = [
@@ -27,11 +28,32 @@ const FAKE_INVENTORY_ITEMS: TInventoryItem[] = [
 ]
 
 export const DevMode = () => {
-    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen, appendConsoleMessage, isEnableDevMode, setEnableDevMode } = useDevModeStore()
+    const {
+        isDevModeOpen,
+        setDevModeOpen,
+        isConsoleOpen,
+        setConsoleOpen,
+        setPermission,
+        permission,
+        setUIPreviewOpen,
+        appendConsoleMessage,
+        isEnableDevMode,
+        setEnableDevMode
+    } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
     const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
-    const { setOpenInventory, setInventoryItems, inventoryItems, setSlotCount } = useInventoryStore()
+    const {
+        setOpenInventory,
+        setInventoryItems,
+        inventoryItems,
+        setSlotCount,
+        setOtherItemsType,
+        setOtherItems,
+        otherItems,
+        setOtherItemsSlotCount,
+        otherItemsSlotCount
+    } = useInventoryStore()
 
     const [animationName, setAnimationName] = useState('')
 
@@ -62,6 +84,12 @@ export const DevMode = () => {
         window.hEvent("playAnimation", { animationName })
         appendConsoleMessage({ message: `Playing animation: ${animationName}`, index: 0 })
     }, [animationName])
+
+    const onClickSetGroundItems = useCallback(() => {
+        setOtherItemsType('ground')
+        setOtherItems([...otherItems, ...FAKE_INVENTORY_ITEMS])
+        setOtherItemsSlotCount(42)
+    }, [otherItems])
     
     // Don't render the dev mode tools if not in browser
     // Or if the permission is not admin
@@ -120,9 +148,15 @@ export const DevMode = () => {
                         <TabsContent value="inventory">
                             inventory
                             <Button onClick={() => {
+                                setSlotCount(42)
                                 setOpenInventory(true)
                                 setDevModeOpen(false)
                             }}>Open Inventory</Button>
+
+                            <ButtonGroup>
+                                <Button onClick={onClickSetGroundItems}>Set Ground Items</Button>
+                                <Button>Button 2</Button>
+                            </ButtonGroup>
                         </TabsContent>
                         <TabsContent value="menu" className="grid gap-2">
                             <Button onClick={() => {

@@ -116,7 +116,19 @@
   "inventory.rare.uncommon": "Ít phổ biến",
   "inventory.rare.rare": "Hiếm",
   "inventory.rare.epic": "Cực hiếm",
-  "inventory.rare.legendary": "Huyền thoại"
+  "inventory.rare.legendary": "Huyền thoại",
+
+  "inventory.crafting.searchPlaceholder": "Tìm kiếm công thức chế tạo",
+  "inventory.crafting.search": "Tìm kiếm",
+  "crafting.category.all": "Tất cả",
+  "crafting.category.weapon": "Vũ khí",
+  "crafting.category.ammo": "Đạn",
+  "crafting.category.tool": "Công cụ",
+  "crafting.category.food": "Thức ăn",
+  "crafting.category.material": "Vật liệu",
+  "crafting.category.medicine": "Dược phẩm",
+  "crafting.category.building": "Nhà cửa",
+  "crafting.category.other": "Khác"
 }
 
 

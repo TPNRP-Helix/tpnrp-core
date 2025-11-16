@@ -4,9 +4,8 @@ import { create } from "zustand"
 
 type InventoryState = {
   isOpenInventory: boolean
-  isHaveOtherItems: boolean
   otherItems: TInventoryItem[]
-  otherItemsType: 'ground' | 'player' | 'stack'
+  otherItemsType: 'ground' | 'player' | 'stack' | ''
   otherItemsSlotCount: number
   isOpenAmountDialog: boolean
   amountDialogType: 'give' | 'drop'
@@ -14,11 +13,12 @@ type InventoryState = {
   inventoryItems: TInventoryItem[]
   slotCount: number
   equipmentItems: TInventoryItem[]
+  selectOtherTab: 'ground' | 'crafting' | 'missions' | ''
+  setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => void
   setEquipmentItems: (items: TInventoryItem[]) => void
   setSlotCount: (value: number) => void
   setInventoryItems: (items: TInventoryItem[]) => void
   setOpenInventory: (value: boolean) => void
-  setIsHaveOtherItems: (value: boolean) => void
   setIsOpenAmountDialog: (value: boolean) => void
   setAmountDialogType: (value: 'give' | 'drop') => void
   resetAmountDialog: () => void
@@ -27,11 +27,11 @@ type InventoryState = {
   setOtherItemsType: (value: 'ground' | 'player' | 'stack') => void
   setOtherItemsSlotCount: (value: number) => void
   getEquipmentItem: (equipSlot: EEquipmentSlot) => TInventoryItem | undefined
+  isHaveOtherItems: () => boolean
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
   isOpenInventory: false,
-  isHaveOtherItems: false,
   isOpenAmountDialog: false,
   amountDialogType: 'drop',
   dialogItem: null,
@@ -41,10 +41,15 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   otherItemsType: 'ground',
   otherItemsSlotCount: 0,
   equipmentItems: [],
+  selectOtherTab: 'crafting',
+  setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => set({ selectOtherTab: value }),
   setEquipmentItems: (items: TInventoryItem[]) => set({ equipmentItems: items }),
   setSlotCount: (value: number) => set({ slotCount: value }),
-  setOpenInventory: (value: boolean) => set({ isOpenInventory: value }),
-  setIsHaveOtherItems: (value: boolean) => set({ isHaveOtherItems: value }),
+  setOpenInventory: (value: boolean) => {
+    let isHaveOtherItems = get().isHaveOtherItems()
+    console.log('isHaveOtherItems', isHaveOtherItems)
+    set({ isOpenInventory: value, selectOtherTab: isHaveOtherItems ? 'ground' : 'crafting' })
+  },
   setIsOpenAmountDialog: (value: boolean) => set({ isOpenAmountDialog: value }),
   setAmountDialogType: (value: 'give' | 'drop') => set({ amountDialogType: value }),
   resetAmountDialog: () => set({ isOpenAmountDialog: false, amountDialogType: 'drop' }),
@@ -54,5 +59,8 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   setOtherItemsType: (value: 'ground' | 'player' | 'stack') => set({ otherItemsType: value }),
   setOtherItemsSlotCount: (value: number) => set({ otherItemsSlotCount: value }),
   getEquipmentItem: (equipSlot: EEquipmentSlot) => get().equipmentItems.find((item: TInventoryItem) => item.slot === equipSlot),
+  isHaveOtherItems: () => {
+    return get().otherItems.length > 0 && get().otherItemsType !== '' && get().otherItemsSlotCount > 0
+  },
 }))
 

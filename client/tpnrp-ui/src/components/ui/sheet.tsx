@@ -144,7 +144,7 @@ function SheetTitle({
         {props.children}
       </span>
       <svg className="absolute -z-1 inset-0 w-full h-full" viewBox="0 0 162 29" fill="none" preserveAspectRatio="none">
-          <path d="M0 28.0332H162V14.6376C162 13.4903 161.507 12.3983 160.647 11.639L148.635 1.03454C147.904 0.389288 146.963 0.0331955 145.988 0.0331955H3C1.34314 0.0331955 0 1.37634 0 3.0332V28.0332Z" fill="var(--foreground)" fillOpacity="0.32"></path>
+          <path d="M0 28.0332H162V14.6376C162 13.4903 161.507 12.3983 160.647 11.639L148.635 1.03454C147.904 0.389288 146.963 0.0331955 145.988 0.0331955H3C1.34314 0.0331955 0 1.37634 0 3.0332V28.0332Z" fill="var(--foreground)" style={{ fillOpacity: "var(--sheet-title-fill-opacity, 0.32)" }}></path>
       </svg>
     </SheetPrimitive.Title>
   )

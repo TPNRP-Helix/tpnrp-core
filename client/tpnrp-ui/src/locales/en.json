@@ -115,7 +115,19 @@
   "inventory.rare.uncommon": "Uncommon",
   "inventory.rare.rare": "Rare",
   "inventory.rare.epic": "Epic",
-  "inventory.rare.legendary": "Legendary"
+  "inventory.rare.legendary": "Legendary",
+
+  "inventory.crafting.searchPlaceholder": "Search crafting recipe",
+  "inventory.crafting.search": "Search",
+  "crafting.category.all": "All",
+  "crafting.category.weapon": "Weapon",
+  "crafting.category.ammo": "Ammo",
+  "crafting.category.tool": "Tool",
+  "crafting.category.food": "Food",
+  "crafting.category.material": "Material",
+  "crafting.category.medicine": "Medicine",
+  "crafting.category.building": "Building",
+  "crafting.category.other": "Other"
 }
 
 

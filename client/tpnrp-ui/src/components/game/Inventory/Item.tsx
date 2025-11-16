@@ -12,7 +12,7 @@ import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star
 import { useInventoryStore } from "@/stores/useInventoryStore"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
-    const { item = null, slot = null } = props
+    const { item = null, slot = null, isShowHotbarNumber = true } = props
     const { t } = useI18n()
     const { setIsOpenAmountDialog, setAmountDialogType, setDialogItem } = useInventoryStore()
 
@@ -69,7 +69,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                     <HoverCardTrigger>
                         <div className="w-full h-[116px] bg-accent rounded">
                             <Item className="relative gap-2 p-2">
-                                {slot !== null && slot <= 6 ? (
+                                {slot !== null && slot <= 6 && isShowHotbarNumber ? (
                                     <Badge className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
                                         {slot}
                                     </Badge>
@@ -91,7 +91,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                         </div>
                     </HoverCardTrigger>
                     {!!item && (
-                        <HoverCardContent className="w-80 pointer-events-none select-none">
+                        <HoverCardContent className="w-80 pointer-events-none select-none rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
                             {/* Hover card more details */}
                             <div className="flex flex-col justify-between space-x-4">
                                 <div className="flex flex-row justify-between space-x-4">

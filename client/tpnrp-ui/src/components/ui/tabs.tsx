@@ -2,6 +2,7 @@ import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
+import { SheetTitle } from "./sheet"
 
 function Tabs({
   className,
@@ -48,6 +49,46 @@ function TabsTrigger({
   )
 }
 
+function TabsListHelix({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.List>) {
+  return (
+    <TabsPrimitive.List
+      data-slot="tabs-list"
+      className={cn(
+        "text-muted-foreground inline-flex w-fit items-center justify-center rounded",
+        className
+      )}
+      {...props}
+    />
+  )
+}
+
+function TabsTriggerHelix({
+  className,
+  ...props
+}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+  return (
+    <TabsPrimitive.Trigger
+      data-slot="tabs-trigger"
+      className={cn(
+        "relative data-[state=active]:bg-background text-blue-100 dark:data-[state=active]:bg-transparent inline-flex flex-1 items-center justify-center gap-1.5 rounded border-none border-transparent text-sm font-medium whitespace-nowrap transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:h-full! [&_svg]:w-full! [&_svg:not([class*='size-'])]:size-4",
+        "leading-none font-semibold text-primary uppercase p-0!",
+        "dark:data-[state=active]:text-black!",
+        "**:data-[slot='sheet-title']:text-muted-foreground",
+        "data-[state=active]:**:data-[slot='sheet-title']:text-black",
+        "[--sheet-title-fill-opacity:0.1]",
+        "data-[state=active]:[--sheet-title-fill-opacity:0.32]",
+        className
+      )}
+      {...props}
+    >
+      <SheetTitle>{props.children}</SheetTitle>
+    </TabsPrimitive.Trigger>
+  )
+}
+
 function TabsContent({
   className,
   ...props
@@ -61,4 +102,4 @@ function TabsContent({
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent, TabsListHelix, TabsTriggerHelix }

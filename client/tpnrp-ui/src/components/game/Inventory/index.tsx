@@ -5,13 +5,13 @@ import { InventoryItem } from "./Item"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useEffect, useMemo } from "react"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { AmountDialog } from "./AmountDialog"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { PackageOpen } from "lucide-react"
 import { EEquipmentSlot } from "@/constants/enum"
+import { OtherInventory } from "./OtherInventory"
 
 export const Inventory = () => {
     const {
@@ -60,13 +60,13 @@ export const Inventory = () => {
                 }
             }}>
                 <DialogContent
-                    className="w-11/12 sm:max-w-11/12 h-4/5! sm:max-h-4/5 select-none"
-                    contentClassName="h-4/5!"
+                    className="w-11/12 sm:max-w-11/12 h-4/5! max-h-4/5! select-none"
+                    contentClassName="h-4/6!"
                     isHaveBackdropFilter
                     title={t("inventory.title")}
                     onContextMenu={(e) => e.preventDefault()}
                 >
-                    <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-0 overflow-hidden">
+                    <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-0 overflow-hidden h-full">
                         <div className="col-span-2">
                             Character info
                         </div>
@@ -89,7 +89,7 @@ export const Inventory = () => {
                                     <SheetTitle>{t("inventory.backpack.title")}</SheetTitle>
                                     <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount}</div>
                                     <Separator className="relative mb-4 -top-[1px]" />
-                                    <ScrollArea className="h-full overflow-hidden">
+                                    <ScrollArea className="h-[calc(100%-70px)] overflow-hidden">
                                         {slotCount > 0 ? (
                                             <div className="grid grid-cols-6 gap-4 grid-wrap">
                                                 {Array.from({ length: slotCount }, (_, i) => {
@@ -115,35 +115,8 @@ export const Inventory = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="col-span-3">
-                            <Tabs defaultValue="crafting" className="w-full">
-                                <TabsList className="">
-                                    {isHaveOtherItems && (
-                                        <TabsTrigger value={otherItemsType}>{t(`inventory.other.${otherItemsType}`)}</TabsTrigger>
-                                    )}
-                                    <TabsTrigger value="crafting">Crafting</TabsTrigger>
-                                    <TabsTrigger value="missions">Missions</TabsTrigger>
-                                </TabsList>
-                                {/* <Separator className="relative mb-4 -top-[1px]" /> */}
-                                <TabsContent value="ground">
-                                    <ScrollArea className="h-167">
-                                        <div className="grid grid-cols-6 gap-4 grid-wrap">
-                                            {Array.from({ length: otherItemsSlotCount }, (_, i) => {
-                                                const slot = i + 7
-                                                const item = backpackItems.find(item => item.slot === slot)
-                                                return <InventoryItem key={slot} item={item} slot={slot} />
-                                            })}
-                                        </div>
-                                    </ScrollArea>
-                                </TabsContent>
-                                <TabsContent value="crafting">
-                                    
-                                </TabsContent>
-                                <TabsContent value="missions">
-                                    
-                                </TabsContent>
-                            </Tabs>
-                            
+                        <div className="col-span-3 h-full overflow-hidden">
+                            <OtherInventory />
                         </div>
                     </div>
                 </DialogContent>
