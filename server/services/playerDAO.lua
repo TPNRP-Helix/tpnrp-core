@@ -91,10 +91,10 @@ DAO.player.delete = function(citizenId)
     ]], { citizenId, citizenId, citizenId, citizenId, citizenId })
     if result then
         DAO.DB.Execute('COMMIT;')
-        print(('[LOG] Deleted player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
+        print(('[LOG] Deleted player (Citizen ID: %s)'):format(citizenId))
         return true
     end
-    print(('[ERROR] DAO.player.delete: Failed to delete player for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
+    print(('[ERROR] DAO.player.delete: Failed to delete player (Citizen ID: %s)'):format(citizenId))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end
