@@ -7,9 +7,10 @@ import { InventoryItem } from "./Item"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search } from "lucide-react"
+import { PackageOpen, Search } from "lucide-react"
 import { CRAFTING_CATEGORIES } from "@/constants/crafting"
 import { useState } from "react"
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 
 export const OtherInventory = () => {
     const { t } = useI18n()
@@ -64,7 +65,17 @@ export const OtherInventory = () => {
                 <ScrollArea className="flex-1 overflow-hidden mt-4">
                     <div className="grid grid-cols-6 gap-4 grid-wrap">
                         {/* Crafting items will go here */}
+                        
                     </div>
+                    <Empty className="h-full w-full bg-accent rounded">
+                        <EmptyHeader>
+                            <EmptyMedia variant="icon">
+                                <PackageOpen className="w-6 h-6 text-muted-foreground" />
+                            </EmptyMedia>
+                            <EmptyTitle>{t('crafting.empty')}</EmptyTitle>
+                            <EmptyDescription>{t('crafting.emptyDescription')}</EmptyDescription>
+                        </EmptyHeader>
+                    </Empty>
                 </ScrollArea>
             </TabsContent>
             <TabsContent value="missions" className="h-full overflow-hidden">

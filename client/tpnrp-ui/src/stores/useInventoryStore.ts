@@ -14,6 +14,8 @@ type InventoryState = {
   slotCount: number
   equipmentItems: TInventoryItem[]
   selectOtherTab: 'ground' | 'crafting' | 'missions' | ''
+  learnedCraftingRecipes: string[]
+  setLearnedCraftingRecipes: (recipes: string[]) => void
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => void
   setEquipmentItems: (items: TInventoryItem[]) => void
   setSlotCount: (value: number) => void
@@ -42,6 +44,8 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   otherItemsSlotCount: 0,
   equipmentItems: [],
   selectOtherTab: 'crafting',
+  learnedCraftingRecipes: [],
+  setLearnedCraftingRecipes: (recipes: string[]) => set({ learnedCraftingRecipes: recipes }),
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => set({ selectOtherTab: value }),
   setEquipmentItems: (items: TInventoryItem[]) => set({ equipmentItems: items }),
   setSlotCount: (value: number) => set({ slotCount: value }),

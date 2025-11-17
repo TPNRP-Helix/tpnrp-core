@@ -63,6 +63,7 @@
   "helper.toggleToastExpand": "Toggle toast expand",
   "helper.toggleDevMode": "Toggle dev mode",
   "helper.toggleConsole": "Toggle console",
+  "helper.toggleInventory": "Toggle inventory",
 
   "inventory.title": "Inventory",
   "inventory.backpack.title": "Backpack",
@@ -127,7 +128,9 @@
   "crafting.category.material": "Material",
   "crafting.category.medicine": "Medicine",
   "crafting.category.building": "Building",
-  "crafting.category.other": "Other"
+  "crafting.category.other": "Other",
+  "crafting.empty": "No crafting recipe found",
+  "crafting.emptyDescription": "Buy a recipe book from store or level up to unlock recipes."
 }
 
 

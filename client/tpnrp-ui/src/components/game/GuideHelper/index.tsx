@@ -6,6 +6,7 @@ import { verticalStackAnim } from "@/lib/animation";
 import { useDevModeStore } from "@/stores/useDevModeStore";
 import { useGameSettingStore } from "@/stores/useGameSettingStore";
 import { useGameStore } from "@/stores/useGameStore";
+import { useInventoryStore } from "@/stores/useInventoryStore";
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
@@ -24,10 +25,18 @@ export const GuideHelper = () => {
     const { permission, toggleDevMode, toggleConsole } = useDevModeStore()
     const { toastConfig, setToastConfig, uiConfig } = useGameSettingStore()
     const { isInGame } = useGameStore()
+    const { setOpenInventory } = useInventoryStore()
     
     const helperItems: HelperItem[] = [
         { id: 'focus', label: "helper.toggleFocus", shortcut: "F2", onClick: () => {} },
-        { id: 'toast', label: "helper.toggleToastExpand", shortcut: "F3", onClick: () => setToastConfig({ ...toastConfig, isExpand: !toastConfig.isExpand }) },
+        { id: 'toast', label: "helper.toggleToastExpand", shortcut: "F3", onClick: () => {
+            setToastConfig({ ...toastConfig, isExpand: !toastConfig.isExpand })
+            setOpen(false)
+        } },
+        { id: 'inventory', label: "helper.toggleInventory", shortcut: "TAB", onClick: () => {
+            setOpenInventory(true)
+            setOpen(false)
+        } },
     ]
     if (permission === 'admin') {
         helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => {

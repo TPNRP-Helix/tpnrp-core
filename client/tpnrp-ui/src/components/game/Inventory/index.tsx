@@ -108,15 +108,15 @@ export const Inventory = () => {
                                             </div>
                                         ) : (
                                             <>
-                                            <Empty className="h-full w-full bg-accent rounded">
-                                                <EmptyHeader>
-                                                    <EmptyMedia variant="icon">
-                                                        <PackageOpen className="w-6 h-6 text-muted-foreground" />
-                                                    </EmptyMedia>
-                                                    <EmptyTitle>{t('inventory.backpack.empty')}</EmptyTitle>
-                                                    <EmptyDescription>{t('inventory.backpack.emptyDescription')}</EmptyDescription>
-                                                </EmptyHeader>
-                                            </Empty>
+                                                <Empty className="h-full w-full bg-accent rounded">
+                                                    <EmptyHeader>
+                                                        <EmptyMedia variant="icon">
+                                                            <PackageOpen className="w-6 h-6 text-muted-foreground" />
+                                                        </EmptyMedia>
+                                                        <EmptyTitle>{t('inventory.backpack.empty')}</EmptyTitle>
+                                                        <EmptyDescription>{t('inventory.backpack.emptyDescription')}</EmptyDescription>
+                                                    </EmptyHeader>
+                                                </Empty>
                                             </>
                                         )}
                                     </ScrollArea>

@@ -19,3 +19,7 @@ export type TInventoryItemProps = {
     slot?: number
     isShowHotbarNumber?: boolean
 }
+
+export type TCraftingRecipe = {
+    
+}
