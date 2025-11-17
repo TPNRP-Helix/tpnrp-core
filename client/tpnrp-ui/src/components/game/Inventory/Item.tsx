@@ -126,7 +126,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                     </div>
                                     <div className='flex-1 px-2'>
                                         <div className='text-sm mb-2'>
-                                            {item?.label ?? item?.name}
+                                            {itemLabel}
                                         </div>
                                         <div className='text-xs text-gray-500'>
                                             {t('inventory.amount')}: {item?.amount ?? 1}
