@@ -12,6 +12,8 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { PackageOpen } from "lucide-react"
 import { EEquipmentSlot } from "@/constants/enum"
 import { OtherInventory } from "./OtherInventory"
+import { formatWeight } from "@/lib/inventory"
+import { CharacterInfo } from "./CharacterInfo"
 
 export const Inventory = () => {
     const {
@@ -19,7 +21,9 @@ export const Inventory = () => {
         setOpenInventory,
         inventoryItems,
         slotCount,
-        getEquipmentItem
+        getEquipmentItem,
+        getTotalWeight,
+        getTotalLimitWeight
     } = useInventoryStore()
     const { t } = useI18n()
     
@@ -75,17 +79,18 @@ export const Inventory = () => {
                     onContextMenu={(e) => e.preventDefault()}
                 >
                     <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-full overflow-hidden h-full">
-                        <div className="col-span-2">
-                            Character info
+                        <div className="col-span-2 h-full overflow-hidden">
+                            <CharacterInfo />
+                            <OtherInventory />
                         </div>
                         <div className="col-span-3 h-full overflow-hidden">
                             <div className="flex flex-col h-full">
                                 <div className="relative shrink-0">
                                     <SheetTitle>{t("inventory.title")}</SheetTitle>
-                                    <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">Weight: 100/100</div>
+                                    <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.weight')}: {formatWeight(getTotalWeight())}/{formatWeight(getTotalLimitWeight())}</div>
                                     <Separator className="relative mb-4 -top-[1px]" />
-                                    <div className="grid grid-cols-6 gap-4">
-                                        {Array.from({ length: 6 }, (_, i) => {
+                                    <div className="grid grid-cols-[repeat(5,96px)] gap-4 justify-center">
+                                        {Array.from({ length: 5 }, (_, i) => {
                                             const slot = i + 1
                                             const item = hotbarItems.find(item => item.slot === slot)
                                                 
@@ -97,9 +102,9 @@ export const Inventory = () => {
                                     <SheetTitle>{t("inventory.backpack.title")}</SheetTitle>
                                     <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount}</div>
                                     <Separator className="relative mb-4 -top-[1px]" />
-                                    <ScrollArea className="h-[calc(100%-70px)] overflow-hidden">
+                                    <ScrollArea className="h-[calc(100%-70px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed">
                                         {slotCount > 0 ? (
-                                            <div className="grid grid-cols-6 gap-4 grid-wrap">
+                                            <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: slotCount }, (_, i) => {
                                                     const slot = i + 7
                                                     const item = backpackItems.find(item => item.slot === slot)

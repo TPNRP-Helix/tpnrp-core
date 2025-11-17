@@ -4,11 +4,10 @@ export const formatWeight = (weight: number, unitText = {
     ton: 'ton'
 }, isShowUnit = true) => {
     if (weight < 1000) {  
-      return `${weight}${isShowUnit ? unitText.gram : ''}`;
+      return `${weight} ${isShowUnit ? unitText.gram : ''}`;
     } else if (weight < 1000000) {
-      return `${(weight / 1000).toFixed(1)}${isShowUnit ? unitText.kg : ''}`;
+      return `${(weight / 1000).toFixed(1)} ${isShowUnit ? unitText.kg : ''}`;
     } else {
-      return `${(weight / 1000000).toFixed(1)}${isShowUnit ? unitText.ton : ''}`;
+      return `${(weight / 1000000).toFixed(1)} ${isShowUnit ? unitText.ton : ''}`;
     }
 }
-  

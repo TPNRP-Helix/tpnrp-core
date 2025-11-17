@@ -17,6 +17,7 @@ export type TInventoryItem = {
 export type TInventoryItemProps = {
     item?: TInventoryItem
     slot?: number
+    group?: 'equipment' | 'inventory' | 'other'
     isShowHotbarNumber?: boolean
 }
 

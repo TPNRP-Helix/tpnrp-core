@@ -12,13 +12,16 @@ type InventoryState = {
   dialogItem: TInventoryItem | null
   inventoryItems: TInventoryItem[]
   slotCount: number
+  totalWeight: number // Total weight of inventory in grams
   equipmentItems: TInventoryItem[]
   selectOtherTab: 'ground' | 'crafting' | 'missions' | ''
   learnedCraftingRecipes: string[]
+  selectCharacterTab: 'equipment' | 'skills' | 'stats'
   setLearnedCraftingRecipes: (recipes: string[]) => void
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => void
   setEquipmentItems: (items: TInventoryItem[]) => void
   setSlotCount: (value: number) => void
+  setTotalWeight: (value: number) => void
   setInventoryItems: (items: TInventoryItem[]) => void
   setOpenInventory: (value: boolean) => void
   setIsOpenAmountDialog: (value: boolean) => void
@@ -30,6 +33,9 @@ type InventoryState = {
   setOtherItemsSlotCount: (value: number) => void
   getEquipmentItem: (equipSlot: EEquipmentSlot) => TInventoryItem | undefined
   isHaveOtherItems: () => boolean
+  getTotalLimitWeight: () => number
+  getTotalWeight: () => number
+  setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => void
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
@@ -38,17 +44,20 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   amountDialogType: 'drop',
   dialogItem: null,
   inventoryItems: [],
-  slotCount: 6,
+  slotCount: 0,
+  totalWeight: 15000, // 15kg
   otherItems: [],
   otherItemsType: 'ground',
   otherItemsSlotCount: 0,
   equipmentItems: [],
   selectOtherTab: 'crafting',
   learnedCraftingRecipes: [],
+  selectCharacterTab: 'equipment',
   setLearnedCraftingRecipes: (recipes: string[]) => set({ learnedCraftingRecipes: recipes }),
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => set({ selectOtherTab: value }),
   setEquipmentItems: (items: TInventoryItem[]) => set({ equipmentItems: items }),
   setSlotCount: (value: number) => set({ slotCount: value }),
+  setTotalWeight: (value: number) => set({ totalWeight: value }),
   setOpenInventory: (value: boolean) => {
     let isHaveOtherItems = get().isHaveOtherItems()
     console.log('isHaveOtherItems', isHaveOtherItems)
@@ -66,5 +75,17 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   isHaveOtherItems: () => {
     return get().otherItems.length > 0 && get().otherItemsType !== '' && get().otherItemsSlotCount > 0
   },
+  getTotalLimitWeight: () => {
+    const totalWeight = get().totalWeight
+    const bagItem = get().getEquipmentItem(EEquipmentSlot.Bag)
+    if (!bagItem) {
+      return totalWeight
+    }
+    return totalWeight + (bagItem.info?.maxWeight ?? 0)
+  },
+  getTotalWeight: () => {
+    return get().inventoryItems.reduce((acc, item) => acc + (item.weight * item.amount), 0)
+  },
+  setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => set({ selectCharacterTab: value }),
 }))
 

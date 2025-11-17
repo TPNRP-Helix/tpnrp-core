@@ -1,6 +1,6 @@
 import { ContextMenu, ContextMenuTrigger, ContextMenuItem, ContextMenuContent, ContextMenuSeparator, ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent } from "@/components/ui/context-menu"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { ItemContent, ItemMedia, ItemTitle } from "@/components/ui/item"
+import { ItemMedia, ItemTitle } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
 import type { TInventoryItemProps } from "@/types/inventory"
@@ -10,9 +10,10 @@ import { RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
 import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf } from "lucide-react"
 import { useInventoryStore } from "@/stores/useInventoryStore"
+import { Progress } from "@/components/ui/progress"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
-    const { item = null, slot = null, isShowHotbarNumber = true } = props
+    const { item = null, slot = null, isShowHotbarNumber = true, group = 'inventory' } = props
     const { t } = useI18n()
     const { setIsOpenAmountDialog, setAmountDialogType, setDialogItem } = useInventoryStore()
 
@@ -67,24 +68,40 @@ export const InventoryItem = (props: TInventoryItemProps) => {
             <ContextMenuTrigger>
                 <HoverCard>
                     <HoverCardTrigger>
-                        <div className="w-full h-[116px] bg-accent rounded">
-                            <Item className="relative gap-2 p-2">
-                                {slot !== null && slot <= 6 && isShowHotbarNumber ? (
+                        <div className="w-24 h-24 bg-accent rounded">
+                            <Item className="relative gap-1 p-0 w-full h-full border-none">
+                                {slot !== null && slot <= 5 && isShowHotbarNumber ? (
                                     <Badge className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
                                         {slot}
                                     </Badge>
                                 ) : null}
+                                {group === 'equipment' && (
+                                    <div className="absolute top-0 left-0 right-0 bottom-0 text-xs p-1">
+                                        <ItemMedia className="w-full object-cover p-4">
+                                            <img src={`/assets/images/equipments/${slot}.png`} alt="Item" className="w-10 h-10 object-cover select-none pointer-events-none" />
+                                        </ItemMedia>
+                                    </div>
+                                )}
                                 {item !== null && (
                                     <>
-                                        <div className="absolute top-0 right-0 text-xs p-1">
-                                            {item.amount}
-                                        </div>
-                                        <ItemMedia className="w-full object-cover p-1">
+                                        {item.amount > 1 && (
+                                            <div className="absolute top-0 right-0 text-shadow-2xs text-xs p-1">
+                                                x{item.amount}
+                                            </div>
+                                        )}
+                                        <ItemMedia className="w-full object-cover p-4">
                                             <img src={itemImage ?? ''} alt="Item" className="w-11/12 h-11/12 object-cover select-none pointer-events-none" />
                                         </ItemMedia>
-                                        <ItemContent className="items-center justify-center">
-                                            <ItemTitle className="truncate text-xs">{itemLabel}</ItemTitle>
-                                        </ItemContent>
+                                        {item.info?.durability && (
+                                            <div className="absolute bottom-0 left-0 w-full">
+                                                <Progress value={item?.info?.durability ?? 0} className="rounded h-1" />
+                                            </div>
+                                        )}
+                                        {group === 'equipment' && (
+                                            <ItemTitle>
+                                                a
+                                            </ItemTitle>
+                                        )}
                                     </>
                                 )}
                             </Item>

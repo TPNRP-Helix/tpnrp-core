@@ -64,6 +64,7 @@
   "helper.toggleDevMode": "Toggle dev mode",
   "helper.toggleConsole": "Toggle console",
   "helper.toggleInventory": "Toggle inventory",
+  "helper.toggleSettings": "Toggle settings",
 
   "inventory.title": "Inventory",
   "inventory.backpack.title": "Backpack",
@@ -84,6 +85,9 @@
   "inventory.weightPerUnit": "Weight per unit",
   "inventory.canCarry": "Can carry",
   "inventory.noDescription": "No description",
+
+  "inventory.other.crafting.title": "Crafting",
+  "inventory.other.missions.title": "Missions",
 
   "inventory.amountDialog.title": "You want to {type} how many {item}?",
   "inventory.amountDialog.description": "You can choose the quantity from 1 to {amount}",
@@ -117,6 +121,10 @@
   "inventory.rare.rare": "Rare",
   "inventory.rare.epic": "Epic",
   "inventory.rare.legendary": "Legendary",
+
+  "inventory.equipment.title": "Equipment",
+  "inventory.skills.title": "Skills",
+  "inventory.stats.title": "Stats",
 
   "inventory.crafting.searchPlaceholder": "Search crafting recipe",
   "inventory.crafting.search": "Search",

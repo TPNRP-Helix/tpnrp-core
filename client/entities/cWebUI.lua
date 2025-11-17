@@ -89,6 +89,13 @@ function CWebUI.new(core)
             self:sendEvent('toggleToastExpand')
         end, 'Pressed')
 
+        Input.BindKey('F9', function()
+            if not self.core:isInGame() then
+                return
+            end
+            self:sendEvent('toggleSettings')
+        end, 'Pressed')
+
         -- [ADMIN] [F7] Dev Mode menu
         Input.BindKey('F7', function()
             TriggerCallback('getPermissions', function(result)

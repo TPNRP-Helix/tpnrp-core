@@ -64,6 +64,7 @@
   "helper.toggleDevMode": "Bật/Tắt DevMode",
   "helper.toggleConsole": "Bật/Tắt Console",
   "helper.toggleInventory": "Bật/tắt túi đồ",
+  "helper.toggleSettings": "Bật/tắt cài đặt",
 
   "inventory.title": "Túi đồ",
   "inventory.backpack.title": "Ba lô",
@@ -85,6 +86,13 @@
   "inventory.weightPerUnit": "Trọng lượng mỗi đơn vị",
   "inventory.canCarry": "Có thể mang",
   "inventory.noDescription": "Không có mô tả",
+
+  "inventory.other.crafting.title": "Chế tạo",
+  "inventory.other.missions.title": "Nhiệm vụ",
+
+  "inventory.equipment.title": "Trang bị",
+  "inventory.skills.title": "Kỹ năng",
+  "inventory.stats.title": "Thống kê",
 
   "inventory.amountDialog.title": "Bạn muốn {type} bao nhiêu {item}?",
   "inventory.amountDialog.description": "Bạn có thể chọn số lượng từ 1 đến {amount}",

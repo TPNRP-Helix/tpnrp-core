@@ -23,7 +23,7 @@ export const GuideHelper = () => {
     const { t } = useI18n()
     const [open, setOpen] = useState(false)
     const { permission, toggleDevMode, toggleConsole } = useDevModeStore()
-    const { toastConfig, setToastConfig, uiConfig } = useGameSettingStore()
+    const { toastConfig, setToastConfig, uiConfig, setSettingsOpen } = useGameSettingStore()
     const { isInGame } = useGameStore()
     const { setOpenInventory } = useInventoryStore()
     
@@ -35,6 +35,10 @@ export const GuideHelper = () => {
         } },
         { id: 'inventory', label: "helper.toggleInventory", shortcut: "TAB", onClick: () => {
             setOpenInventory(true)
+            setOpen(false)
+        } },
+        { id: 'settings', label: "helper.toggleSettings", shortcut: "F9", onClick: () => {
+            setSettingsOpen(true)
             setOpen(false)
         } },
     ]

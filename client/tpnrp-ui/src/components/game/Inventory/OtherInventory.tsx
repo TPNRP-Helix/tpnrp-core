@@ -6,8 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { InventoryItem } from "./Item"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { PackageOpen, Search } from "lucide-react"
+import { PackageOpen } from "lucide-react"
 import { CRAFTING_CATEGORIES } from "@/constants/crafting"
 import { useState } from "react"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
@@ -30,8 +29,8 @@ export const OtherInventory = () => {
                 {isHaveOtherItems() && (
                     <TabsTriggerHelix value={otherItemsType}>{t(`inventory.other.${otherItemsType}`)}</TabsTriggerHelix>
                 )}
-                <TabsTriggerHelix value="crafting">Crafting</TabsTriggerHelix>
-                <TabsTriggerHelix value="missions">Missions</TabsTriggerHelix>
+                <TabsTriggerHelix value="crafting">{t('inventory.other.crafting.title')}</TabsTriggerHelix>
+                <TabsTriggerHelix value="missions">{t('inventory.other.missions.title')}</TabsTriggerHelix>
             </TabsListHelix>
             <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)]" />
             <TabsContent value="ground" className="h-full overflow-hidden">
@@ -59,10 +58,9 @@ export const OtherInventory = () => {
                     </Select>
                     <div className="w-full flex items-center gap-2">
                         <Input className="flex-1" placeholder={t('inventory.crafting.searchPlaceholder')} />
-                        <Button className="shrink-0"><Search className="size-4" /> {t('inventory.crafting.search')}</Button>
                     </div>
                 </div>
-                <ScrollArea className="flex-1 overflow-hidden mt-4">
+                <ScrollArea className="flex-1 overflow-hidden mt-4" viewportClassName="[&>div]:h-full [&>div]:table-fixed">
                     <div className="grid grid-cols-6 gap-4 grid-wrap">
                         {/* Crafting items will go here */}
                         

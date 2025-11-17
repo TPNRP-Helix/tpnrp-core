@@ -7,6 +7,7 @@ import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
 import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { useI18n } from "@/i18n"
 import { TabsContent, TabsTrigger, TabsList, Tabs } from "@/components/ui/tabs"
+import { useWebUIMessage } from "@/hooks/use-hevent"
 
 export const Settings = () => {
     const {
@@ -18,6 +19,8 @@ export const Settings = () => {
         setLanguage,
     } = useGameSettingStore()
     const { t } = useI18n()
+
+    useWebUIMessage<[]>('toggleSettings', () => setSettingsOpen(!isSettingsOpen))
 
     return (
         <Sheet open={isSettingsOpen} onOpenChange={setSettingsOpen}>
