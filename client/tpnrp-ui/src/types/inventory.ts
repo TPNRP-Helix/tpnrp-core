@@ -14,10 +14,12 @@ export type TInventoryItem = {
     }
 }
 
+export type TInventoryGroup = 'equipment' | 'inventory' | 'other'
+
 export type TInventoryItemProps = {
     item?: TInventoryItem
     slot?: number
-    group?: 'equipment' | 'inventory' | 'other'
+    group?: TInventoryGroup
     isShowHotbarNumber?: boolean
 }
 

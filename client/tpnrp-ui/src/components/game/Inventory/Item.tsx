@@ -4,13 +4,14 @@ import { ItemMedia, ItemTitle } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
 import type { TInventoryItemProps } from "@/types/inventory"
-import { useCallback, useMemo } from "react"
+import { useCallback, useId, useMemo } from "react"
 import { useI18n } from "@/i18n"
 import { RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
 import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf } from "lucide-react"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Progress } from "@/components/ui/progress"
+import { useDraggable, useDroppable } from "@dnd-kit/core"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
     const { item = null, slot = null, isShowHotbarNumber = true, group = 'inventory' } = props
@@ -63,20 +64,61 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setIsOpenAmountDialog(true)
     }, [])
 
+    const slotId = typeof slot === "number" ? slot : null
+    const uniqueId = useId()
+    const dndId = useMemo(() => {
+        if (slotId !== null) {
+            return `${group}-${slotId}`
+        }
+        return `${group}-${uniqueId}`
+    }, [group, slotId, uniqueId])
+    const hasItem = !!item
+    const { attributes, listeners, setNodeRef: setDraggableNodeRef, isDragging } = useDraggable({
+        id: dndId,
+        disabled: !hasItem || slotId === null,
+        data: {
+            slot: slotId,
+            group,
+            item
+        }
+    })
+    const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
+        id: dndId,
+        data: {
+            slot: slotId,
+            group
+        }
+    })
+    const setRefs = useCallback((node: HTMLDivElement | null) => {
+        setDroppableNodeRef(node)
+        setDraggableNodeRef(node)
+    }, [setDroppableNodeRef, setDraggableNodeRef])
+    const slotClasses = useMemo(() => {
+        const base = ["w-24 h-24 bg-accent rounded transition-all duration-150 ease-out"]
+        if (isOver) {
+            base.push("ring-2 ring-primary/60 shadow-lg")
+        }
+        if (isDragging) {
+            base.push("ring-2 ring-primary/60 opacity-60")
+        }
+        return base.join(" ")
+    }, [isDragging, isOver])
+    const cursorClass = hasItem ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-default"
+
     return (
         <ContextMenu>
-            <ContextMenuTrigger>
-                <HoverCard>
-                    <HoverCardTrigger>
-                        <div className="w-24 h-24 bg-accent rounded">
+            <HoverCard>
+                <ContextMenuTrigger asChild>
+                    <HoverCardTrigger asChild>
+                        <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...attributes} {...listeners}>
                             <Item className="relative gap-1 p-0 w-full h-full border-none">
                                 {slot !== null && slot <= 5 && isShowHotbarNumber ? (
                                     <Badge className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
                                         {slot}
                                     </Badge>
                                 ) : null}
-                                {group === 'equipment' && (
-                                    <div className="absolute top-0 left-0 right-0 bottom-0 text-xs p-1">
+                                {group === 'equipment' && item === null && (
+                                    <div className="absolute top-0 left-0 right-0 bottom-0 text-xs p-1 z-1">
                                         <ItemMedia className="w-full object-cover p-4">
                                             <img src={`/assets/images/equipments/${slot}.png`} alt="Item" className="w-10 h-10 object-cover select-none pointer-events-none" />
                                         </ItemMedia>
@@ -89,26 +131,22 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                                 x{item.amount}
                                             </div>
                                         )}
-                                        <ItemMedia className="w-full object-cover p-4">
-                                            <img src={itemImage ?? ''} alt="Item" className="w-11/12 h-11/12 object-cover select-none pointer-events-none" />
+                                        <ItemMedia className="relative z-10 w-full object-cover p-4">
+                                            <img src={itemImage ?? ''} alt="Item" className="w-11/12 h-11/12 object-cover select-none pointer-events-none" draggable={false} />
                                         </ItemMedia>
                                         {item.info?.durability && (
                                             <div className="absolute bottom-0 left-0 w-full">
                                                 <Progress value={item?.info?.durability ?? 0} className="rounded h-1" />
                                             </div>
                                         )}
-                                        {group === 'equipment' && (
-                                            <ItemTitle>
-                                                a
-                                            </ItemTitle>
-                                        )}
                                     </>
                                 )}
                             </Item>
                         </div>
                     </HoverCardTrigger>
-                    {!!item && (
-                        <HoverCardContent className="w-80 pointer-events-none select-none rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
+                </ContextMenuTrigger>
+                {!!item && (
+                    <HoverCardContent className="w-80 pointer-events-none select-none rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
                             {/* Hover card more details */}
                             <div className="flex flex-col justify-between space-x-4">
                                 <div className="flex flex-row justify-between space-x-4">
@@ -170,9 +208,8 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                 </div>
                             </div>
                         </HoverCardContent>
-                    )}
-                </HoverCard>
-            </ContextMenuTrigger>
+                )}
+            </HoverCard>
             {!!item && (
                 <ContextMenuContent>
                     {item.useable && (

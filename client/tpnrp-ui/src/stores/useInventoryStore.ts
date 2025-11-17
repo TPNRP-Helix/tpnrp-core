@@ -1,5 +1,5 @@
 import { EEquipmentSlot } from "@/constants/enum"
-import type { TInventoryItem } from "@/types/inventory"
+import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
 import { create } from "zustand"
 
 type InventoryState = {
@@ -36,6 +36,12 @@ type InventoryState = {
   getTotalLimitWeight: () => number
   getTotalWeight: () => number
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => void
+  moveInventoryItem: (params: {
+    sourceSlot: number
+    targetSlot: number
+    sourceGroup: TInventoryGroup
+    targetGroup: TInventoryGroup
+  }) => void
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
@@ -87,5 +93,76 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     return get().inventoryItems.reduce((acc, item) => acc + (item.weight * item.amount), 0)
   },
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => set({ selectCharacterTab: value }),
+  moveInventoryItem: ({ sourceSlot, targetSlot, sourceGroup, targetGroup }) => {
+    // Same slot, same group => Don't do anything
+    if (sourceSlot === targetSlot && sourceGroup === targetGroup) {
+      return
+    }
+    
+
+    set((state) => {
+      const inventoryItems = [...state.inventoryItems]
+      const equipmentItems = [...state.equipmentItems]
+      const otherItems = [...state.otherItems]
+
+      const collections: Record<TInventoryGroup, TInventoryItem[]> = {
+        inventory: inventoryItems,
+        equipment: equipmentItems,
+        other: otherItems,
+      }
+
+      const sourceList = collections[sourceGroup]
+      const targetList = collections[targetGroup]
+      const sourceIndex = sourceList.findIndex((item) => item.slot === sourceSlot)
+
+      if (sourceIndex === -1) {
+        return {}
+      }
+
+      const targetIndex = targetList.findIndex((item) => item.slot === targetSlot)
+
+      if (sourceGroup === targetGroup) {
+        sourceList[sourceIndex] = { ...sourceList[sourceIndex], slot: targetSlot }
+
+        if (targetIndex !== -1) {
+          sourceList[targetIndex] = { ...sourceList[targetIndex], slot: sourceSlot }
+        }
+
+        return {
+          inventoryItems,
+          equipmentItems,
+          otherItems,
+        }
+      }
+
+      const [extractedSourceItem] = sourceList.splice(sourceIndex, 1)
+
+      if (!extractedSourceItem) {
+        return {}
+      }
+
+      const movedSourceItem = { ...extractedSourceItem, slot: targetSlot }
+      let displacedItem: TInventoryItem | null = null
+
+      if (targetIndex !== -1) {
+        const [removedTargetItem] = targetList.splice(targetIndex, 1)
+        if (removedTargetItem) {
+          displacedItem = removedTargetItem
+        }
+      }
+
+      targetList.push(movedSourceItem)
+
+      if (displacedItem) {
+        sourceList.push({ ...displacedItem, slot: sourceSlot })
+      }
+
+      return {
+        inventoryItems,
+        equipmentItems,
+        otherItems,
+      }
+    })
+  },
 }))
 

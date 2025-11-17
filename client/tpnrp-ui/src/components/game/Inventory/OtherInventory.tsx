@@ -25,7 +25,7 @@ export const OtherInventory = () => {
     
     return (
         <Tabs value={selectOtherTab} onValueChange={(value) => setSelectOtherTab(value as 'ground' | 'crafting' | 'missions')} className="relative w-full h-full flex flex-col">
-            <TabsListHelix className="gap-[1px] shrink-0">
+            <TabsListHelix className="gap-px shrink-0">
                 {isHaveOtherItems() && (
                     <TabsTriggerHelix value={otherItemsType}>{t(`inventory.other.${otherItemsType}`)}</TabsTriggerHelix>
                 )}
@@ -35,11 +35,11 @@ export const OtherInventory = () => {
             <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)]" />
             <TabsContent value="ground" className="h-full overflow-hidden">
                 <ScrollArea className="h-full overflow-hidden mt-2">
-                    <div className="grid grid-cols-6 gap-4 grid-wrap">
+                    <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap">
                         {Array.from({ length: otherItemsSlotCount }, (_, i) => {
                             const slot = i + 1
                             const item = otherItems.find(item => item.slot === slot)
-                            return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} />
+                            return <InventoryItem key={slot} item={item} slot={slot} group="other" isShowHotbarNumber={false} />
                         })}
                     </div>
                 </ScrollArea>
@@ -61,7 +61,7 @@ export const OtherInventory = () => {
                     </div>
                 </div>
                 <ScrollArea className="flex-1 overflow-hidden mt-4" viewportClassName="[&>div]:h-full [&>div]:table-fixed">
-                    <div className="grid grid-cols-6 gap-4 grid-wrap">
+                    <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap">
                         {/* Crafting items will go here */}
                         
                     </div>
