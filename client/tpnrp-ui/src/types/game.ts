@@ -4,3 +4,11 @@ export type TNotification = {
     type: 'success' | 'error' | 'warning' | 'info'
     duration: number
 }
+
+export type TCharacter = {
+    name: string
+    citizenId: string
+    level: number
+    money: number
+    gender: 'male' | 'female'
+}

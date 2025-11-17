@@ -279,6 +279,33 @@ function TPNRPServer.new()
             }
         end)
         
+        -- Delete character
+        ---@param source PlayerController player controller
+        ---@param citizenId string citizen id
+        ---@return table result
+        RegisterCallback('deleteCharacter', function(source, citizenId)
+            local license = self:getLicenseBySource(source)
+            if not license then
+                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
+                return {
+                    success = false,
+                    message = SHARED.t('error.failedToGetLicense'),
+                }
+            end
+            local result = DAO.player.deleteCharacter(license, citizenId)
+            if not result then
+                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to delete character!')
+                return {
+                    success = false,
+                    message = SHARED.t('error.deleteCharacter.failedToDeleteCharacter'),
+                }
+            end
+            return {
+                success = true,
+                message = SHARED.t('success.deleteCharacter'),
+            }
+        end)
+
         -- On Player join game
         ---@param source PlayerController player controller
         ---@param citizenId string citizen id
@@ -324,6 +351,24 @@ function TPNRPServer.new()
                 message = SHARED.t('success.joinGame'),
                 playerData = playerData,
             }
+        end)
+
+        --- In-game Events
+        RegisterCallback('onOpenInventory', function(source, data)
+            local player = self:getPlayerBySource(source)
+            if not player then
+                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get player by source!')
+                return {
+                    success = false,
+                    message = SHARED.t('error.failedToGetPlayer'),
+                }
+            end
+            print('[TPN][SERVER] onOpenInventory - data: ', JSON.stringify(data))
+            -- Open inventory
+            local result = player.inventory:openInventory(data)
+            print('[TPN][SERVER] onOpenInventory - result: ', JSON.stringify(result))
+
+            return result
         end)
     end
 

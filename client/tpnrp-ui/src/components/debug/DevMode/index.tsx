@@ -43,28 +43,22 @@ const FAKE_INVENTORY_ITEMS: TInventoryItem[] = [
 
 export const DevMode = () => {
     const {
-        isDevModeOpen,
-        setDevModeOpen,
-        isConsoleOpen,
-        setConsoleOpen,
-        setPermission,
-        permission,
+        isDevModeOpen, setDevModeOpen,
+        isConsoleOpen, setConsoleOpen,
+        permission, setPermission,
         setUIPreviewOpen,
         appendConsoleMessage,
-        isEnableDevMode,
-        setEnableDevMode
+        isEnableDevMode, setEnableDevMode
     } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
-    const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
+    const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters, setPlayerCharacters } = useCreateCharacterStore()
     const {
+        inventoryItems, setInventoryItems,
+        otherItems, setOtherItems,
         setOpenInventory,
-        setInventoryItems,
-        inventoryItems,
         setSlotCount,
         setOtherItemsType,
-        setOtherItems,
-        otherItems,
         setOtherItemsSlotCount
     } = useInventoryStore()
 
@@ -185,6 +179,13 @@ export const DevMode = () => {
                                 setDevModeOpen(false)
                                 toggleSelectCharacter()
                                 setMaxCharacters(5)
+                                setPlayerCharacters([{
+                                    name: 'Test Character',
+                                    citizenId: 'TPN123456',
+                                    level: 1,
+                                    money: 1000,
+                                    gender: 'male',
+                                }])
                             }}>Select Character</Button>
                             <Button onClick={() => toggleCreateCharacter()}>Create Character</Button>
                         </TabsContent>

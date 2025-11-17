@@ -19,6 +19,7 @@
   "settings.basicNeedsHUD.showStamina": "Hiện Thể lực khi nhỏ hơn",
 
   "selectCharacter.title": "Chọn nhân vật",
+  "selectCharacter.delete": "Xóa",
   "selectCharacter.emptySlot": "Ô trống {n}",
   "selectCharacter.citizenId": "CCCD",
   "selectCharacter.money": "Tiền",
@@ -28,7 +29,10 @@
   "selectCharacter.infoTitle": "Thông tin",
   "selectCharacter.infoDesc": "Chọn nhân vật của bạn hoặc tạo nhân vật mới để bắt đầu.",
   "selectCharacter.language.placeholder": "Chọn ngôn ngữ",
-
+  "selectCharacter.deleteConfirmTitle": "Xóa nhân vật",
+  "selectCharacter.deleteConfirmDesc": "Bạn có chắc chắn muốn xóa nhân vật với CCCD {citizenId}?",
+  "selectCharacter.cancel": "Hủy",
+  
   "createCharacter.title": "Tạo nhân vật",
   "createCharacter.description": "Tạo nhân vật mới để bắt đầu hành trình của bạn.",
   "createCharacter.firstName": "Tên",

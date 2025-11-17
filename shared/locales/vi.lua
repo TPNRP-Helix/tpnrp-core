@@ -26,10 +26,16 @@ LOCALES.VI = {
         joinGame = {
             playerNotFound = "Không tìm thấy nhân vật!",
         },
+        failedToGetPlayer = "Không tìm thấy nhân vật!",
+        invalidData = "Dữ liệu không hợp lệ!",
+        deleteCharacter = {
+            failedToDeleteCharacter = "Không thể xóa nhân vật!",
+        },
     },
     success = {
         joinGame = "Đã vào game thành công",
         createCharacter = "Tạo nhân vật thành công!",
+        deleteCharacter = "Xóa nhân vật thành công!",
     },
 }
 

@@ -17,6 +17,7 @@ import { OtherInventory } from "./OtherInventory"
 import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
 import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
+import { useDevModeStore } from "@/stores/useDevModeStore"
 
 export const Inventory = () => {
     const {
@@ -30,6 +31,7 @@ export const Inventory = () => {
         moveInventoryItem
     } = useInventoryStore()
     const { t } = useI18n()
+    const { appendConsoleMessage } = useDevModeStore()
     const [activeDragItem, setActiveDragItem] = useState<{
         item: TInventoryItem | null
         slot: number | null
@@ -73,7 +75,7 @@ export const Inventory = () => {
             setActiveDragItem(null)
             return
         }
-        
+        // Make sure all input values are valid
         if (
             typeof sourceSlot === "number" &&
             typeof targetSlot === "number" &&
@@ -85,10 +87,19 @@ export const Inventory = () => {
                 targetSlot,
                 sourceGroup: activeGroup,
                 targetGroup
+            }, {
+                onSuccess: () => {
+                    console.log('Move inventory item success', sourceSlot, targetSlot, activeGroup, targetGroup)
+                },
+                onFail: () => {
+                    console.error('Failed to move inventory item', sourceSlot, targetSlot, activeGroup, targetGroup, item)
+                    appendConsoleMessage({ message: `Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`, index: 0 })
+                }
             })
         }
         setActiveDragItem(null)
     }, [moveInventoryItem])
+
     const handleDragCancel = useCallback(() => {
         setActiveDragItem(null)
     }, [])
@@ -167,7 +178,7 @@ export const Inventory = () => {
                                     <SheetTitle>{t("inventory.backpack.title")}</SheetTitle>
                                     <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount}</div>
                                     <Separator className="relative mb-4 -top-px" />
-                                    <ScrollArea className="h-[calc(100%-70px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed">
+                                    <ScrollArea className="h-[calc(100%-45px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed">
                                         {slotCount > 0 ? (
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: slotCount }, (_, i) => {

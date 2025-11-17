@@ -1,6 +1,6 @@
 import { ContextMenu, ContextMenuTrigger, ContextMenuItem, ContextMenuContent, ContextMenuSeparator, ContextMenuSub, ContextMenuSubTrigger, ContextMenuSubContent } from "@/components/ui/context-menu"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { ItemMedia, ItemTitle } from "@/components/ui/item"
+import { ItemMedia } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
 import type { TInventoryItemProps } from "@/types/inventory"
@@ -117,13 +117,6 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                         {slot}
                                     </Badge>
                                 ) : null}
-                                {group === 'equipment' && item === null && (
-                                    <div className="absolute top-0 left-0 right-0 bottom-0 text-xs p-1 z-1">
-                                        <ItemMedia className="w-full object-cover p-4">
-                                            <img src={`/assets/images/equipments/${slot}.png`} alt="Item" className="w-10 h-10 object-cover select-none pointer-events-none" />
-                                        </ItemMedia>
-                                    </div>
-                                )}
                                 {item !== null && (
                                     <>
                                         {item.amount > 1 && (
@@ -147,67 +140,67 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                 </ContextMenuTrigger>
                 {!!item && (
                     <HoverCardContent className="w-80 pointer-events-none select-none rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
-                            {/* Hover card more details */}
-                            <div className="flex flex-col justify-between space-x-4">
-                                <div className="flex flex-row justify-between space-x-4">
-                                    <div className='w-16 h-16'>
-                                        <img
-                                            src={itemImage ?? ''}
-                                            alt={item?.label ?? item?.name}
-                                            width={128}
-                                            height={128}
-                                            className="h-full w-full object-cover"
-                                            // style={{
-                                            //     filter: rareLevel?.color ? `drop-shadow(0 0 26px ${rareLevel?.color})` : 'none'
-                                            // }}
-                                        />
-                                    </div>
-                                    <div className='flex-1 px-2'>
-                                        <div className='text-sm mb-2'>
-                                            {itemLabel}
-                                        </div>
-                                        <div className='text-xs text-gray-500'>
-                                            {t('inventory.amount')}: {item?.amount ?? 1}
-                                        </div>
-                                        {item?.info?.rare && (
-                                            <div className='text-xs text-gray-500'>
-                                                {t('inventory.rareLevel')}: <span className="font-bold text-shadow-md" style={{ color: rareLevel?.color ?? 'inherit' }}>{t(`inventory.${rareLevel?.name}`)}</span>
-                                            </div>
-                                        )}
-                                        {item?.weight > 0 && (
-                                            <>
-                                                <div className='text-xs text-gray-500'>
-                                                    {t('inventory.weight')}: {formatWeight((item?.weight ?? 0) * item.amount)}
-                                                </div>
-                                                {item.amount > 1 && (
-                                                    <div className='text-xs text-gray-500'>
-                                                        {t('inventory.weight')} ({t('inventory.weightPerUnit')}): {formatWeight(item?.weight ?? 0)}
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                        {item?.info?.durability ? (
-                                            <div className='text-xs text-gray-500'>
-                                                {t('inventory.durability')}: {item?.info?.durability}%
-                                            </div>
-                                        ) : null}
-                                        {item?.info?.slot ? (
-                                            <div className='text-xs text-gray-500'>
-                                                {t('inventory.slot')}: {item?.info?.slot}
-                                            </div>
-                                        ) : null}
-                                        {item?.info?.maxWeight ? (
-                                            <div className='text-xs text-gray-500'>
-                                                {t('inventory.maxWeight')}: {formatWeight(item?.info?.maxWeight, { gram: 'gam', kg: 'kg', ton: 'ton' }, true)} ({t('inventory.canCarry')})
-                                            </div>
-                                        ) : null}
-                                    </div>
+                        {/* Hover card more details */}
+                        <div className="flex flex-col justify-between space-x-4">
+                            <div className="flex flex-row justify-between space-x-4">
+                                <div className='w-16 h-16'>
+                                    <img
+                                        src={itemImage ?? ''}
+                                        alt={item?.label ?? item?.name}
+                                        width={128}
+                                        height={128}
+                                        className="h-full w-full object-cover"
+                                        // style={{
+                                        //     filter: rareLevel?.color ? `drop-shadow(0 0 26px ${rareLevel?.color})` : 'none'
+                                        // }}
+                                    />
                                 </div>
-                                <div className='text-xs text-gray-400 mt-4'>
-                                    {item?.description ?? t('inventory.noDescription')}
+                                <div className='flex-1 px-2'>
+                                    <div className='text-sm mb-2'>
+                                        {itemLabel}
+                                    </div>
+                                    <div className='text-xs text-gray-500'>
+                                        {t('inventory.amount')}: {item?.amount ?? 1}
+                                    </div>
+                                    {item?.info?.rare && (
+                                        <div className='text-xs text-gray-500'>
+                                            {t('inventory.rareLevel')}: <span className="font-bold text-shadow-md" style={{ color: rareLevel?.color ?? 'inherit' }}>{t(`inventory.${rareLevel?.name}`)}</span>
+                                        </div>
+                                    )}
+                                    {item?.weight > 0 && (
+                                        <>
+                                            <div className='text-xs text-gray-500'>
+                                                {t('inventory.weight')}: {formatWeight((item?.weight ?? 0) * item.amount)}
+                                            </div>
+                                            {item.amount > 1 && (
+                                                <div className='text-xs text-gray-500'>
+                                                    {t('inventory.weight')} ({t('inventory.weightPerUnit')}): {formatWeight(item?.weight ?? 0)}
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                    {item?.info?.durability ? (
+                                        <div className='text-xs text-gray-500'>
+                                            {t('inventory.durability')}: {item?.info?.durability}%
+                                        </div>
+                                    ) : null}
+                                    {item?.info?.slot ? (
+                                        <div className='text-xs text-gray-500'>
+                                            {t('inventory.slot')}: {item?.info?.slot}
+                                        </div>
+                                    ) : null}
+                                    {item?.info?.maxWeight ? (
+                                        <div className='text-xs text-gray-500'>
+                                            {t('inventory.maxWeight')}: {formatWeight(item?.info?.maxWeight, { gram: 'gam', kg: 'kg', ton: 'ton' }, true)} ({t('inventory.canCarry')})
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
-                        </HoverCardContent>
+                            <div className='text-xs text-gray-400 mt-4'>
+                                {item?.description ?? t('inventory.noDescription')}
+                            </div>
+                        </div>
+                    </HoverCardContent>
                 )}
             </HoverCard>
             {!!item && (

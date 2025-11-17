@@ -2,6 +2,22 @@ import { EEquipmentSlot } from "@/constants/enum"
 import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
 import { create } from "zustand"
 
+type MoveInventoryItemParams = {
+  sourceSlot: number
+  targetSlot: number
+  sourceGroup: TInventoryGroup
+  targetGroup: TInventoryGroup
+}
+
+type MoveInventoryItemSuccessPayload = MoveInventoryItemParams & {
+  displacedItem: TInventoryItem | null
+}
+
+type MoveInventoryItemOptions = {
+  onSuccess?: (payload: MoveInventoryItemSuccessPayload) => void
+  onFail?: () => void
+}
+
 type InventoryState = {
   isOpenInventory: boolean
   otherItems: TInventoryItem[]
@@ -36,12 +52,7 @@ type InventoryState = {
   getTotalLimitWeight: () => number
   getTotalWeight: () => number
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => void
-  moveInventoryItem: (params: {
-    sourceSlot: number
-    targetSlot: number
-    sourceGroup: TInventoryGroup
-    targetGroup: TInventoryGroup
-  }) => void
+  moveInventoryItem: (params: MoveInventoryItemParams, options?: MoveInventoryItemOptions) => boolean
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
@@ -93,12 +104,22 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     return get().inventoryItems.reduce((acc, item) => acc + (item.weight * item.amount), 0)
   },
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => set({ selectCharacterTab: value }),
-  moveInventoryItem: ({ sourceSlot, targetSlot, sourceGroup, targetGroup }) => {
+  moveInventoryItem: ({ sourceSlot, targetSlot, sourceGroup, targetGroup }, options) => {
+    const payload: MoveInventoryItemSuccessPayload = {
+      sourceSlot,
+      targetSlot,
+      sourceGroup,
+      targetGroup,
+      displacedItem: null,
+    }
+
     // Same slot, same group => Don't do anything
     if (sourceSlot === targetSlot && sourceGroup === targetGroup) {
-      return
+      options?.onFail?.()
+      return false
     }
-    
+
+    let isSuccess = false
 
     set((state) => {
       const inventoryItems = [...state.inventoryItems]
@@ -128,6 +149,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
           sourceList[targetIndex] = { ...sourceList[targetIndex], slot: sourceSlot }
         }
 
+        isSuccess = true
         return {
           inventoryItems,
           equipmentItems,
@@ -155,14 +177,24 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       if (displacedItem) {
         sourceList.push({ ...displacedItem, slot: sourceSlot })
+        payload.displacedItem = displacedItem
       }
 
+      isSuccess = true
       return {
         inventoryItems,
         equipmentItems,
         otherItems,
       }
     })
+
+    if (isSuccess) {
+      options?.onSuccess?.(payload)
+    } else {
+      options?.onFail?.()
+    }
+
+    return isSuccess
   },
 }))
 

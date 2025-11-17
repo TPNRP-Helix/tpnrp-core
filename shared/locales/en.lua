@@ -26,10 +26,16 @@ LOCALES.EN = {
         joinGame = {
             playerNotFound = "Player not found!",
         },
+        failedToGetPlayer = "Failed to get player!",
+        invalidData = "Invalid data!",
+        deleteCharacter = {
+            failedToDeleteCharacter = "Failed to delete character!",
+        },
     },
     success = {
         joinGame = "Joined game successfully",
         createCharacter = "Character created successfully!",
+        deleteCharacter = "Character deleted successfully!",
     },
 }
 

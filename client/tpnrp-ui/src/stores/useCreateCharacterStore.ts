@@ -1,3 +1,4 @@
+import type { TCharacter } from "@/types/game"
 import { create } from "zustand"
 
 type CreateCharacterState = {
@@ -10,6 +11,8 @@ type CreateCharacterState = {
     lastName: string
     dateOfBirth: Date | undefined
     gender: 'male' | 'female'
+    playerCharacters: TCharacter[]
+    setPlayerCharacters: (value: TCharacter[]) => void
     setFirstName: (value: string) => void
     setLastName: (value: string) => void
     setDateOfBirth: (value: Date | undefined) => void
@@ -31,6 +34,8 @@ export const useCreateCharacterStore = create<CreateCharacterState>((set) => ({
     lastName: '',
     dateOfBirth: undefined,
     gender: 'male',
+    playerCharacters: [],
+    setPlayerCharacters: (value: TCharacter[]) => set({ playerCharacters: value }),
     setFirstName: (value: string) => set({ firstName: value }),
     setLastName: (value: string) => set({ lastName: value }),
     setDateOfBirth: (value: Date | undefined) => set({ dateOfBirth: value }),

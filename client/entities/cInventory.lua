@@ -65,9 +65,20 @@ function CInventory.new(player)
 
     ---Open inventory
     function self:openInventory()
-        -- TODO: open inventory
-        self.core.webUI:focus()
-        self.core.webUI:sendEvent('openInventory')
+        TriggerCallback('onOpenInventory', function(result)
+            if not result.success then
+                self.core:showNotification({
+                    title = result.message,
+                    type = 'error',
+                    duration = 5000,
+                })
+                return
+            end
+            print('[INFO] CInventory.openInventory result: ', JSON.stringify(result))
+            -- Open inventory
+            self.core.webUI:focus()
+            self.core.webUI:sendEvent('openInventory')
+        end, { type = 'player' })
     end
 
     function self:doCloseInventory()

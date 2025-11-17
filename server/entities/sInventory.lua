@@ -7,9 +7,9 @@ SInventory = {}
 SInventory.__index = SInventory
 
 ---@param player SPlayer player entity
----@param type 'player' | 'stack' | ''
+---@param inventoryType 'player' | 'stack' | ''
 ---@return SInventory
-function SInventory.new(player, type)
+function SInventory.new(player, inventoryType)
     ---@class SInventory
     local self = setmetatable({}, SInventory)
 
@@ -17,7 +17,7 @@ function SInventory.new(player, type)
     self.core = player.core
     -- Player's entity
     self.player = player
-    self.type = type
+    self.type = inventoryType
     self.items = {}
 
     ---/********************************/
@@ -27,7 +27,7 @@ function SInventory.new(player, type)
     ---Contructor function
     local function _contructor()
         -- type is player then load it
-        if type == 'player' then
+        if inventoryType == 'player' then
             self:load('player')
         end
     end
@@ -43,15 +43,15 @@ function SInventory.new(player, type)
     end
 
     ---Load inventory
-    ---@param type 'player' | 'stack' | ''
+---@param inventoryType 'player' | 'stack' | ''
     ---@return boolean success
-    function self:load(type)
+    function self:load(inventoryType)
         -- Type is empty then don't load inventory
-        if type == '' then
+        if inventoryType == '' then
             return false
         end
         -- Assign type
-        self.type = type
+        self.type = inventoryType
         -- Get inventory items
         local inventories = DAO.inventory.get(self.player.playerData.citizenId, self.type)
         if inventories then
@@ -440,6 +440,36 @@ function SInventory.new(player, type)
                 totalAmount = totalAmount 
             }
         end
+    end
+
+    ---Open inventory
+    ---@param data {type: 'player' | 'stack' | 'other_player' | ''} type of inventory to open
+    function self:openInventory(data)
+        if not data then
+            data = { type = 'player' }
+        end
+        if not data.type or type(data.type) ~= 'string' then
+            return {
+                success = false,
+                message = SHARED.t('error.invalidData'),
+            }
+        end
+        local inventory = nil
+        if data.type == 'other_player' or data.type == 'stack' then
+            return {
+                success = false,
+                message = 'TODO: Feature not implemented yet!',
+            }
+        end
+        if data.type == 'player' then
+            inventory = self.items
+        end
+
+        return {
+            success = true,
+            message = 'Inventory opened!',
+            inventory = inventory,
+        }
     end
 
     _contructor()

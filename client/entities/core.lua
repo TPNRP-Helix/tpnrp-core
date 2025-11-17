@@ -89,6 +89,20 @@ function TPNRPClient.new()
             end, data)
         end)
 
+        self.webUI:registerEventHandler('deleteCharacter', function(data)
+            TriggerCallback('deleteCharacter', function(result)
+                local type = 'success'
+                if not result.success then
+                    type = 'error'
+                end
+                
+                self:showNotification({
+                    title = result.message,
+                    type = type,
+                })
+            end, data)
+        end)
+
         -- On Player click join game
         self.webUI:registerEventHandler('joinGame', function(data)
             MODEL.player.joinGame(data.citizenId, function(result)
