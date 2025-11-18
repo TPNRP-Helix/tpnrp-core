@@ -84,9 +84,30 @@ function CInventory.new(player)
         end, { type = 'player' })
     end
 
+    ---Close inventory
     function self:doCloseInventory()
         self.core.webUI:outFocus()
         self.core.webUI:sendEvent('closeInventory')
+    end
+
+    ---Find items owned by current player that contain the provided name fragment
+    ---@param name string item name fragment
+    ---@return SInventoryItemType[] matchingItems
+    function self:findItemsByName(name)
+        if type(name) ~= 'string' or name == '' then
+            return {}
+        end
+
+        local keyword = name:lower()
+        local matchedItems = {}
+
+        for _, item in pairs(self.items or {}) do
+            if item and item.name and item.name:lower():find(keyword, 1, true) then
+                table.insert(matchedItems, item)
+            end
+        end
+
+        return matchedItems
     end
 
     _contructor()

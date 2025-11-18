@@ -4,7 +4,6 @@
 TPNRPServer = TPNRPServer.new()
 
 function onShutdown()
-    print('[TPN][SERVER] onShutdown - Close database connection')
     DAO.DB.Close()
 end
 
