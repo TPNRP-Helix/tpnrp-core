@@ -1,7 +1,7 @@
 DAO.equipment = {}
 ---Save inventory
 ---@param equipment SEquipment
----@return boolean success
+---@return boolean status success status
 DAO.equipment.save = function(equipment)
     -- Don't execute any query if equipment or player or playerData doesn't exist
     if not equipment or not equipment.player or not equipment.player.playerData then

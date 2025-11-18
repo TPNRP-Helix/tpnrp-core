@@ -44,6 +44,7 @@ export const Inventory = () => {
             }
         })
     )
+    
     const handleDragStart = useCallback((event: DragStartEvent) => {
         const currentSlot = typeof event.active.data.current?.slot === "number" ? event.active.data.current?.slot : null
         const potentialGroup = event.active.data.current?.group
@@ -58,6 +59,7 @@ export const Inventory = () => {
             group: currentGroup
         })
     }, [])
+
     const handleDragEnd = useCallback((event: DragEndEvent) => {
         const { active, over } = event
         const sourceSlot = active.data.current?.slot
@@ -89,10 +91,10 @@ export const Inventory = () => {
                 targetGroup
             }, {
                 onSuccess: () => {
-                    console.log('Move inventory item success', sourceSlot, targetSlot, activeGroup, targetGroup)
+                    appendConsoleMessage({ message: `Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`, index: 0 })
+                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup })
                 },
                 onFail: () => {
-                    console.error('Failed to move inventory item', sourceSlot, targetSlot, activeGroup, targetGroup, item)
                     appendConsoleMessage({ message: `Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`, index: 0 })
                 }
             })
@@ -107,11 +109,6 @@ export const Inventory = () => {
     // Filter items with slot indices from 1 to 6
     const hotbarItems = inventoryItems.filter(item => item.slot >= 1 && item.slot <= 6).sort((a, b) => a.slot - b.slot)
     const backpackItems = inventoryItems.filter(item => item.slot >= 7).sort((a, b) => a.slot - b.slot)
-
-    const backpackItem = useMemo(() => {
-        return getEquipmentItem(EEquipmentSlot.Bag)
-    }, [])
-    console.log('Equipment backpack item', backpackItem)
 
     useWebUIMessage<[]>('openInventory', () => setOpenInventory(true))
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))

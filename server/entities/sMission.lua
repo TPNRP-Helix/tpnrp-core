@@ -1,14 +1,14 @@
----@class SMissionManager
+---@class SMission
 ---@field core TPNRPServer core entity
 ---@field player SPlayer player entity
-SMissionManager = {}
-SMissionManager.__index = SMissionManager
+SMission = {}
+SMission.__index = SMission
 
 ---@param player SPlayer player entity
----@return SMissionManager
-function SMissionManager.new(player)
-    ---@class SMissionManager
-    local self = setmetatable({}, SMissionManager)
+---@return SMission
+function SMission.new(player)
+    ---@class SMission
+    local self = setmetatable({}, SMission)
     
     -- Core
     self.core = player.core
@@ -42,7 +42,7 @@ function SMissionManager.new(player)
     ---/********************************/
     
     ---Save missions
-    ---@return boolean success
+    ---@return boolean status success status
     function self:save()
         return DAO.mission.save(self.player)
     end
@@ -107,7 +107,7 @@ function SMissionManager.new(player)
     ---@param progress TMissionProgress progress entry
     ---@param requirement TMissionRequirement requirement
     ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
-    ---@return boolean success
+    ---@return boolean status success status
     local function updateItemProgress(progress, requirement, data)
         if not requirement.name or progress.name ~= requirement.name then
             return false
@@ -123,7 +123,7 @@ function SMissionManager.new(player)
     ---@param progress TMissionProgress progress entry
     ---@param requirement TMissionRequirement requirement
     ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
-    ---@return boolean success
+    ---@return boolean status success status
     local function updateNpcTakeItemProgress(progress, requirement, data)
         if not requirement.npcName or not data.npcName or requirement.npcName ~= data.npcName then
             return false
@@ -136,7 +136,7 @@ function SMissionManager.new(player)
     ---@param progress TMissionProgress progress entry
     ---@param requirement TMissionRequirement requirement
     ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
-    ---@return boolean success
+    ---@return boolean status success status
     local function updateKillNpcProgress(progress, requirement, data)
         if not requirement.npcName or not data.npcName or requirement.npcName ~= data.npcName then
             return false
@@ -149,7 +149,7 @@ function SMissionManager.new(player)
     ---@param progress TMissionProgress progress entry
     ---@param requirement TMissionRequirement requirement
     ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
-    ---@return boolean success
+    ---@return boolean status success status
     local function updateTalkNpcProgress(progress, requirement, data)
         if not requirement.npcName or not data.npcName or requirement.npcName ~= data.npcName then
             return false
@@ -163,7 +163,7 @@ function SMissionManager.new(player)
     ---@param progress TMissionProgress progress entry
     ---@param requirement TMissionRequirement requirement
     ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
-    ---@return boolean success
+    ---@return boolean status success status
     local function updateMoneyProgress(progress, requirement, data)
         if not requirement.type or requirement.type ~= 'spend' or requirement.type ~= 'receive' then
             return false
@@ -232,7 +232,7 @@ function SMissionManager.new(player)
     ---Update mission progress
     ---@param requirement TMissionRequirement requirement
     ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
-    ---@return boolean success is update success or not
+    ---@return boolean status is update success or not
     function self:updateActiveMissionProgress(requirement, data)
         if not data then return false end
         
@@ -295,7 +295,7 @@ function SMissionManager.new(player)
     end
 
     ---Give player reward
-    ---@return boolean success
+    ---@return boolean status success status
     function self:givePlayerReward()
         local reward = self:getMissionReward()
         if not reward then return false end
@@ -323,5 +323,5 @@ function SMissionManager.new(player)
     return self
 end
 
-return SMissionManager
+return SMission
 

@@ -15,7 +15,7 @@ end
 
 ---Save player's missions
 ---@param player SPlayer player entity
----@return boolean success
+---@return boolean status success status
 DAO.mission.save = function(player)
     -- Validate data
     if not player or not player.playerData then

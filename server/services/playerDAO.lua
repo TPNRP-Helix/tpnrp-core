@@ -35,7 +35,7 @@ end
 
 ---Save player
 ---@param player SPlayer
----@return boolean success
+---@return boolean status success status
 DAO.player.save = function(player)
     local playerData = player.playerData
     local pCoords = player:getCoords()
@@ -79,7 +79,7 @@ end
 
 ---Delete player
 ---@param citizenId string citizen id
----@return boolean success
+---@return boolean status success status
 DAO.player.delete = function(citizenId)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
@@ -134,7 +134,7 @@ end
 ---Create character
 ---@param license string
 ---@param playerData PlayerData
----@return boolean success
+---@return boolean status success status
 DAO.player.createCharacter = function(license, playerData)
     -- Save player into database
     local result = DAO.DB.Execute([[INSERT INTO players (citizen_id, license, name, money, character_info, job, gang, position, heading, metadata)

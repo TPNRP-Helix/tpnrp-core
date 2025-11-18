@@ -36,6 +36,16 @@ function CInventory.new(player)
         self.core.webUI:registerEventHandler('onCloseInventory', function()
             self.core.webUI:outFocus()
         end)
+
+        -- On move inventory item
+        self.core.webUI:registerEventHandler('onMoveInventoryItem', function(data)
+            TriggerCallback('onMoveInventoryItem', function(result)
+                if not result.status then
+                    return
+                end
+                print('[CLIENT][INFO] CInventory.onMoveInventoryItem - result: ', JSON.stringify(result))
+            end, data)
+        end)
     end
 
 
@@ -66,7 +76,7 @@ function CInventory.new(player)
     ---Open inventory
     function self:openInventory()
         TriggerCallback('onOpenInventory', function(result)
-            if not result.success then
+            if not result.status then
                 self.core:showNotification({
                     title = result.message,
                     type = 'error',

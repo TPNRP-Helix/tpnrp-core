@@ -22,6 +22,12 @@ function TPNRPServer.new()
     ---@type SGame game manager entity
     self.gameManager = nil
 
+    --- Manager
+    --- @type SInventoryManager inventory manager entity
+    self.inventoryManager = nil
+    --- @type SCharacterManager character manager entity
+    self.characterManager = nil
+
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
@@ -30,6 +36,9 @@ function TPNRPServer.new()
     local function _contructor()
         self.cheatDetector = SCheatDetector.new(self)
         self.gameManager = SGame.new(self)
+        -- Bind all events, callback for inventory
+        self.inventoryManager = SInventoryManager.new(self)
+        self.characterManager = SCharacterManager.new(self)
         -- Bind Helix events (Default events of game)
         self:bindHelixEvents()
         -- Bind TPN's events (Custom events of TPNRP-Core)
@@ -43,7 +52,7 @@ function TPNRPServer.new()
     ---/********************************/
 
     ---Get player by source
-    ---@param source number player source
+    ---@param source PlayerController player source
     ---@return SPlayer | nil player SPlayer entity
     function self:getPlayerBySource(source)
         for _, player in pairs(self.players) do
@@ -227,148 +236,6 @@ function TPNRPServer.new()
             
             -- Return default language by server's config
             return SHARED.CONFIG.LANGUAGE
-        end)
-        
-        -- Create character
-        ---@param source PlayerController player controller
-        ---@param data table data
-        ---@return table result
-        RegisterCallback('createCharacter', function(source, data)
-            local license = self:getLicenseBySource(source)
-            if not license then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
-                return {
-                    success = false,
-                    message = SHARED.t('error.failedToGetLicense'),
-                    playerData = nil
-                }
-            end
-            local playerData = {
-                citizenId = SHARED.createCitizenId(),
-                license = license,
-                name = data.firstName .. ' ' .. data.lastName,
-                money = SHARED.DEFAULT.PLAYER.money,
-                characterInfo = {
-                    firstName = data.firstName,
-                    lastName = data.lastName,
-                    gender = data.gender,
-                    birthday = data.dateOfBirth,
-                },
-                job = SHARED.DEFAULT.PLAYER.job,
-                gang = SHARED.DEFAULT.PLAYER.gang,
-                position = SHARED.DEFAULT.SPAWN.POSITION,
-                heading = SHARED.DEFAULT.SPAWN.HEADING,
-                metadata = SHARED.DEFAULT.PLAYER.metadata,
-                level = SHARED.DEFAULT.LEVEL,
-            }
-            -- Create character
-            local result = DAO.player.createCharacter(license, playerData)
-            if not result then
-                print(('[ERROR] TPNRPServer.bindCallbackEvents - Failed to create character for %s (License: %s)'):format(playerData.name, license))
-                return {
-                    success = false,
-                    message = SHARED.t('error.createCharacter.failedToCreateCharacter'),
-                    playerData = nil
-                }
-            end
-            -- Return success
-            return {
-                success = true,
-                message = SHARED.t('success.createCharacter'),
-                playerData = playerData,
-            }
-        end)
-        
-        -- Delete character
-        ---@param source PlayerController player controller
-        ---@param citizenId string citizen id
-        ---@return table result
-        RegisterCallback('deleteCharacter', function(source, citizenId)
-            local license = self:getLicenseBySource(source)
-            if not license then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
-                return {
-                    success = false,
-                    message = SHARED.t('error.failedToGetLicense'),
-                }
-            end
-            local result = DAO.player.deleteCharacter(license, citizenId)
-            if not result then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to delete character!')
-                return {
-                    success = false,
-                    message = SHARED.t('error.deleteCharacter.failedToDeleteCharacter'),
-                }
-            end
-            return {
-                success = true,
-                message = SHARED.t('success.deleteCharacter'),
-            }
-        end)
-
-        -- On Player join game
-        ---@param source PlayerController player controller
-        ---@param citizenId string citizen id
-        ---@return table result
-        RegisterCallback('callbackOnPlayerJoinGame', function(source, citizenId)
-            local license = self:getLicenseBySource(source)
-            if not license then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
-                return {
-                    success = false,
-                    message = SHARED.t('error.failedToGetLicense'),
-                    playerData = nil
-                }
-            end
-            local playerData = DAO.player.get(citizenId)
-            if playerData.license ~= license then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Player license mismatch!')
-                -- TODO: Cheat detect!!
-                -- TODO: Consider to ban this player by diconnected and add to blacklist
-                self.cheatDetector:logCheater({
-                    action = 'joinGame',
-                    citizenId = citizenId,
-                    license = license,
-                    content = ('[ERROR] TPNRPServer.bindCallbackEvents - Player license mismatch!')
-                })
-                -- This player trying to login with character of other player
-                return {
-                    success = false,
-                    message = SHARED.t('error.joinGame.playerNotFound'),
-                    playerData = nil
-                }
-            end
-            -- Create player
-            local player = SPlayer.new(self, source, playerData)
-            -- Assign back playerData with other properties
-            playerData = player:login()
-            -- Push player into array
-            self.players[#self.players + 1] = player
-
-            -- Return success
-            return {
-                success = true,
-                message = SHARED.t('success.joinGame'),
-                playerData = playerData,
-            }
-        end)
-
-        --- In-game Events
-        RegisterCallback('onOpenInventory', function(source, data)
-            local player = self:getPlayerBySource(source)
-            if not player then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get player by source!')
-                return {
-                    success = false,
-                    message = SHARED.t('error.failedToGetPlayer'),
-                }
-            end
-            print('[TPN][SERVER] onOpenInventory - data: ', JSON.stringify(data))
-            -- Open inventory
-            local result = player.inventory:openInventory(data)
-            print('[TPN][SERVER] onOpenInventory - result: ', JSON.stringify(result))
-
-            return result
         end)
     end
 

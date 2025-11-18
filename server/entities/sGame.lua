@@ -30,7 +30,7 @@ function SGame.new(core)
 
     ---Spawn static mesh
     ---@param params TSpawnStaticMeshParams
-    ---@return {success:boolean; entityId:string; entity:unknown} returnValue 
+    ---@return {status:boolean; entityId:string; entity:unknown} returnValue 
     function self:spawnStaticMesh(params)
         local spawnPosition = params.position
         local spawnRotation = params.rotation
@@ -40,7 +40,7 @@ function SGame.new(core)
         if entityPath == '' then
             print('[ERROR] SGame.SPAWN_STATIC_MESH - Entity path is empty!')
             return {
-                success = false,
+                status = false,
                 entityId = nil,
                 entity = nil,
             }
@@ -50,7 +50,7 @@ function SGame.new(core)
         if not entity then
             print('[ERROR] SGame.SPAWN_STATIC_MESH - Failed to spawn static mesh!')
             return {
-                success = false,
+                status = false,
                 entityId = nil,
                 entity = nil,
             }
@@ -66,7 +66,7 @@ function SGame.new(core)
         }
 
         return {
-            success = true,
+            status = true,
             entityId = entityId,
             entity = entity,
         }
@@ -74,14 +74,14 @@ function SGame.new(core)
     
     ---Add interactable to entity
     ---@param params TAddInteractableParams
-    ---@return {success:boolean} returnValue 
+    ---@return {status:boolean} returnValue 
     function self:addInteractable(params)
         local entity = params.entity
         local options = params.options
         if not entity or not options then
             print('[ERROR] SGame.ADD_INTERACTABLE - Entity or options is empty!')
             return {
-                success = false,
+                status = false,
             }
         end
 
@@ -96,19 +96,19 @@ function SGame.new(core)
         self.entities[entity.id].isInteractable = true
 
         return {
-            success = true,
+            status = true,
         }
     end
 
     ---Destroy entity
     ---@param id string Entity id
-    ---@return {success:boolean} returnValue 
+    ---@return {status:boolean} returnValue 
     function self:destroyEntity(id)
         local entity = self.entities[id]
         if not entity then
             print('[ERROR] SGame.DESTROY_ENTITY - Entity not found!')
             return {
-                success = false,
+                status = false,
             }
         end
 
@@ -120,7 +120,7 @@ function SGame.new(core)
         self.entities[id] = nil
 
         return {
-            success = true,
+            status = true,
         }
     end
 

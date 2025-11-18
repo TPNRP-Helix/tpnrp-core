@@ -37,14 +37,14 @@ function SInventory.new(player, inventoryType)
     ---/********************************/
 
     ---Save inventory
-    ---@return boolean success
+    ---@return boolean status success status
     function self:save()
         return DAO.inventory.save(self)
     end
 
     ---Load inventory
 ---@param inventoryType 'player' | 'stack' | ''
-    ---@return boolean success
+    ---@return boolean status success status
     function self:load(inventoryType)
         -- Type is empty then don't load inventory
         if inventoryType == '' then
@@ -450,14 +450,14 @@ function SInventory.new(player, inventoryType)
         end
         if not data.type or type(data.type) ~= 'string' then
             return {
-                success = false,
+                status = false,
                 message = SHARED.t('error.invalidData'),
             }
         end
         local inventory = nil
         if data.type == 'other_player' or data.type == 'stack' then
             return {
-                success = false,
+                status = false,
                 message = 'TODO: Feature not implemented yet!',
             }
         end
@@ -466,10 +466,29 @@ function SInventory.new(player, inventoryType)
         end
 
         return {
-            success = true,
+            status = true,
             message = 'Inventory opened!',
             inventory = inventory,
         }
+    end
+    
+    ---Move item to slot
+    ---@param item SInventoryItemType item data
+    ---@param targetSlot number target slot number
+    ---@return {status:boolean, message:string, slot:number} result of moving item
+    function self:moveItem(item, targetSlot)
+        -- Validate inputs
+        if not item or not targetSlot then
+            return { status = false, message = 'Invalid parameters!', slot = -1 }
+        end
+        -- Remove current item at source slot
+        self.items[item.slot] = nil
+        -- Assign new slot to item
+        item.slot = targetSlot
+        -- Assign item to new slot
+        self.items[targetSlot] = item
+
+        return { status = true, message = 'Item moved to slot!', slot = targetSlot }
     end
 
     _contructor()

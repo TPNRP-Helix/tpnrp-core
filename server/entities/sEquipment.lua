@@ -34,7 +34,7 @@ function SEquipment.new(player)
     ---/********************************/
 
     ---Save equipment
-    ---@return boolean success
+    ---@return boolean status
     function self:save()
         return DAO.equipment.save(self)
     end

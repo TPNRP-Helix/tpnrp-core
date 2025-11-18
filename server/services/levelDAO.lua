@@ -32,7 +32,7 @@ end
 
 ---Save player
 ---@param level SLevel
----@return boolean success
+---@return boolean status success status
 DAO.level.save = function(level)
 	-- Validate data
 	if not level or not level.player.playerController or not level.player.playerData then

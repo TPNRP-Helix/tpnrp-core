@@ -3,7 +3,7 @@
 ---@field inventory SInventory|nil
 ---@field equipment SEquipment|nil
 ---@field level SLevel|nil
----@field missionManager SMissionManager|nil
+---@field missionManager SMission|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -50,7 +50,7 @@ function SPlayer.new(core, playerController, playerData)
         -- Get player's equipment
         self.equipment = SEquipment.new(self)
         -- Get player's missions
-        self.missionManager = SMissionManager.new(self)
+        self.missionManager = SMission.new(self)
     end
 
     ---/********************************/
@@ -58,7 +58,7 @@ function SPlayer.new(core, playerController, playerData)
     ---/********************************/
 
     ---Save player
-    ---@return boolean success is save success or not
+    ---@return boolean status is save success or not
     function self:save()
         if not self.playerData then
             print('[ERROR] SPLAYER.SAVE - playerData is empty!')
@@ -218,7 +218,7 @@ function SPlayer.new(core, playerController, playerData)
     ---Add Money
     ---@param type 'cash' | 'bank' money type
     ---@param amount number amount to add
-    ---@return boolean success
+    ---@return boolean status success status
     function self:addMoney(type, amount)
         if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
             print('[ERROR] SPLAYER.ADD_MONEY - Invalid type!')

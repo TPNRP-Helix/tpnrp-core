@@ -20,6 +20,7 @@ function TPNRPClient.new()
 
     -- Permission
     self.permission = 'player'
+    self.isInGame = false
 
     ---Contructor function
     local function _contructor()
@@ -76,7 +77,7 @@ function TPNRPClient.new()
         -- On create character
         self.webUI:registerEventHandler('createCharacter', function(data)
             TriggerCallback('createCharacter', function(result)
-                if not result.success then return end
+                if not result.status then return end
                 -- Show notification
                 self:showNotification({
                     title = result.message,
@@ -92,7 +93,7 @@ function TPNRPClient.new()
         self.webUI:registerEventHandler('deleteCharacter', function(data)
             TriggerCallback('deleteCharacter', function(result)
                 local type = 'success'
-                if not result.success then
+                if not result.status then
                     type = 'error'
                 end
                 
@@ -122,6 +123,7 @@ function TPNRPClient.new()
                 self.webUI:sendEvent('joinGameSuccess', result.playerData)
                 -- Out focus from WebUI to focus on game
                 self.webUI:outFocus()
+                self.isInGame = true
             end)
         end)
     end
