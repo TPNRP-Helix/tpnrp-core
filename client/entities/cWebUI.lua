@@ -60,7 +60,6 @@ function CWebUI.new(core)
         -- [GAME] [F1] Toggle guide helper
         Input.BindKey('F1', function()
             if not self.core:isInGame() then
-                print('[INFO] CWebUI.NEW - not in game')
                 return
             end
             self:sendEvent('toggleGuideHelper')
@@ -89,6 +88,7 @@ function CWebUI.new(core)
             self:sendEvent('toggleToastExpand')
         end, 'Pressed')
 
+        -- [GAME] [F9] Toggle settings
         Input.BindKey('F9', function()
             if not self.core:isInGame() then
                 return
@@ -99,10 +99,7 @@ function CWebUI.new(core)
         -- [ADMIN] [F7] Dev Mode menu
         Input.BindKey('F7', function()
             TriggerCallback('getPermissions', function(result)
-                print('[INFO] CWebUI.NEW - getPermissions callback received')
-                print('[INFO] CWebUI.NEW - result: ', JSON.stringify(result))
                 if result ~= 'admin' then
-                    print('[INFO] CWebUI.NEW - result is not admin')
                     return
                 end
                 -- Player is admin
@@ -174,7 +171,6 @@ function CWebUI.new(core)
     ---@vararg any event data
     function self:sendEvent(event, ...)
         if not self._webUI then
-            print('[ERROR] CWebUI.SEND_EVENT - webUI is not initialized!')
             return false
         end
         -- TODO: Implement a cheat detection system for sending events
@@ -189,7 +185,6 @@ function CWebUI.new(core)
     ---@param callback function event callback
     function self:registerEventHandler(event, callback)
         if not self._webUI then
-            print('[ERROR] CWebUI.REGISTER_EVENT_HANDLER - webUI is not initialized!')
             return false
         end
         -- TODO: Implement a cheat detection system for event handlers
@@ -202,7 +197,6 @@ function CWebUI.new(core)
     ---Focus webUI
     function self:focus()
         if not self._webUI then
-            print('[ERROR] CWebUI.FOCUS - webUI is not initialized!')
             return false
         end
         self._webUI:SetInputMode(EWebUIInputMode.UI)
@@ -212,7 +206,6 @@ function CWebUI.new(core)
     ---Out focus from webUI
     function self:outFocus()
         if not self._webUI then
-            print('[ERROR] CWebUI.OUT_FOCUS - webUI is not initialized!')
             return false
         end
         self._webUI:SetInputMode(EWebUIInputMode.None)

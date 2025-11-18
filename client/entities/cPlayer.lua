@@ -120,21 +120,16 @@ function CPlayer.new(core, playerData)
     function self:bindWebUIEvents()
         -- [TEST] Test function only, it should not be exist on production
         self.core.webUI:registerEventHandler('playAnimation', function(data)
-            print('[TPN][CLIENT] playAnimation ' .. JSON.stringify(data))
-            local char = self.playerController:K2_GetPawn()
-            if not char then
-                print('[TPN][CLIENT] playAnim - Failed to get character!')
-                return
-            end
-            print('[TPN][CLIENT] playAnim - Character found!')
-            local AnimParams = UE.FHelixPlayAnimParams()
-            AnimParams.LoopCount = 1
-            AnimParams.bIgnoreMovementInput = true
-            print('[TPN][CLIENT] playAnim - AnimParams.')
-            Animation.Play(char, data.animationName, AnimParams, function()
-                print('Animation Ended')
-            end)
+            self.core.game:playAnimation(nil, data.animationName, {
+                onEnd = function()
+                    print('Animation Ended')
+                end,
+            })
         end)
+    end
+
+    function self:getPawn()
+        return self.playerController:K2_GetPawn()
     end
 
     _contructor()

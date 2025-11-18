@@ -89,10 +89,12 @@ export const InventoryItem = (props: TInventoryItemProps) => {
             group
         }
     })
+
     const setRefs = useCallback((node: HTMLDivElement | null) => {
         setDroppableNodeRef(node)
         setDraggableNodeRef(node)
     }, [setDroppableNodeRef, setDraggableNodeRef])
+
     const slotClasses = useMemo(() => {
         const base = ["w-24 h-24 bg-accent rounded transition-all duration-150 ease-out"]
         if (isOver) {

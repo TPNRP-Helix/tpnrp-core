@@ -29,5 +29,8 @@
         "CollisionType",
         "Interactable",
         "Color"
+    ],
+    "Lua.diagnostics.disable": [
+        "undefined-doc-name"
     ]
 }

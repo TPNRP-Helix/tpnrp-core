@@ -1,6 +1,8 @@
 ---@class TPNRPClient
 ---@field player CPlayer
----@field ui CWebUI webUI entity
+---@field webUI CWebUI webUI entity
+---@field game CGame game entity
+---@field permission string permission
 TPNRPClient = {}
 TPNRPClient.__index = TPNRPClient
 
@@ -17,10 +19,10 @@ function TPNRPClient.new()
     self.player = nil
     self.shared = SHARED    -- Bind shared for other resources to use it via exports
     self.webUI = nil
+    self.game = nil -- Game entity
 
     -- Permission
     self.permission = 'player'
-    self.isInGame = false
 
     ---Contructor function
     local function _contructor()
@@ -106,7 +108,7 @@ function TPNRPClient.new()
 
         -- On Player click join game
         self.webUI:registerEventHandler('joinGame', function(data)
-            MODEL.player.joinGame(data.citizenId, function(result)
+            TriggerCallback('callbackOnPlayerJoinGame', function(result)
                 if not result.success then
                     self:showNotification({
                         title = SHARED.t('error.joinGameFailed'),
@@ -123,8 +125,7 @@ function TPNRPClient.new()
                 self.webUI:sendEvent('joinGameSuccess', result.playerData)
                 -- Out focus from WebUI to focus on game
                 self.webUI:outFocus()
-                self.isInGame = true
-            end)
+            end, data.citizenId)
         end)
     end
 

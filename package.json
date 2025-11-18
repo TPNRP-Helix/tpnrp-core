@@ -12,8 +12,6 @@
     ],
     "client": [
         "client/entities/*.lua",
-        "client/models/baseModel.lua",
-        "client/models/playerModel.lua",
         "client/main.lua"
     ],
     "server": [
