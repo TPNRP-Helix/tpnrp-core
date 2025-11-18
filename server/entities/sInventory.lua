@@ -36,6 +36,10 @@ function SInventory.new(player, inventoryType)
     ---/*           Functions          */
     ---/********************************/
 
+    function self:sync()
+        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', self.items)
+    end
+
     ---Save inventory
     ---@return boolean status success status
     function self:save()
@@ -306,13 +310,15 @@ function SInventory.new(player, inventoryType)
             }
         end
         -- Tell player that item is added to inventory
-        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, self.items[targetSlot])
+        -- TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, self.items[targetSlot])
         -- Trigger mission action
         self.player.missionManager:triggerAction('add_item', {
             name = itemName,
             amount = amount,
             info = info or {}
         })
+        -- Sync inventory to client
+        self:sync()
         return { status = true, message = 'Item added to inventory!', slot = targetSlot }
     end
 
@@ -481,12 +487,27 @@ function SInventory.new(player, inventoryType)
         if not item or not targetSlot then
             return { status = false, message = 'Invalid parameters!', slot = -1 }
         end
-        -- Remove current item at source slot
-        self.items[item.slot] = nil
-        -- Assign new slot to item
-        item.slot = targetSlot
-        -- Assign item to new slot
-        self.items[targetSlot] = item
+        local targetItem = self:findItemBySlot(targetSlot)
+        if targetItem ~= nil then
+            -- Target slot have item
+            local sourceSlot = item.slot
+            local targetItem = self.items[targetSlot]
+            targetItem.slot = item.slot
+            -- Change slot of item
+            item.slot = targetSlot
+            self.items[targetSlot] = item
+            -- Assign item to new slo
+            targetItem.slot = sourceSlot
+            self.items[sourceSlot] = targetItem
+        else
+            -- Target slot is empty
+            -- Remove current item at source slot
+            self.items[item.slot] = nil
+            -- Assign new slot to item
+            item.slot = targetSlot
+            -- Assign item to new slot
+            self.items[targetSlot] = item
+        end
 
         return { status = true, message = 'Item moved to slot!', slot = targetSlot }
     end

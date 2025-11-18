@@ -24,6 +24,7 @@
         "server/services/equipmentDAO.lua",
         "server/services/missionDAO.lua",
         "server/entities/*.lua",
+        "server/entities/managers/*.lua",
         "server/main.lua"
     ]
 }

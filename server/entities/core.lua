@@ -139,7 +139,7 @@ function TPNRPServer.new()
     end
 
     ---On Player Unloaded
-    ---@param source number player source
+    ---@param source PlayerController player source
     function self:onPlayerUnloaded(source)
         ---@type SPlayer | nil
         local player = self:getPlayerBySource(source)
@@ -151,7 +151,7 @@ function TPNRPServer.new()
     end
 
     ---On Player Sync
-    ---@param source number player source
+    ---@param source PlayerController player source
     function self:onPlayerSync(source)
         ---@type SPlayer | nil
         local player = self:getPlayerBySource(source)

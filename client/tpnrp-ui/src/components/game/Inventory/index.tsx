@@ -5,14 +5,13 @@ import { InventoryItem } from "./Item"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { AmountDialog } from "./AmountDialog"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
 import { PackageOpen } from "lucide-react"
-import { EEquipmentSlot } from "@/constants/enum"
 import { OtherInventory } from "./OtherInventory"
 import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
@@ -23,9 +22,8 @@ export const Inventory = () => {
     const {
         isOpenInventory,
         setOpenInventory,
-        inventoryItems,
+        inventoryItems, setInventoryItems,
         slotCount,
-        getEquipmentItem,
         getTotalWeight,
         getTotalLimitWeight,
         moveInventoryItem
@@ -112,6 +110,12 @@ export const Inventory = () => {
 
     useWebUIMessage<[]>('openInventory', () => setOpenInventory(true))
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
+    useWebUIMessage<[type: string, items: TInventoryItem[]]>('doSyncInventory', ([type, items]) => {
+        if (type === 'sync') {
+            appendConsoleMessage({ message: `doSyncInventory: ${JSON.stringify(items)}`, index: 0 })
+            setInventoryItems(items)
+        }
+    })
     
     useEffect(() => {
         // Only disable when menu is open

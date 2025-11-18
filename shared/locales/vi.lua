@@ -31,6 +31,8 @@ LOCALES.VI = {
         deleteCharacter = {
             failedToDeleteCharacter = "Không thể xóa nhân vật!",
         },
+        noEmptySlotAvailable = "Không có ô trống trong túi đồ!",
+        itemNotCloth = "Vật phẩm không phải là quần áo!",
     },
     success = {
         joinGame = "Đã vào game thành công",

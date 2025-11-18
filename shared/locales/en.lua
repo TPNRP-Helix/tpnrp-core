@@ -31,6 +31,8 @@ LOCALES.EN = {
         deleteCharacter = {
             failedToDeleteCharacter = "Failed to delete character!",
         },
+        noEmptySlotAvailable = "No empty slot available!",
+        itemNotCloth = "Item is not a cloth item!",
     },
     success = {
         joinGame = "Joined game successfully",

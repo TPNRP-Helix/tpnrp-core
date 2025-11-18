@@ -1,5 +1,6 @@
 ---@class CInventory
 ---@field player CPlayer player entity
+---@field items table<number, SInventoryItemType> item data
 CInventory = {}
 CInventory.__index = CInventory
 
@@ -11,6 +12,7 @@ function CInventory.new(player)
 
     self.core = player.core
     self.player = player
+    ---@type table<number, SInventoryItemType> slotNumber, InventoryItem
     self.items = {}
 
     ---/********************************/
@@ -20,8 +22,8 @@ function CInventory.new(player)
     ---Contructor function
     local function _contructor()
         -- On Update inventory
-        RegisterClientEvent('TPN:inventory:sync', function(type, amount, item)
-            self:onSyncInventory(type, amount, item)
+        RegisterClientEvent('TPN:inventory:sync', function(items)
+            self:onSyncInventory(items)
         end)
         -- Bind key
         -- [Player] [TAB] Inventory
@@ -40,10 +42,10 @@ function CInventory.new(player)
         -- On move inventory item
         self.core.webUI:registerEventHandler('onMoveInventoryItem', function(data)
             TriggerCallback('onMoveInventoryItem', function(result)
+                print('[CLIENT][INFO] CInventory.onMoveInventoryItem - result: ', JSON.stringify(result))
                 if not result.status then
                     return
                 end
-                print('[CLIENT][INFO] CInventory.onMoveInventoryItem - result: ', JSON.stringify(result))
             end, data)
         end)
     end
@@ -54,22 +56,13 @@ function CInventory.new(player)
     ---/********************************/
     
     -- On Update inventory
-    ---@param type 'add' | 'remove' inventory type
-    ---@param amount number item amount
-    ---@param item SInventoryItemType item data
-    function self:onSyncInventory(type, amount, item)
-        if type == 'add' then
-            -- Push item to items table
-            self.items[item.slot] = item
-        elseif type == 'remove' then
-            -- Remove item from items table
-            self.items[item.slot] = nil
-        end
+    ---@param items table<number, SInventoryItemType> item data
+    function self:onSyncInventory(items)
+        self.items = items
         -- Update UI for items changes
-        self.core.webUI:sendEvent('ITEM_CHANGED', {
-            type = type,
-            amount = amount,
-            item = item
+        self.core.webUI:sendEvent('doSyncInventory', {
+            type = 'sync',
+            items = items
         })
     end
 

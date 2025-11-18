@@ -99,12 +99,126 @@ function SInventoryManager.new(core)
         return nil
     end
 
-    local function moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup)
-        -- TODO: Move item to target slot
+    ---Move item between different groups
+    ---@param player SPlayer player entity
+    ---@param sourceItem SInventoryItemType|SEquipmentItemType source item data
+    ---@param targetItem SInventoryItemType|SEquipmentItemType|nil target item data
+    ---@param sourceGroup 'inventory' | 'equipment' | 'other' source group type
+    ---@param targetGroup 'inventory' | 'equipment' | 'other' target group type
+    ---@param sourceSlot number source slot number
+    ---@param targetSlot number target slot number
+    ---@return {status: boolean; message: string; slot:number} result of moving item
+    local function moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot)
+        -- Moving from inventory to equipment
+        if sourceGroup == 'inventory' and targetGroup == 'equipment' then
+            local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
+            if not clothType then
+                return {
+                    status = false,
+                    message = SHARED.t('error.itemNotCloth'),
+                }
+            end
+            local equipResult = player.equipment:equipItem(sourceItem.name, targetSlot)
+            print('[TPN][SERVER] moveItemDifferentGroup - equipResult: ', JSON.stringify(equipResult))
+            return {
+                status = equipResult.status,
+                message = equipResult.message,
+                slot = targetSlot,
+            }
+        end
+        
+        -- Moving from equipment to inventory
+        if sourceGroup == 'equipment' and targetGroup == 'inventory' then
+            -- Un-equip item
+            if targetItem then
+                local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
+                if not clothType then
+                    self.core.cheatDetector:logCheater({
+                        action = 'moveInventoryItem',
+                        player = player or nil,
+                        citizenId = player.playerData.citizenId or '',
+                        license = player.playerData.license or '',
+                        name = player.playerData.name or '',
+                        content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Item %s is not a cloth item! Player trying to un-equip item that is not a cloth item!'):format(sourceItem.name)
+                    })
+                    return {
+                        status = false,
+                        message = 'Item is not a cloth item!',
+                    }
+                end
+
+                -- Have target item => un-equip clothes
+                local unequipResult = player.equipment:unequipItem(clothType, targetSlot)
+                print('[TPN][SERVER] moveItemDifferentGroup - unequipResult: ', JSON.stringify(unequipResult))
+                return {
+                    status = unequipResult.status,
+                    message = unequipResult.message,
+                    slot = targetSlot,
+                }
+            else
+                -- No target item => Move item to target slot
+                local moveResult = player.inventory:moveItem(sourceItem, targetSlot)
+                print('[TPN][SERVER] moveItemDifferentGroup - moveResult: ', JSON.stringify(moveResult))
+                return {
+                    status = moveResult.status,
+                    message = moveResult.message,
+                    slot = targetSlot,
+                }
+            end
+            
+            return {
+                status = true,
+                message = 'Item moved from equipment to inventory!',
+            }
+        end
+        
+        -- [TODO] Moving from/to other groups (not implemented yet)
+        if sourceGroup == 'inventory' and targetGroup == 'other' then
+            return {
+                status = false,
+                message = 'Moving items to/from other groups is not implemented yet!',
+            }
+        end
+        -- [TODO] Moving from/to other groups (not implemented yet)
+        if sourceGroup == 'other' and targetGroup == 'inventory' then
+            return {
+                status = false,
+                message = 'Moving items to/from other groups is not implemented yet!',
+            }
+        end
+
+        -- [TODO] Moving from/to other groups (not implemented yet)
+        if sourceGroup == 'other' and targetGroup == 'equipment' then
+            return {
+                status = false,
+                message = 'Moving items to/from other groups is not implemented yet!',
+            }
+        end
+
+        -- [TODO] Moving from/to other groups (not implemented yet)
+        if sourceGroup == 'equipment' and targetGroup == 'other' then
+            return {
+                status = false,
+                message = 'Moving items to/from other groups is not implemented yet!',
+            }
+        end
+
+        -- Unknown combination
+        return {
+            status = false,
+            message = 'Unknown group combination!',
+        }
     end
 
-    local function moveItemSameGroup(player, sourceItem, targetItem, sourceGroup, targetGroup)
-        -- TODO: Move item to target slot
+    ---Move item to same group
+    ---@param player SPlayer player entity
+    ---@param sourceItem SInventoryItemType source item data
+    ---@param targetItem SInventoryItemType|nil target item data
+    ---@param sourceGroup 'inventory' | 'equipment' | 'other' source group type
+    ---@param targetGroup 'inventory' | 'equipment' | 'other' target group type
+    ---@param targetSlot number target slot number
+    ---@return {status: boolean; message: string; slot:number} result of moving item
+    local function moveItemSameGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, targetSlot)
         if sourceGroup ~= targetGroup then
             return {
                 status = false,
@@ -113,18 +227,32 @@ function SInventoryManager.new(core)
         end
 
         if sourceGroup == 'inventory' then
-            if not targetItem then
-                -- No target item => Move item to target slot
-                player.inventory:moveItem(sourceItem, targetSlot)
-            else
-                -- Have target item => Swap slot
-                player.inventory:swapItem(sourceItem, targetItem)
-            end
+            local result = player.inventory:moveItem(sourceItem, targetSlot)
+            print('[TPN][SERVER] moveItemSameGroup - result: ', JSON.stringify(result))
+            return result
         elseif sourceGroup == 'equipment' then
-
+            return {
+                status = false,
+                message = 'Equipment does not support swapping items!',
+            }
+        elseif sourceGroup == 'other' then
+            -- TODO: Handle other inventory types (ground, other player, etc.)
+            return {
+                status = false,
+                message = 'Other does not support swapping items yet!',
+            }
         end
+
+        return {
+            status = true,
+            message = 'Item moved successfully!',
+        }
     end
 
+    ---On move inventory item
+    ---@param source PlayerController player controller
+    ---@param data {sourceSlot: number; targetSlot: number; sourceGroup: string; targetGroup: string} data
+    ---@return {status: boolean; message: string; slot:number} result of moving item
     function self:onMoveInventoryItem(source, data)
         local player = self.core:getPlayerBySource(source)
         if not player then
@@ -176,18 +304,19 @@ function SInventoryManager.new(core)
         end
 
         local targetItem = getItemFromGroup(player, targetGroup, targetSlot)
+        local result = nil
         if sourceGroup == targetGroup then
             -- Same group => Move item to target slot
-            moveItemSameGroup(player, sourceItem, targetItem, sourceGroup, targetGroup)
+            result = moveItemSameGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, targetSlot)
         else
             -- Different group => Move item to target slot
-            moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup)
+            result = moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot)
         end
         
-        
-        return {
-            status = true,
-            message = 'Item moved successfully!',
+        -- Return the result from the move function
+        return result or {
+            status = false,
+            message = 'Move operation failed!',
         }
     end
 

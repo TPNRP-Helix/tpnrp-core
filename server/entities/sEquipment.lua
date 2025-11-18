@@ -33,6 +33,10 @@ function SEquipment.new(player)
     ---/*           Functions          */
     ---/********************************/
 
+    function self:sync()
+        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', self.items)
+    end
+
     ---Save equipment
     ---@return boolean status
     function self:save()
@@ -83,33 +87,12 @@ function SEquipment.new(player)
             return { status = false, message = 'Item not found in inventory!' }
         end
         -- Verify that the item in the slot matches the provided itemName
-        if item.name:lower() ~= itemName:lower() then
-            -- [CHEAT] possible event cheat
-            self.core.cheatDetector:logCheater({
-                action = 'equipItem',
-                player = self.player or nil,
-                citizenId = self.player.playerData.citizenId or '',
-                license = self.player.playerData.license or '',
-                name = self.player.playerData.name or '',
-                content = ('[ERROR] sEquipment.equipItem: Item %s does not match item %s in slot %s!'):format(itemName, item.name, slotNumber)
-            })
-            return { status = false, message = 'Item mismatch!' }
-        end
         local clothItemType = SHARED.getClothItemTypeByName(itemName)
         if not clothItemType then
-            -- [CHEAT] possible event cheat
-            self.core.cheatDetector:logCheater({
-                action = 'equipItem',
-                player = self.player or nil,
-                citizenId = self.player.playerData.citizenId or '',
-                license = self.player.playerData.license or '',
-                name = self.player.playerData.name or '',
-                content = ('[ERROR] sEquipment.equipItem: Item %s is not a cloth item!'):format(itemName)
-            })
-            return { status = false, message = 'Item is not a cloth item!' }
+            return { status = false, message = SHARED.t('error.itemNotCloth') }
         end
         -- Remove item from inventory
-        local removeResult = self.player.inventory:removeItem(itemName, 1, slotNumber)
+        local removeResult = self.player.inventory:removeItem(itemName, 1, item.slot)
         if not removeResult.status then
             print(('[ERROR] sEquipment.equipItem: Failed to remove item %s from inventory!'):format(itemName))
             -- [CHEAT] possible event cheat
@@ -128,7 +111,8 @@ function SEquipment.new(player)
         ---@cast item SEquipmentItemType
         self.items[clothItemType] = item
         -- call client for sync (This mean equip cloth success)
-        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', 'equip', clothItemType, itemName)
+        self:sync() -- Sync equipment
+        self.player.inventory:sync() -- Sync inventory
         return { status = true, message = SHARED.t('equipment.equipped', { item = itemName }) }
     end
 
@@ -152,6 +136,19 @@ function SEquipment.new(player)
             if not toSlotNumber then
                 return { status = false, message = SHARED.t('inventory.full') }
             end
+        else
+            -- Have toSlotNumber
+            -- Check if slot have item or not
+            local slotItem = self.player.inventory:findItemBySlot(toSlotNumber)
+            if slotItem then
+                -- Slot have item
+                local newEmptySlot = self.player.inventory:getEmptySlot()
+                if not newEmptySlot then
+                    return { status = false, message = SHARED.t('inventory.full') }
+                end
+                -- Assign new slot into toSlotNumber
+                toSlotNumber = newEmptySlot
+            end
         end
         -- Add item to inventory
         local addResult = self.player.inventory:addItem(item.name, 1, toSlotNumber)
@@ -160,8 +157,19 @@ function SEquipment.new(player)
             return { status = false, message = addResult.message }
         end
         -- call client for sync (This mean unequip cloth success)
-        TriggerClientEvent(self.player.playerController, 'TPN:equipment:sync', 'unequip', clothItemType)
+        self:sync() -- Sync equipment
+        self.player.inventory:sync() -- Sync inventory
         return { status = true, message = SHARED.t('equipment.unequipped', { item = item.name }) }
+    end
+
+    ---Find item by slot number
+    ---@param slotNumber number slot number
+    ---@return SEquipmentItemType | nil item data, or nil if item not found
+    function self:findItemBySlot(slotNumber)
+        if not slotNumber then
+            return nil
+        end
+        return self.items[slotNumber] or nil
     end
 
     _contructor()

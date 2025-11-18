@@ -4,10 +4,28 @@ import { Separator } from "@/components/ui/separator"
 import { InventoryItem } from "./Item"
 import { useI18n } from "@/i18n"
 import { EEquipmentSlot } from "@/constants/enum"
+import { useWebUIMessage } from "@/hooks/use-hevent"
+import type { TInventoryItem } from "@/types/inventory"
+import { useDevModeStore } from "@/stores/useDevModeStore"
 
 export const CharacterInfo = () => {
-    const { selectCharacterTab, setSelectCharacterTab, getEquipmentItem } = useInventoryStore()
+    const {
+        selectCharacterTab,
+        setSelectCharacterTab,
+        getEquipmentItem,
+        setEquipmentItems
+    } = useInventoryStore()
+    
     const { t } = useI18n()
+    const { appendConsoleMessage } = useDevModeStore()
+
+    useWebUIMessage<{ type: 'sync', items: TInventoryItem[] }>('doSyncEquipment', (data) => {
+        if (data.type === 'sync') {
+            console.log('doSyncEquipment', JSON.stringify(data.items))
+            appendConsoleMessage({ message: `doSyncEquipment: ${JSON.stringify(data.items)}`, index: 0 })
+            setEquipmentItems(data.items)
+        }
+    })
 
     return (
         <Tabs value={selectCharacterTab} onValueChange={(value) => setSelectCharacterTab(value as 'equipment' | 'skills' | 'stats')} className="relative w-full! h-full flex flex-col">

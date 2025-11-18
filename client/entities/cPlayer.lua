@@ -18,6 +18,8 @@ function CPlayer.new(core, playerData)
     self.playerController = nil
     -- Player's inventory
     self.inventory = nil
+    -- Player's equipment
+    self.equipment = nil
     -- Player's custom properties
     self.properties = {}
     -- Player's dead state
@@ -38,6 +40,8 @@ function CPlayer.new(core, playerData)
         self:bindWebUIEvents()
         -- Get player's inventory
         self.inventory = CInventory.new(self)
+        -- Get player's equipment
+        self.equipment = CEquipment.new(self)
         -- Update
         Timer.SetInterval(function()
             TriggerServerEvent('TPN:player:syncPlayer')
@@ -112,6 +116,7 @@ function CPlayer.new(core, playerData)
         end)
     end
 
+    ---Bind WebUI events
     function self:bindWebUIEvents()
         -- [TEST] Test function only, it should not be exist on production
         self.core.webUI:registerEventHandler('playAnimation', function(data)
