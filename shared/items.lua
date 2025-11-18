@@ -3,6 +3,8 @@ SHARED.items = {
     id_card                      = { name = 'id_card', label = 'ID Card', weight = 20, type = 'item', image = 'id_card.png', unique = true, useable = true, shouldClose = false, description = "An indentification card. It contains your name, age, and other information." },
     driver_license               = { name = 'driver_license', label = 'Drivers License', weight = 20, type = 'item', image = 'driver_license.png', unique = true, useable = true, shouldClose = false, description = 'Your drive license. Without this, you can get in trouble with the law.' },
 
+    -- Phones
+    phone                        = { name = 'phone', label = 'Phone', weight = 600, type = 'item', image = 'phone.png', unique = true, useable = true, shouldClose = false, description = 'A phone. It can be used to make calls and send messages.' },
     -- Foods
     bread                        = { name = 'bread', label = 'Bread', weight = 100, type = 'item', image = 'bread.png', unique = false, useable = true, shouldClose = false, description = 'A loaf of bread. It can be used to restore your hunger.' },
     sandwich                     = { name = 'sandwich', label = 'Sandwich', weight = 100, type = 'item', image = 'sandwich.png', unique = false, useable = true, shouldClose = false, description = 'A sandwich. It can be used to restore your hunger.' },

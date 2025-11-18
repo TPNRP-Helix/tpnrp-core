@@ -35,7 +35,7 @@ end
 
 ---Save player
 ---@param player SPlayer
----@return boolean success
+---@return boolean status success status
 DAO.player.save = function(player)
     local playerData = player.playerData
     local pCoords = player:getCoords()
@@ -78,11 +78,24 @@ DAO.player.save = function(player)
 end
 
 ---Delete player
----@param player SPlayer
----@return boolean success
-DAO.player.delete = function(player)
-    -- TODO: Delete
-    print('[ERROR] DAO.player.delete - Not implemented!')
+---@param citizenId string citizen id
+---@return boolean status success status
+DAO.player.delete = function(citizenId)
+    -- Begin transaction
+    DAO.DB.Execute('BEGIN TRANSACTION;')
+    local result = DAO.DB.Execute([[DELETE FROM players WHERE citizen_id = ?
+        DELETE FROM levels WHERE citizen_id = ?
+        DELETE FROM inventories WHERE citizen_id = ?
+        DELETE FROM equipments WHERE citizen_id = ?
+        DELETE FROM player_missions WHERE citizen_id = ?
+    ]], { citizenId, citizenId, citizenId, citizenId, citizenId })
+    if result then
+        DAO.DB.Execute('COMMIT;')
+        print(('[LOG] Deleted player (Citizen ID: %s)'):format(citizenId))
+        return true
+    end
+    print(('[ERROR] DAO.player.delete: Failed to delete player (Citizen ID: %s)'):format(citizenId))
+    DAO.DB.Execute('ROLLBACK;')
     return false
 end
 
@@ -106,6 +119,11 @@ DAO.player.getCharacters = function(license)
             row.money               = JSON.parse(rowData.money).cash or 0
             row.job                 = JSON.parse(rowData.job)
             row.citizenId           = rowData.citizen_id
+            row.name                = row.characterInfo.firstName .. ' ' .. row.characterInfo.lastName
+            local levelData = DAO.level.get(rowData.citizen_id)
+            if levelData then
+                row.level = levelData.level
+            end
             characters[#characters + 1] = row
         end
     end
@@ -116,7 +134,7 @@ end
 ---Create character
 ---@param license string
 ---@param playerData PlayerData
----@return boolean success
+---@return boolean status success status
 DAO.player.createCharacter = function(license, playerData)
     -- Save player into database
     local result = DAO.DB.Execute([[INSERT INTO players (citizen_id, license, name, money, character_info, job, gang, position, heading, metadata)

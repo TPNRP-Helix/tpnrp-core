@@ -7,7 +7,19 @@
   "settings.showThirst": "Hiện Khát khi nhỏ hơn",
   "settings.showStamina": "Hiện Thể lực khi nhỏ hơn",
 
+  "settings.audio.title": "Âm thanh",
+  "settings.audio.description": "Cài đặt âm thanh cho trò chơi",
+
+  "settings.basicNeedsHUD.title": "HUD góc phải",
+  "settings.basicNeedsHUD.description": "Cài đặt HUD cần thiết cho trò chơi",
+  "settings.basicNeedsHUD.showHealth": "Hiện Máu khi nhỏ hơn",
+  "settings.basicNeedsHUD.showArmor": "Hiện Giáp khi nhỏ hơn",
+  "settings.basicNeedsHUD.showHunger": "Hiện Đói khi nhỏ hơn",
+  "settings.basicNeedsHUD.showThirst": "Hiện Khát khi nhỏ hơn",
+  "settings.basicNeedsHUD.showStamina": "Hiện Thể lực khi nhỏ hơn",
+
   "selectCharacter.title": "Chọn nhân vật",
+  "selectCharacter.delete": "Xóa",
   "selectCharacter.emptySlot": "Ô trống {n}",
   "selectCharacter.citizenId": "CCCD",
   "selectCharacter.money": "Tiền",
@@ -17,7 +29,10 @@
   "selectCharacter.infoTitle": "Thông tin",
   "selectCharacter.infoDesc": "Chọn nhân vật của bạn hoặc tạo nhân vật mới để bắt đầu.",
   "selectCharacter.language.placeholder": "Chọn ngôn ngữ",
-
+  "selectCharacter.deleteConfirmTitle": "Xóa nhân vật",
+  "selectCharacter.deleteConfirmDesc": "Bạn có chắc chắn muốn xóa nhân vật với CCCD {citizenId}?",
+  "selectCharacter.cancel": "Hủy",
+  
   "createCharacter.title": "Tạo nhân vật",
   "createCharacter.description": "Tạo nhân vật mới để bắt đầu hành trình của bạn.",
   "createCharacter.firstName": "Tên",
@@ -51,7 +66,86 @@
   "helper.toggleFocus": "Bật/tắt con trỏ",
   "helper.toggleToastExpand": "Bật/tắt thông báo",
   "helper.toggleDevMode": "Bật/Tắt DevMode",
-  "helper.toggleConsole": "Bật/Tắt Console"
+  "helper.toggleConsole": "Bật/Tắt Console",
+  "helper.toggleInventory": "Bật/tắt túi đồ",
+  "helper.toggleSettings": "Bật/tắt cài đặt",
+
+  "inventory.title": "Túi đồ",
+  "inventory.backpack.title": "Ba lô",
+  "inventory.backpack.slotCount": "Số ô",
+  "inventory.backpack.empty": "Bạn không có ba lô",
+  "inventory.backpack.emptyDescription": "Mua ba lô từ cửa hàng để tăng số lượng ô trong túi đồ.",
+
+  "inventory.other.ground": "Đất",
+  "inventory.other.player": "Ba lô",
+  "inventory.other.stack": "Túi",
+
+  "inventory.weight": "Trọng lượng",
+  "inventory.slot": "Số ô",
+  "inventory.durability": "Độ bền",
+  "inventory.maxWeight": "Trọng lượng tối đa",
+  "inventory.description": "Mô tả",
+  "inventory.amount": "Số lượng",
+  "inventory.rareLevel": "Độ hiếm",
+  "inventory.weightPerUnit": "Trọng lượng mỗi đơn vị",
+  "inventory.canCarry": "Có thể mang",
+  "inventory.noDescription": "Không có mô tả",
+
+  "inventory.equipment.notCloth": "Vật phẩm không phải là quần áo!",
+
+  "inventory.other.crafting.title": "Chế tạo",
+  "inventory.other.missions.title": "Nhiệm vụ",
+
+  "inventory.equipment.title": "Trang bị",
+  "inventory.skills.title": "Kỹ năng",
+  "inventory.stats.title": "Thống kê",
+
+  "inventory.amountDialog.title": "Bạn muốn {type} bao nhiêu {item}?",
+  "inventory.amountDialog.description": "Bạn có thể chọn số lượng từ 1 đến {amount}",
+  "inventory.amountDialog.quantity": "Số lượng",
+  "inventory.amountDialog.cancel": "Không",
+  "inventory.amountDialog.confirm": "Xác nhận",
+  "inventory.amountDialog.give": "Cho",
+  "inventory.amountDialog.drop": "Vứt",
+  "inventory.amountDialog.invalidQuantity": "Số lượng không hợp lệ",
+  "inventory.amountDialog.other": "Khác",
+
+  "inventory.use": "Dùng",
+  "inventory.split": "Tách",
+  "inventory.give": "Cho",
+  "inventory.drop": "Vứt",
+  "inventory.half": "Một nửa",
+  "inventory.one": "Một",
+  "inventory.all": "Tất cả",
+  "inventory.other": "Khác",
+
+  "inventory.item.label.id_card": "CCCD",
+  "inventory.item.label.driver_license": "Giấy phép lái xe",
+  "inventory.item.label.beer": "Bia",
+  "inventory.item.label.bandage": "Băng gạc",
+  "inventory.item.label.wood_log": "Gỗ",
+  "inventory.item.label.sandwich": "Sandwich",
+  "inventory.item.label.painkillers": "Thuốc giảm đau",
+
+  "inventory.rare.common": "Thường",
+  "inventory.rare.uncommon": "Ít phổ biến",
+  "inventory.rare.rare": "Hiếm",
+  "inventory.rare.epic": "Cực hiếm",
+  "inventory.rare.legendary": "Huyền thoại",
+
+  "inventory.crafting.searchPlaceholder": "Tìm kiếm công thức chế tạo",
+  "inventory.crafting.search": "Tìm kiếm",
+  "crafting.category.all": "Tất cả",
+  "crafting.category.weapon": "Vũ khí",
+  "crafting.category.ammo": "Đạn",
+  "crafting.category.tool": "Công cụ",
+  "crafting.category.food": "Thức ăn",
+  "crafting.category.material": "Vật liệu",
+  "crafting.category.medicine": "Dược phẩm",
+  "crafting.category.building": "Nhà cửa",
+  "crafting.category.other": "Khác",
+  "crafting.empty": "Không tìm thấy công thức chế tạo",
+  "crafting.emptyDescription": "Mua sách công thức từ cửa hàng hoặc nâng cấp để mở khóa công thức."
 }
 
 

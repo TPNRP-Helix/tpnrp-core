@@ -7,9 +7,9 @@ SInventory = {}
 SInventory.__index = SInventory
 
 ---@param player SPlayer player entity
----@param type 'player' | 'stack' | ''
+---@param inventoryType 'player' | 'stack' | ''
 ---@return SInventory
-function SInventory.new(player, type)
+function SInventory.new(player, inventoryType)
     ---@class SInventory
     local self = setmetatable({}, SInventory)
 
@@ -17,7 +17,7 @@ function SInventory.new(player, type)
     self.core = player.core
     -- Player's entity
     self.player = player
-    self.type = type
+    self.type = inventoryType
     self.items = {}
 
     ---/********************************/
@@ -27,7 +27,7 @@ function SInventory.new(player, type)
     ---Contructor function
     local function _contructor()
         -- type is player then load it
-        if type == 'player' then
+        if inventoryType == 'player' then
             self:load('player')
         end
     end
@@ -36,22 +36,26 @@ function SInventory.new(player, type)
     ---/*           Functions          */
     ---/********************************/
 
+    function self:sync()
+        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', self.items)
+    end
+
     ---Save inventory
-    ---@return boolean success
+    ---@return boolean status success status
     function self:save()
         return DAO.inventory.save(self)
     end
 
     ---Load inventory
-    ---@param type 'player' | 'stack' | ''
-    ---@return boolean success
-    function self:load(type)
+---@param inventoryType 'player' | 'stack' | ''
+    ---@return boolean status success status
+    function self:load(inventoryType)
         -- Type is empty then don't load inventory
-        if type == '' then
+        if inventoryType == '' then
             return false
         end
         -- Assign type
-        self.type = type
+        self.type = inventoryType
         -- Get inventory items
         local inventories = DAO.inventory.get(self.player.playerData.citizenId, self.type)
         if inventories then
@@ -92,22 +96,20 @@ function SInventory.new(player, type)
         if self.type == 'player' then
             inventoryCapacity = self.player.equipment:getBackpackCapacity()
         end
-        if not inventoryCapacity.status then
-            print(('[ERROR] SInventory.canAddItem: Inventory capacity not found for type %s!'):format(self.type))
-            return { status = false, message = 'Inventory capacity not found!' }
-        end
+        local totalInventoryWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + inventoryCapacity.weightLimit
+        local totalInventorySlots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
         -- Check if item weight is greater than backpack weight limit
-        if totalWeight > inventoryCapacity.weightLimit then
-            return { status = false, message = 'Inventory weight limit reached!' }
+        if totalWeight > totalInventoryWeight then
+            return { status = false, message = SHARED.t('error.inventoryWeightLimitReached') }
         end
         -- Check if item slots is greater than backpack slots limit
         local totalUsedSlots = #self.items
         local totalNewUsedSlots = totalUsedSlots + 1
-        if totalNewUsedSlots > inventoryCapacity.slots then
-            return { status = false, message = 'Inventory slots limit reached!' }
+        if totalNewUsedSlots > totalInventorySlots then
+            return { status = false, message = SHARED.t('error.inventoryFull') }
         end
 
-        return { status = true, message = 'Item can be added to inventory!' }
+        return { status = true, message = SHARED.t('inventory.added', { count = amount, item = itemData.label }) }
     end
 
     ---Find an empty slot in the inventory
@@ -118,19 +120,8 @@ function SInventory.new(player, type)
         if self.type == 'player' then
             inventoryCapacity = self.player.equipment:getBackpackCapacity()
         end
-        if not inventoryCapacity.status then
-            print(('[ERROR] SInventory.getEmptySlot: Inventory capacity not found for type %s!'):format(self.type))
-            return nil
-        end
-
-        -- If no capacity found, use default from config or return nil
-        local maxSlots = 0
-        if inventoryCapacity.status and inventoryCapacity.slots > 0 then
-            maxSlots = inventoryCapacity.slots
-        else
-            -- No capacity available
-            return nil
-        end
+        -- Max slots is default slots + inventory capacity slots
+        local maxSlots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
         
         -- Create a set of used slots for quick lookup
         local usedSlots = {}
@@ -306,13 +297,15 @@ function SInventory.new(player, type)
             }
         end
         -- Tell player that item is added to inventory
-        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, self.items[targetSlot])
+        -- TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, self.items[targetSlot])
         -- Trigger mission action
         self.player.missionManager:triggerAction('add_item', {
             name = itemName,
             amount = amount,
             info = info or {}
         })
+        -- Sync inventory to client
+        self:sync()
         return { status = true, message = 'Item added to inventory!', slot = targetSlot }
     end
 
@@ -428,18 +421,93 @@ function SInventory.new(player, type)
         
         -- Check if total amount meets the required amount
         if totalAmount >= amount then
-            return { 
-                status = true, 
-                message = string.format('Item found in inventory! (Has: %d, Required: %d)', totalAmount, amount), 
-                totalAmount = totalAmount 
+            return {
+                status = true,
+                message = string.format('Item found in inventory! (Has: %d, Required: %d)', totalAmount, amount),
+                totalAmount = totalAmount
             }
         else
-            return { 
-                status = false, 
-                message = string.format('Not enough items in inventory! (Has: %d, Required: %d)', totalAmount, amount), 
-                totalAmount = totalAmount 
+            return {
+                status = false,
+                message = string.format('Not enough items in inventory! (Has: %d, Required: %d)', totalAmount, amount),
+                totalAmount = totalAmount
             }
         end
+    end
+
+    ---Open inventory
+    ---@param data {type: 'player' | 'stack' | 'other_player' | ''} type of inventory to open
+    function self:openInventory(data)
+        if not data then
+            data = { type = 'player' }
+        end
+        if not data.type or type(data.type) ~= 'string' then
+            return {
+                status = false,
+                message = SHARED.t('error.invalidData'),
+            }
+        end
+        local inventory = nil
+        if data.type == 'other_player' or data.type == 'stack' then
+            return {
+                status = false,
+                message = 'TODO: Feature not implemented yet!',
+            }
+        end
+        if data.type == 'player' then
+            -- Filter out nil values from inventory and convert to array
+            inventory = {}
+            for slot, item in pairs(self.items) do
+                if item ~= nil then
+                    table.insert(inventory, item)
+                end
+            end
+        end
+        local backpackCapacity = self.player.equipment:getBackpackCapacity()
+        
+        return {
+            status = true,
+            message = 'Inventory opened!',
+            inventory = inventory,
+            capacity = {
+                weight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpackCapacity.weightLimit,
+                slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,
+            }
+        }
+    end
+    
+    ---Move item to slot
+    ---@param item SInventoryItemType item data
+    ---@param targetSlot number target slot number
+    ---@return {status:boolean, message:string, slot:number} result of moving item
+    function self:moveItem(item, targetSlot)
+        -- Validate inputs
+        if not item or not targetSlot then
+            return { status = false, message = 'Invalid parameters!', slot = -1 }
+        end
+        local targetItem = self:findItemBySlot(targetSlot)
+        if targetItem ~= nil then
+            -- Target slot have item
+            local sourceSlot = item.slot
+            local targetItem = self.items[targetSlot]
+            targetItem.slot = item.slot
+            -- Change slot of item
+            item.slot = targetSlot
+            self.items[targetSlot] = item
+            -- Assign item to new slo
+            targetItem.slot = sourceSlot
+            self.items[sourceSlot] = targetItem
+        else
+            -- Target slot is empty
+            -- Remove current item at source slot
+            self.items[item.slot] = nil
+            -- Assign new slot to item
+            item.slot = targetSlot
+            -- Assign item to new slot
+            self.items[targetSlot] = item
+        end
+
+        return { status = true, message = 'Item moved to slot!', slot = targetSlot }
     end
 
     _contructor()

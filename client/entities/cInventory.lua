@@ -1,5 +1,6 @@
 ---@class CInventory
 ---@field player CPlayer player entity
+---@field items table<number, SInventoryItemType> item data
 CInventory = {}
 CInventory.__index = CInventory
 
@@ -11,6 +12,7 @@ function CInventory.new(player)
 
     self.core = player.core
     self.player = player
+    ---@type table<number, SInventoryItemType> slotNumber, InventoryItem
     self.items = {}
 
     ---/********************************/
@@ -20,14 +22,32 @@ function CInventory.new(player)
     ---Contructor function
     local function _contructor()
         -- On Update inventory
-        RegisterClientEvent('TPN:inventory:sync', function(type, amount, item)
-            self:onSyncInventory(type, amount, item)
+        RegisterClientEvent('TPN:inventory:sync', function(items)
+            self:onSyncInventory(items)
         end)
         -- Bind key
         -- [Player] [TAB] Inventory
         Input.BindKey('TAB', function()
+            if not self.core:isInGame() then
+                return
+            end
             self:openInventory()
         end, 'Pressed')
+
+        -- On close inventory
+        self.core.webUI:registerEventHandler('onCloseInventory', function()
+            self.core.webUI:outFocus()
+        end)
+
+        -- On move inventory item
+        self.core.webUI:registerEventHandler('onMoveInventoryItem', function(data)
+            TriggerCallback('onMoveInventoryItem', function(result)
+                print('[CLIENT][INFO] CInventory.onMoveInventoryItem - result: ', JSON.stringify(result))
+                if not result.status then
+                    return
+                end
+            end, data)
+        end)
     end
 
 
@@ -36,29 +56,58 @@ function CInventory.new(player)
     ---/********************************/
     
     -- On Update inventory
-    ---@param type 'add' | 'remove' inventory type
-    ---@param amount number item amount
-    ---@param item SInventoryItemType item data
-    function self:onSyncInventory(type, amount, item)
-        if type == 'add' then
-            -- Push item to items table
-            self.items[item.slot] = item
-        elseif type == 'remove' then
-            -- Remove item from items table
-            self.items[item.slot] = nil
-        end
+    ---@param items table<number, SInventoryItemType> item data
+    function self:onSyncInventory(items)
+        self.items = items
         -- Update UI for items changes
-        self.core.webUI:sendEvent('ITEM_CHANGED', {
-            type = type,
-            amount = amount,
-            item = item
+        self.core.webUI:sendEvent('doSyncInventory', {
+            type = 'sync',
+            items = items
         })
     end
 
     ---Open inventory
     function self:openInventory()
-        -- TODO: open inventory
-        -- self.core.webUI:sendEvent('OPEN_INVENTORY')
+        ---@param result {status: boolean, message: string, inventory: SInventoryItemType[]} result
+        TriggerCallback('onOpenInventory', function(result)
+            if not result.status then
+                self.core:showNotification({
+                    title = result.message,
+                    type = 'error',
+                    duration = 5000,
+                })
+                return
+            end
+            -- Open inventory
+            self.core.webUI:focus()
+            self.core.webUI:sendEvent('openInventory', result)
+        end, { type = 'player' })
+    end
+
+    ---Close inventory
+    function self:doCloseInventory()
+        self.core.webUI:outFocus()
+        self.core.webUI:sendEvent('closeInventory')
+    end
+
+    ---Find items owned by current player that contain the provided name fragment
+    ---@param name string item name fragment
+    ---@return SInventoryItemType[] matchingItems
+    function self:findItemsByName(name)
+        if type(name) ~= 'string' or name == '' then
+            return {}
+        end
+
+        local keyword = name:lower()
+        local matchedItems = {}
+
+        for _, item in pairs(self.items or {}) do
+            if item and item.name and item.name:lower():find(keyword, 1, true) then
+                table.insert(matchedItems, item)
+            end
+        end
+
+        return matchedItems
     end
 
     _contructor()

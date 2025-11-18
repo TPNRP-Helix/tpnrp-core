@@ -4,7 +4,9 @@ import { useWebUIMessage } from "@/hooks/use-hevent";
 import { useI18n } from "@/i18n";
 import { verticalStackAnim } from "@/lib/animation";
 import { useDevModeStore } from "@/stores/useDevModeStore";
-import { useGameSettingStore } from "@/stores/useGameSetting";
+import { useGameSettingStore } from "@/stores/useGameSettingStore";
+import { useGameStore } from "@/stores/useGameStore";
+import { useInventoryStore } from "@/stores/useInventoryStore";
 import { AnimatePresence, motion } from "motion/react"
 import { useState } from "react"
 
@@ -21,15 +23,34 @@ export const GuideHelper = () => {
     const { t } = useI18n()
     const [open, setOpen] = useState(false)
     const { permission, toggleDevMode, toggleConsole } = useDevModeStore()
-    const { toastConfig, setToastConfig, uiConfig } = useGameSettingStore()
+    const { toastConfig, setToastConfig, uiConfig, setSettingsOpen } = useGameSettingStore()
+    const { isInGame } = useGameStore()
+    const { setOpenInventory } = useInventoryStore()
     
     const helperItems: HelperItem[] = [
         { id: 'focus', label: "helper.toggleFocus", shortcut: "F2", onClick: () => {} },
-        { id: 'toast', label: "helper.toggleToastExpand", shortcut: "F3", onClick: () => setToastConfig({ ...toastConfig, isExpand: !toastConfig.isExpand }) },
+        { id: 'toast', label: "helper.toggleToastExpand", shortcut: "F3", onClick: () => {
+            setToastConfig({ ...toastConfig, isExpand: !toastConfig.isExpand })
+            setOpen(false)
+        } },
+        { id: 'inventory', label: "helper.toggleInventory", shortcut: "TAB", onClick: () => {
+            setOpenInventory(true)
+            setOpen(false)
+        } },
+        { id: 'settings', label: "helper.toggleSettings", shortcut: "F9", onClick: () => {
+            setSettingsOpen(true)
+            setOpen(false)
+        } },
     ]
     if (permission === 'admin') {
-        helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => toggleDevMode() })
-        helperItems.push({ id: 'console', label: "helper.toggleConsole", shortcut: "F8", onClick: () => toggleConsole() })
+        helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => {
+            toggleDevMode()
+            setOpen(false)
+        } })
+        helperItems.push({ id: 'console', label: "helper.toggleConsole", shortcut: "F8", onClick: () => {
+            toggleConsole()
+            setOpen(false)
+        } })
     }
 
     useWebUIMessage<[boolean]>('toggleGuideHelper', () => {
@@ -65,7 +86,7 @@ export const GuideHelper = () => {
             </AnimatePresence>
 
             {/* Main Dock Button */}
-            {uiConfig.isShowGuideHelper && (
+            {uiConfig.isShowGuideHelper && isInGame && (
                 <Button
                     variant="secondary"
                     size="sm"

@@ -1,25 +1,66 @@
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetDescription } from "@/components/ui/sheet"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useCallback, useEffect, useState } from "react"
 import helixBgImage from "@/assets/devmode/helix-bg.png"
 import { Console } from "./Console"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { useGameStore } from "@/stores/useGameStore"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { UIPreview } from "./UIPreview"
 import { toast } from "sonner"
 import { Input } from "@/components/ui/input"
+import { useInventoryStore } from "@/stores/useInventoryStore"
+import type { TInventoryItem } from "@/types/inventory"
+import { ButtonGroup } from "@/components/ui/button-group"
 const IS_SHOW_BG = false
 
+const FAKE_INVENTORY_ITEMS: TInventoryItem[] = [
+    {
+        amount: 1,
+        name: 'id_card',
+        label: 'ID Card',
+        weight: 20,
+        slot: 1
+    },
+    {
+        amount: 10,
+        name: 'wood_log',
+        label: 'Wood Log',
+        weight: 100,
+        slot: 3
+    },
+    {
+        amount: 1,
+        name: 'phone',
+        label: 'Mobile Phone',
+        weight: 500,
+        slot: 4
+    }
+]
+
 export const DevMode = () => {
-    const [enableDevMode, setEnableDevMode] = useState(true)
-    const { isDevModeOpen, setDevModeOpen, isConsoleOpen, setConsoleOpen, setPermission, permission, setUIPreviewOpen, appendConsoleMessage } = useDevModeStore()
+    const {
+        isDevModeOpen, setDevModeOpen,
+        isConsoleOpen, setConsoleOpen,
+        permission, setPermission,
+        setUIPreviewOpen,
+        appendConsoleMessage,
+        isEnableDevMode, setEnableDevMode
+    } = useDevModeStore()
     const { toggleHud } = useGameStore()
     const { toggleSettings } = useGameSettingStore()
-    const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters } = useCreateCharacterStore()
+    const { toggleSelectCharacter, toggleCreateCharacter, setMaxCharacters, setPlayerCharacters } = useCreateCharacterStore()
+    const {
+        inventoryItems, setInventoryItems,
+        otherItems, setOtherItems,
+        setOpenInventory,
+        setSlotCount,
+        setOtherItemsType,
+        setOtherItemsSlotCount
+    } = useInventoryStore()
 
     const [animationName, setAnimationName] = useState('')
 
@@ -32,14 +73,19 @@ export const DevMode = () => {
     })
 
     useWebUIMessage<[string]>('setPermission', ([permission]) => {
+        appendConsoleMessage({ message: `setPermission: ${permission}`, index: 0 })
         setPermission(permission)
     })
 
     useEffect(() => {
-        const isInBrowser = window.location.href.includes("http://localhost:")
+        const isInBrowser = window.location.port === '5173'
+        appendConsoleMessage({ message: `isInBrowser: ${isInBrowser.toString()}`, index: 0 })
+        appendConsoleMessage({ message: `window.location.href: ${window.location.href}`, index: 0 })
         if (isInBrowser) {
             setEnableDevMode(true)
             setPermission('admin')
+            // Set some fake inventory item for debugging
+            setInventoryItems([...inventoryItems, ...FAKE_INVENTORY_ITEMS])
         }
     }, [])
 
@@ -47,10 +93,16 @@ export const DevMode = () => {
         window.hEvent("playAnimation", { animationName })
         appendConsoleMessage({ message: `Playing animation: ${animationName}`, index: 0 })
     }, [animationName])
+
+    const onClickSetGroundItems = useCallback(() => {
+        setOtherItemsType('ground')
+        setOtherItems([...otherItems, ...FAKE_INVENTORY_ITEMS])
+        setOtherItemsSlotCount(42)
+    }, [otherItems])
     
     // Don't render the dev mode tools if not in browser
     // Or if the permission is not admin
-    if (!enableDevMode || permission !== 'admin') return null
+    if (permission !== 'admin') return null
 
     return (
         <>
@@ -65,16 +117,7 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            {/* <SheetTrigger asChild>
-                <Button className="relative top-1 left-1">
-                    <Kbd>F7</Kbd>
-                    Dev Mode Tools
-                </Button>
-            </SheetTrigger> */}
-            <SheetContent side="left" className="w-[400px] sm:max-w-[400px]">
-                <SheetHeader>
-                    <SheetTitle>Dev Mode Tools</SheetTitle>
-                </SheetHeader>
+            <SheetContent side="left" className="w-[400px] sm:max-w-[400px]" title="Dev Mode Tools">
                 <div className="grid gap-4 p-4">
                     <SheetDescription>
                         DevMode Tools support for testing inventory features
@@ -84,8 +127,17 @@ export const DevMode = () => {
                                 duration: 3000
                             })}>Test toast</Button>
                     <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
-                    <Button onClick={() => toggleSettings()}>Toggle Settings</Button>
+                    <Button onClick={() => {
+                        toggleSettings()
+                        setDevModeOpen(false)
+                    }}>Toggle Settings</Button>
                     <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
+                    <div>
+                        {isEnableDevMode ? 'DevMode is enabled' : 'DevMode is disabled'}
+                    </div>
+                    <div>
+                        Permission: {permission}
+                    </div>
                     <Tabs defaultValue="inventory" className="w-full">
                         <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="character">Character</TabsTrigger>
@@ -104,12 +156,43 @@ export const DevMode = () => {
                         </TabsContent>
                         <TabsContent value="inventory">
                             inventory
+                            <Button onClick={() => {
+                                setOpenInventory(true)
+                                setDevModeOpen(false)
+                            }}>Open Inventory</Button>
+
+                            <ButtonGroup>
+                                <Button onClick={() => {
+                                    onClickSetGroundItems()
+                                    setOpenInventory(true)
+                                    setDevModeOpen(false)
+                                }}>Set Ground Items</Button>
+                                <Button onClick={() => {
+                                    setSlotCount(42)
+                                    setOpenInventory(true)
+                                    setDevModeOpen(false)
+                                }}>Open (42 slots)</Button>
+                            </ButtonGroup>
+
+                            <ButtonGroup>
+                                <Button onClick={() => {
+                                    window.hEvent("addItem", { itemName: 'id_card', amount: 1 })
+                                }}>Add item id_card</Button>
+                                
+                            </ButtonGroup>
                         </TabsContent>
                         <TabsContent value="menu" className="grid gap-2">
                             <Button onClick={() => {
                                 setDevModeOpen(false)
                                 toggleSelectCharacter()
                                 setMaxCharacters(5)
+                                setPlayerCharacters([{
+                                    name: 'Test Character',
+                                    citizenId: 'TPN123456',
+                                    level: 1,
+                                    money: 1000,
+                                    gender: 'male',
+                                }])
                             }}>Select Character</Button>
                             <Button onClick={() => toggleCreateCharacter()}>Create Character</Button>
                         </TabsContent>
@@ -123,17 +206,8 @@ export const DevMode = () => {
                 window.hEvent("doOutFocus")
             }
         }}>
-            {/* <SheetTrigger asChild>
-                <Button className="relative top-1 left-1 ml-2 bg-primary! text-primary-foreground!">
-                    <Kbd>F8</Kbd>
-                    Console
-                </Button>
-            </SheetTrigger> */}
-            <SheetContent className="w-[800px] sm:max-w-[800px]">
-                <SheetHeader>
-                    <SheetTitle>Console</SheetTitle>
-                </SheetHeader>
-                <div className="grid gap-4 p-4">
+            <SheetContent title="Console" className="w-[800px] sm:max-w-[800px]">
+                <div className="flex flex-col gap-4 p-4 h-full">
                     <Console />
                 </div>
             </SheetContent>

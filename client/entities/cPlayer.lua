@@ -15,8 +15,11 @@ function CPlayer.new(core, playerData)
 
     self.core = core
     self.playerData = playerData
+    self.playerController = nil
     -- Player's inventory
     self.inventory = nil
+    -- Player's equipment
+    self.equipment = nil
     -- Player's custom properties
     self.properties = {}
     -- Player's dead state
@@ -28,6 +31,7 @@ function CPlayer.new(core, playerData)
 
     ---Contructor function
     local function _contructor()
+        self.playerController = UE.UGameplayStatics.GetPlayerController(HWorld, 0)
         -- Bind Helix events (Default events of game)
         self:bindHelixEvents()
         -- Bind TPN events (Custom events of TPNRP-Core)
@@ -36,10 +40,18 @@ function CPlayer.new(core, playerData)
         self:bindWebUIEvents()
         -- Get player's inventory
         self.inventory = CInventory.new(self)
+        -- Get player's equipment
+        self.equipment = CEquipment.new(self)
         -- Update
         Timer.SetInterval(function()
             TriggerServerEvent('TPN:player:syncPlayer')
         end, (1000 * 60) * SHARED.CONFIG.UPDATE_INTERVAL)
+
+        -- Update basic needs
+        self.core.webUI:sendEvent('setBasicNeeds', {
+            hunger = self.playerData.metadata['hunger'] or 100,
+            thirst = self.playerData.metadata['thirst'] or 100,
+        })
     end
 
     ---/********************************/
@@ -94,14 +106,30 @@ function CPlayer.new(core, playerData)
             self.playerData = playerData
             self.properties = properties or {}
         end)
+
+        -- On Update basic needs
+        RegisterClientEvent('TPN:player:updateBasicNeeds', function(newHunger, newThirst)
+            self.core.webUI:sendEvent('setBasicNeeds', {
+                hunger = newHunger,
+                thirst = newThirst,
+            })
+        end)
     end
 
+    ---Bind WebUI events
     function self:bindWebUIEvents()
-        -- On Play animation
+        -- [TEST] Test function only, it should not be exist on production
         self.core.webUI:registerEventHandler('playAnimation', function(data)
-            print('[TPN][CLIENT] playAnimation ' .. JSON.stringify(data))
-            TriggerServerEvent('playAnim', data.animationName)
+            self.core.game:playAnimation(nil, data.animationName, {
+                onEnd = function()
+                    print('Animation Ended')
+                end,
+            })
         end)
+    end
+
+    function self:getPawn()
+        return self.playerController:K2_GetPawn()
     end
 
     _contructor()

@@ -12,8 +12,6 @@
     ],
     "client": [
         "client/entities/*.lua",
-        "client/models/baseModel.lua",
-        "client/models/playerModel.lua",
         "client/main.lua"
     ],
     "server": [
@@ -22,7 +20,9 @@
         "server/services/levelDAO.lua",
         "server/services/inventoryDAO.lua",
         "server/services/equipmentDAO.lua",
+        "server/services/missionDAO.lua",
         "server/entities/*.lua",
+        "server/entities/managers/*.lua",
         "server/main.lua"
     ]
 }

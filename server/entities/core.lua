@@ -19,6 +19,15 @@ function TPNRPServer.new()
 
     ---@type SCheatDetector cheat detector entity
     self.cheatDetector = nil
+    ---@type SGame game manager entity
+    self.gameManager = nil
+
+    --- Manager
+    --- @type SInventoryManager inventory manager entity
+    self.inventoryManager = nil
+    --- @type SCharacterManager character manager entity
+    self.characterManager = nil
+
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
@@ -26,31 +35,15 @@ function TPNRPServer.new()
     ---Contructor function
     local function _contructor()
         self.cheatDetector = SCheatDetector.new(self)
-        --- Base-game event
-        RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) self:onPlayerUnloaded(playerController) end)
-        RegisterServerEvent('HEvent:PlayerPossessed', function(playerController) self:onPlayerPossessed(playerController) end)
-        RegisterServerEvent('HEvent:PlayerReady', function(playerController) self:onPlayerReady(playerController) end)
-        
-        -- TPN events
-        RegisterServerEvent('TPN:player:syncPlayer', function(playerController) self:onPlayerSync(playerController) end)
-        RegisterServerEvent('playAnim', function(source, animationName)
-            print('[TPN][SERVER] playAnim ' .. animationName)
-            local char = source:K2_GetPawn()
-            if not char then
-                print('[TPN][SERVER] playAnim - Failed to get character!')
-                return
-            end
-            print('[TPN][SERVER] playAnim - Character found!')
-            local AnimParams = UE.FHelixPlayAnimParams()
-            AnimParams.LoopCount = 1
-            AnimParams.bIgnoreMovementInput = true
-            print('[TPN][SERVER] playAnim - AnimParams.')
-            Animation.Play(char, '/Game/Addon_KpopDances/OMG/A_OMG.A_OMG', AnimParams, function()
-                print('Animation Ended')
-            end)
-        end)
-
-        -- Bind callback events
+        self.gameManager = SGame.new(self)
+        -- Bind all events, callback for inventory
+        self.inventoryManager = SInventoryManager.new(self)
+        self.characterManager = SCharacterManager.new(self)
+        -- Bind Helix events (Default events of game)
+        self:bindHelixEvents()
+        -- Bind TPN's events (Custom events of TPNRP-Core)
+        self:bindTPNEvents()
+        -- Bind callback events (Custom events of TPNRP-Core)
         self:bindCallbackEvents()
     end
 
@@ -59,7 +52,7 @@ function TPNRPServer.new()
     ---/********************************/
 
     ---Get player by source
-    ---@param source number player source
+    ---@param source PlayerController player source
     ---@return SPlayer | nil player SPlayer entity
     function self:getPlayerBySource(source)
         for _, player in pairs(self.players) do
@@ -130,9 +123,23 @@ function TPNRPServer.new()
     ---/********************************/
     ---/*           Events             */
     ---/********************************/
+    
+    ---Bind Helix events
+    function self:bindHelixEvents()
+        --- Base-game event
+        RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) self:onPlayerUnloaded(playerController) end)
+        RegisterServerEvent('HEvent:PlayerPossessed', function(playerController) self:onPlayerPossessed(playerController) end)
+        RegisterServerEvent('HEvent:PlayerReady', function(playerController) self:onPlayerReady(playerController) end)
+    end
+
+    ---Bind TPN events
+    function self:bindTPNEvents()
+        -- TPN events
+        RegisterServerEvent('TPN:player:syncPlayer', function(playerController) self:onPlayerSync(playerController) end)
+    end
 
     ---On Player Unloaded
-    ---@param source number player source
+    ---@param source PlayerController player source
     function self:onPlayerUnloaded(source)
         ---@type SPlayer | nil
         local player = self:getPlayerBySource(source)
@@ -144,7 +151,7 @@ function TPNRPServer.new()
     end
 
     ---On Player Sync
-    ---@param source number player source
+    ---@param source PlayerController player source
     function self:onPlayerSync(source)
         ---@type SPlayer | nil
         local player = self:getPlayerBySource(source)
@@ -166,7 +173,7 @@ function TPNRPServer.new()
     function self:onPlayerPossessed(source)
         local playerState = source:GetLyraPlayerState()
         local license = playerState:GetHelixUserId()
-        local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 3 -- Maximum number of characters per player
+        local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 5 -- Maximum number of characters per player
         local result = DAO.player.getCharacters(license)
         
         if not result then
@@ -209,13 +216,13 @@ function TPNRPServer.new()
     
     ---Bind callback events
     function self:bindCallbackEvents()
-        print('[TPN][SERVER] bindCallbackEvents - register callback')
         -- Get player's role
         ---@param source PlayerController player controller
         ---@return string role
-        RegisterCallback('getPermissions', function(source)
+        RegisterCallback('getPermissions', function(source, citizenId)
             -- Get player's role
-            return SHARED.getPermission(source)
+            local permission = SHARED.getPermission(source)
+            return permission
         end)
 
         -- Get player's language
@@ -226,103 +233,6 @@ function TPNRPServer.new()
             
             -- Return default language by server's config
             return SHARED.CONFIG.LANGUAGE
-        end)
-        
-        -- Create character
-        ---@param source PlayerController player controller
-        ---@param data table data
-        ---@return table result
-        RegisterCallback('createCharacter', function(source, data)
-            local license = self:getLicenseBySource(source)
-            if not license then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
-                return {
-                    success = false,
-                    message = SHARED.t('error.failedToGetLicense'),
-                    playerData = nil
-                }
-            end
-            local playerData = {
-                citizenId = SHARED.createCitizenId(),
-                license = license,
-                name = data.firstName .. ' ' .. data.lastName,
-                money = SHARED.DEFAULT.PLAYER.money,
-                characterInfo = {
-                    firstName = data.firstName,
-                    lastName = data.lastName,
-                    gender = data.gender,
-                    birthday = data.dateOfBirth,
-                },
-                job = SHARED.DEFAULT.PLAYER.job,
-                gang = SHARED.DEFAULT.PLAYER.gang,
-                position = SHARED.DEFAULT.SPAWN.POSITION,
-                heading = SHARED.DEFAULT.SPAWN.HEADING,
-                metadata = SHARED.DEFAULT.PLAYER.metadata,
-                level = SHARED.DEFAULT.LEVEL,
-            }
-            -- Create character
-            local result = DAO.player.createCharacter(license, playerData)
-            if not result then
-                print(('[ERROR] TPNRPServer.bindCallbackEvents - Failed to create character for %s (License: %s)'):format(playerData.name, license))
-                return {
-                    success = false,
-                    message = SHARED.t('error.createCharacter.failedToCreateCharacter'),
-                    playerData = nil
-                }
-            end
-            -- Return success
-            return {
-                success = true,
-                message = SHARED.t('success.createCharacter'),
-                playerData = playerData,
-            }
-        end)
-        
-        -- On Player join game
-        ---@param source PlayerController player controller
-        ---@param citizenId string citizen id
-        ---@return table result
-        RegisterCallback('callbackOnPlayerJoinGame', function(source, citizenId)
-            local license = self:getLicenseBySource(source)
-            if not license then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
-                return {
-                    success = false,
-                    message = SHARED.t('error.failedToGetLicense'),
-                    playerData = nil
-                }
-            end
-            local playerData = DAO.player.get(citizenId)
-            if playerData.license ~= license then
-                print('[ERROR] TPNRPServer.bindCallbackEvents - Player license mismatch!')
-                -- TODO: Cheat detect!!
-                -- TODO: Consider to ban this player by diconnected and add to blacklist
-                self.cheatDetector:logCheater({
-                    action = 'joinGame',
-                    citizenId = citizenId,
-                    license = license,
-                    content = ('[ERROR] TPNRPServer.bindCallbackEvents - Player license mismatch!')
-                })
-                -- This player trying to login with character of other player
-                return {
-                    success = false,
-                    message = SHARED.t('error.joinGame.playerNotFound'),
-                    playerData = nil
-                }
-            end
-            -- Create player
-            local player = SPlayer.new(self, source, playerData)
-            -- Assign back playerData with other properties
-            playerData = player:login()
-            -- Push player into array
-            self.players[#self.players + 1] = player
-
-            -- Return success
-            return {
-                success = true,
-                message = SHARED.t('success.joinGame'),
-                playerData = playerData,
-            }
         end)
     end
 

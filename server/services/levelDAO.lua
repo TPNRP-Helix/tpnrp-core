@@ -3,14 +3,23 @@ DAO.level = {}
 ---@param citizen_id string
 ---@return {level:number, exp:number, skills:any} level Level info
 DAO.level.get = function(citizen_id)
-    local result = DAO.DB.Select('SELECT level, exp, skills FROM levels where citizen_id = ?', { citizen_id })
-    local levelData = result[1] and result[1].Columns:ToTable()
+    local levelData = DAO.Action('Select', 'SELECT level, exp, skills FROM levels where citizen_id = ?', { citizen_id })
     if levelData then
         -- Format level data
+		local level = SHARED.DEFAULT.LEVEL
+		if levelData.level ~= nil then
+			level = tonumber(levelData.level) or SHARED.DEFAULT.LEVEL
+		end
+		local exp = levelData.exp or 0
+		local skills = SHARED.DEFAULT.SKILLS
+		if levelData.skills ~= nil then
+			skills = JSON.parse(levelData.skills)
+		end
+		
         return {
-            level = tonumber(levelData.level),
-            exp = tonumber(levelData.exp),
-            skills = JSON.parse(levelData.skills),
+            level = level,
+            exp = exp,
+            skills = skills,
         }
     end
 
@@ -23,15 +32,18 @@ end
 
 ---Save player
 ---@param level SLevel
----@return boolean success
+---@return boolean status success status
 DAO.level.save = function(level)
 	-- Validate data
-	if not level or not level.playerController or not level.playerController.playerData then
+	if not level or not level.player.playerController or not level.player.playerData then
 		print('[ERROR] DAO.level.save: Invalid level or player data!')
 		return false
 	end
-	local playerData = level.playerController.playerData
-	local citizen_id = playerData.citizen_id
+	local playerData = level.player.playerData
+	if not playerData then
+		return false
+	end
+	local citizen_id = playerData.citizenId or ''
 	-- Begin transaction
 	DAO.DB.Execute('BEGIN TRANSACTION;')
 	local sql = [[
@@ -51,10 +63,10 @@ DAO.level.save = function(level)
 	local result = DAO.DB.Execute(sql, params)
 	if result then
 		DAO.DB.Execute('COMMIT;')
-		print(('[LOG] Saved level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+		print(('[LOG] Saved level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
 		return true
 	end
-	print(('[ERROR] DAO.level.save: Failed to save level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizen_id))
+	print(('[ERROR] DAO.level.save: Failed to save level for %s (Citizen ID: %s)'):format(playerData.name, playerData.citizenId))
 	DAO.DB.Execute('ROLLBACK;')
 	return false
 end

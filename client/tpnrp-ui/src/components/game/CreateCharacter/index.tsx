@@ -2,15 +2,14 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { useDevModeStore } from "@/stores/useDevModeStore"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useCallback, useState } from "react"
 import {
     Item,
-    ItemActions,
     ItemContent,
     ItemDescription,
     ItemTitle,
@@ -27,16 +26,11 @@ import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
 import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
 import { useI18n } from "@/i18n"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useGameStore } from "@/stores/useGameStore"
-
-type TCharacter = {
-    name: string
-    citizenId: string
-    level: number
-    money: number
-    gender: 'male' | 'female'
-}
+import { Separator } from "@/components/ui/separator"
+import type { TCharacter } from "@/types/game"
+import { cn } from "@/lib/utils"
 
 type TCreateCharacterResponse = {
     name: string
@@ -57,28 +51,23 @@ export const CreateCharacter = () => {
     const { t } = useI18n()
     const { language, setLanguage } = useGameSettingStore()
     const {
-        isShowCreateCharacter,
-        isShowSelectCharacter,
-        setShowCreateCharacter,
-        setShowSelectCharacter,
-        maxCharacters,
-        setMaxCharacters,
-        isOpenCalendar,
-        setIsOpenCalendar,
-        dateOfBirth,
-        setDateOfBirth,
-        gender,
-        setGender,
-        firstName,
-        setFirstName,
-        lastName,
-        setLastName,
+        isShowCreateCharacter, setShowCreateCharacter,
+        isShowSelectCharacter, setShowSelectCharacter,
+        maxCharacters, setMaxCharacters,
+        isOpenCalendar, setIsOpenCalendar,
+        dateOfBirth, setDateOfBirth,
+        gender, setGender,
+        firstName, setFirstName,
+        lastName, setLastName,
+        playerCharacters, setPlayerCharacters,
     } = useCreateCharacterStore()
     
     const [error, setError] = useState<{ type: string, message: string } | null>(null)
-    const [playerCharacters, setPlayerCharacters] = useState<TCharacter[]>([])
+    const [selectedCitizenId, setSelectedCitizenId] = useState<string>('')
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const { toggleHud } = useGameStore()
+    const [isShowConfirmDeleteCharacter, setIsShowConfirmDeleteCharacter] = useState(false)
+    const { toggleHud, setIsInGame, setShowLoading } = useGameStore()
+    
     useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
         // TPN Log
         appendConsoleMessage({ message: `Max char: ${maxCharacters} - characters ${JSON.stringify(characters)}`, index: 0 })
@@ -98,10 +87,11 @@ export const CreateCharacter = () => {
         setPlayerCharacters(formattedCharacters)
         // Show Select Character Sheet
         setShowSelectCharacter(true)
+        setShowLoading(false)
+        setIsInGame(true)
     })
 
     useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
-        console.log('onCreateCharacterSuccess', playerData)
         appendConsoleMessage({ message: `Character created successfully: ${JSON.stringify(playerData)}`, index: 0 })
         // Set preview character info
         setPlayerCharacters([...playerCharacters, {
@@ -118,11 +108,15 @@ export const CreateCharacter = () => {
     })
 
     useWebUIMessage<[TCreateCharacterResponse]>('joinGameSuccess', ([playerData]) => {
-        console.log('joinGameSuccess', playerData)
         appendConsoleMessage({ message: `Character joined successfully: ${JSON.stringify(playerData)}`, index: 0 })
+        // Hide Select Character
         setShowSelectCharacter(false)
+        // Hide Create Character Dialog
         setShowCreateCharacter(false)
+        // Enable main HUD
         toggleHud()
+        // Enable in-game Guide 
+        setIsInGame(true)
     })
 
     const onClickCreateCharacter = useCallback(() => {
@@ -162,9 +156,31 @@ export const CreateCharacter = () => {
         })
     }, [firstName, lastName, dateOfBirth, gender, isSubmitting])
 
-    const onClickJoinGame = useCallback((character: TCharacter) => {
-        window.hEvent('joinGame', { citizenId: character.citizenId })
-    }, [])
+    const onClickJoinGame = useCallback(() => {
+        const isInBrowser = window.location.port === '5173'
+        if (isInBrowser) {
+            // Hide Select Character
+            setShowSelectCharacter(false)
+            // Hide Create Character Dialog
+            setShowCreateCharacter(false)
+            // Enable main HUD
+            toggleHud()
+            // Enable in-game Guide 
+            setIsInGame(true)
+        }
+        window.hEvent('joinGame', { citizenId: selectedCitizenId })
+    }, [selectedCitizenId])
+
+    const onClickDeleteCharacter = useCallback(() => {
+        // TODO: Delete character
+        const isInBrowser = window.location.port === '5173'
+        if (isInBrowser) {
+            setPlayerCharacters(playerCharacters.filter((character) => character.citizenId !== selectedCitizenId))
+        }
+        setIsShowConfirmDeleteCharacter(false)
+        setSelectedCitizenId('')
+        window.hEvent('deleteCharacter', { citizenId: selectedCitizenId })
+    }, [selectedCitizenId])
     
     return (
         <>
@@ -175,16 +191,24 @@ export const CreateCharacter = () => {
                     isShowOverlay={false}
                     side="left"
                     isShowCloseButton={false}
+                    title={t("selectCharacter.title")}
                 >
-                    <SheetHeader>
-                        <SheetTitle>{t("selectCharacter.title")}</SheetTitle>
-                    </SheetHeader>
                     <div className="grid gap-4 p-4">
                         {Array.from({ length: maxCharacters }).map((_, index) => {
                             const character = playerCharacters[index] ?? null
 
                             return (
-                                <Item variant='muted' key={`character-${index}`} className="rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
+                                <Item
+                                    variant='muted'
+                                    key={`character-${index}`}
+                                    className={cn('relative rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!',
+                                    {
+                                        'bg-primary/10': selectedCitizenId === character?.citizenId,
+                                        'cursor-pointer': character?.citizenId !== '',
+                                    })}
+                                    style={{ overflow: 'initial !important' }}
+                                    onClick={() => setSelectedCitizenId(character?.citizenId ?? '')}
+                                >
                                     <ItemContent>
                                         <ItemTitle>
                                             {character ? (
@@ -209,20 +233,37 @@ export const CreateCharacter = () => {
                                             ) : <>{t("selectCharacter.createNew")}</>}
                                         </ItemDescription>
                                     </ItemContent>
-                                    <ItemActions className="opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                        {character ? (
-                                            <Button variant="default" size="sm" onClick={() => onClickJoinGame(character)}>
-                                                {t("selectCharacter.join")}
-                                            </Button>
-                                        ) : (
-                                            <Button variant="default" size="sm" onClick={onClickCreateCharacter}>
-                                                {t("selectCharacter.create")}
-                                            </Button>
-                                        )}
-                                    </ItemActions>
                                 </Item>
                             )
                         })}
+                        <Separator className="mt-2" />
+                        <div className="flex flex-row items-center justify-center gap-2">
+                            {selectedCitizenId === '' ? (
+                                <>
+                                    <Button className="w-full" variant="default" size="sm" onClick={onClickCreateCharacter}>
+                                        {t("selectCharacter.create")}
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button
+                                        variant="secondary" size="sm" className="w-1/2"
+                                        onClick={() => setIsShowConfirmDeleteCharacter(true)}
+                                        disabled={selectedCitizenId === ''}
+                                    >
+                                        {t("selectCharacter.delete")}
+                                    </Button>
+                                    <Button
+                                        variant="default" size="sm" className="w-1/2"
+                                        onClick={() => onClickJoinGame()}
+                                        disabled={selectedCitizenId === ''}
+                                    >
+                                        {t("selectCharacter.join")}
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                        <Separator className="mt-2" />
                         <Alert>
                             <AlertCircleIcon />
                             <AlertTitle>{t("selectCharacter.infoTitle")}</AlertTitle>
@@ -254,14 +295,11 @@ export const CreateCharacter = () => {
                 }
             }}>
                 <form onSubmit={onSubmitCreateCharacter}>
-                    <DialogContent className="sm:max-w-[425px] ">
-                        <DialogHeader>
-                            <DialogTitle>{t("createCharacter.title")}</DialogTitle>
+                    <DialogContent className="sm:max-w-[425px]" title={t("createCharacter.title")}>
+                        <div className="grid gap-4 p-4">
                             <DialogDescription>
                                 {t("createCharacter.description")}
                             </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 p-4">
                             <div className="flex gap-2">
                                 <div className="grid gap-3 w-full">
                                     <Label htmlFor="firstName">{t("createCharacter.firstName")}</Label>
@@ -366,6 +404,26 @@ export const CreateCharacter = () => {
                         </DialogFooter>
                     </DialogContent>
                 </form>
+            </Dialog>
+            <Dialog open={isShowConfirmDeleteCharacter} onOpenChange={setIsShowConfirmDeleteCharacter}>
+                <DialogContent
+                className="outline-none! w-[400px]"
+                showCloseButton={false}
+                title={t("selectCharacter.delete")}
+                onInteractOutside={(e) => e.preventDefault()}  
+                >
+                    <div className="flex flex-row items-center justify-center py-8 px-4 gap-2">
+                        {t("selectCharacter.deleteConfirmDesc", { citizenId: selectedCitizenId })}
+                    </div>
+                    <DialogFooter>
+                        <Button variant="secondary" size="sm" onClick={() => setIsShowConfirmDeleteCharacter(false)}>
+                            {t("selectCharacter.cancel")}
+                        </Button>
+                        <Button variant="destructive" size="sm" onClick={() => onClickDeleteCharacter()}>
+                            {t("selectCharacter.delete")}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
             </Dialog>
         </>
     )

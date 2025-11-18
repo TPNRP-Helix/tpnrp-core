@@ -11,9 +11,9 @@ function CWebUI.new(core)
     ---@class CWebUI
     local self = setmetatable({}, CWebUI)
 
-    self._core = core
+    self.core = core
     self._webUI = nil
-    self._isFocusing = false
+    self.isFocusing = false
     -- Log
     self.nucleus = nil
     self.lastLogIndex = 0
@@ -48,11 +48,6 @@ function CWebUI.new(core)
         ---+-----------------------------------------------+
         -- | Bind callback                                 |
         ---+-----------------------------------------------/
-
-        -- Get player's permission for WebUI
-        TriggerCallback('getPermissions', function(result)
-            self:sendEvent('setPermission', result)
-        end)
     end
 
 
@@ -63,24 +58,49 @@ function CWebUI.new(core)
     function self:bindInput()
         -- [GAME] [F1] Toggle guide helper
         Input.BindKey('F1', function()
+            if not self.core:isInGame() then
+                return
+            end
             self:sendEvent('toggleGuideHelper')
         end, 'Pressed')
 
         -- [GAME] [F2] Toggle focus with mouse
         Input.BindKey('F2', function()
-            if self._isFocusing then
+            if not self.core:isInGame() and self.core.permission ~= 'admin' then
+                return
+            end
+            if self.isFocusing then
                 -- Close focus 
                 self:outFocus()
                 return
             end
             -- Open focus and open console
             self._webUI:SetInputMode(EWebUIInputMode.UI)
-            self._isFocusing = true
+            self.isFocusing = true
         end, 'Pressed')
 
         -- [GAME] [F3] Toggle toast expand
         Input.BindKey('F3', function()
+            if not self.core:isInGame() then
+                return
+            end
             self:sendEvent('toggleToastExpand')
+        end, 'Pressed')
+
+        -- [GAME] [F9] Toggle settings
+        Input.BindKey('F9', function()
+            if not self.core:isInGame() then
+                return
+            end
+            if self.isFocusing then
+                -- Close focus 
+                self:outFocus()
+                self:sendEvent('toggleSettings')
+                return
+            end
+            self._webUI:SetInputMode(EWebUIInputMode.UI)
+            self:sendEvent('toggleSettings')
+            self.isFocusing = true
         end, 'Pressed')
 
         -- [ADMIN] [F7] Dev Mode menu
@@ -90,7 +110,7 @@ function CWebUI.new(core)
                     return
                 end
                 -- Player is admin
-                if self._isFocusing then
+                if self.isFocusing then
                     -- Close focus 
                     self:outFocus()
                     self:sendEvent('setDevModeOpen', false)
@@ -99,7 +119,7 @@ function CWebUI.new(core)
                 -- Open focus and open console
                 self._webUI:SetInputMode(EWebUIInputMode.UI)
                 self:sendEvent('setDevModeOpen', true)
-                self._isFocusing = true
+                self.isFocusing = true
             end)
         end, 'Pressed')
 
@@ -110,7 +130,7 @@ function CWebUI.new(core)
                     return
                 end
                 -- Player is admin
-                if self._isFocusing then
+                if self.isFocusing then
                     -- Close focus and close console
                     self:outFocus()
                     self:sendEvent('setConsoleOpen', false)
@@ -119,7 +139,7 @@ function CWebUI.new(core)
                 -- Open focus and open console
                 self._webUI:SetInputMode(EWebUIInputMode.UI)
                 self:sendEvent('setConsoleOpen', true)
-                self._isFocusing = true
+                self.isFocusing = true
             end)
             
         end, 'Pressed')
@@ -127,6 +147,7 @@ function CWebUI.new(core)
 
     ---Hide default UI
     function self:hideDefaultUI()
+       if not SetHUDVisibility then return end
         SetHUDVisibility({
             Healthbar = false,
             Inventory = false,
@@ -148,7 +169,6 @@ function CWebUI.new(core)
     ---@vararg any event data
     function self:sendEvent(event, ...)
         if not self._webUI then
-            print('[ERROR] CWebUI.SEND_EVENT - webUI is not initialized!')
             return false
         end
         -- TODO: Implement a cheat detection system for sending events
@@ -163,7 +183,6 @@ function CWebUI.new(core)
     ---@param callback function event callback
     function self:registerEventHandler(event, callback)
         if not self._webUI then
-            print('[ERROR] CWebUI.REGISTER_EVENT_HANDLER - webUI is not initialized!')
             return false
         end
         -- TODO: Implement a cheat detection system for event handlers
@@ -176,21 +195,19 @@ function CWebUI.new(core)
     ---Focus webUI
     function self:focus()
         if not self._webUI then
-            print('[ERROR] CWebUI.FOCUS - webUI is not initialized!')
             return false
         end
         self._webUI:SetInputMode(EWebUIInputMode.UI)
-        self._isFocusing = true
+        self.isFocusing = true
     end
 
     ---Out focus from webUI
     function self:outFocus()
         if not self._webUI then
-            print('[ERROR] CWebUI.OUT_FOCUS - webUI is not initialized!')
             return false
         end
         self._webUI:SetInputMode(EWebUIInputMode.None)
-        self._isFocusing = false
+        self.isFocusing = false
     end
 
     function self:getActorsWithTag(tag)

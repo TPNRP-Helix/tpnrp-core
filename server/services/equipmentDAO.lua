@@ -1,14 +1,14 @@
 DAO.equipment = {}
 ---Save inventory
 ---@param equipment SEquipment
----@return boolean success
+---@return boolean status success status
 DAO.equipment.save = function(equipment)
     -- Don't execute any query if equipment or player or playerData doesn't exist
     if not equipment or not equipment.player or not equipment.player.playerData then
         print('[ERROR] DAO.equipment.save: Invalid equipment or player data!')
         return false
     end
-    local citizen_id = equipment.player.playerData.citizen_id
+    local citizen_id = equipment.player.playerData.citizenId
     local items = equipment.items
     local formattedItems = {}
     for _, item in pairs(items) do
@@ -37,20 +37,20 @@ DAO.equipment.save = function(equipment)
     local result = DAO.DB.Execute(sql, params)
     if result then
         DAO.DB.Execute('COMMIT;')
-        print(('[LOG] Saved equipment for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
+        print(('[LOG] Saved equipment for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizenId))
         return true
     end
-    print(('[ERROR] DAO.equipment.save: Failed to save equipment for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizen_id))
+    print(('[ERROR] DAO.equipment.save: Failed to save equipment for %s (Citizen ID: %s)'):format(equipment.player.playerData.name, equipment.player.playerData.citizenId))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end
 
 ---Get player's inventory (type = 'player' | 'stack')
----@param citizen_id string
+---@param citizenId string
 ---@return table<EEquipmentClothType, SEquipmentItemType> | nil
-DAO.equipment.get = function(citizen_id)
+DAO.equipment.get = function(citizenId)
     -- Query equipment items
-    local result = DAO.DB.Select('SELECT * FROM equipments where citizen_id = ?', { citizen_id })
+    local result = DAO.DB.Select('SELECT * FROM equipments where citizen_id = ?', { citizenId })
     local equipment = result[1] and result[1].Columns:ToTable()
     if not equipment then
         return nil

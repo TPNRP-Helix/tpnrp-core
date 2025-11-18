@@ -1,14 +1,17 @@
 import { motion, AnimatePresence } from "motion/react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { GlassWater, Ham, Heart, Shield, Smartphone, Zap } from "lucide-react"
+import { GlassWater, Ham, Heart, Loader2, Shield, Smartphone, Zap } from "lucide-react"
 import { useGameStore } from "@/stores/useGameStore"
-import { useGameSettingStore } from "@/stores/useGameSetting"
+import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import defaultAvatar from "@/assets/images/default-avatar.png"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { usePhoneStore } from "@/stores/usePhoneStore"
 import { heartbeatAnimation } from "@/lib/animation"
 import { cn } from "@/lib/utils"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { useEffect } from "react"
+import { useDevModeStore } from "@/stores/useDevModeStore"
 
 const MotionHeart = motion(Heart)
 const MotionShield = motion(Shield)
@@ -20,12 +23,21 @@ const MotionPhone = motion(Smartphone)
 const LIMIT_DESTRUCTIVE_COLOR = 10 // Limit value to show destructive color
 
 export const HUD = () => {
-  const { isHudVisible, basicNeeds, setBasicNeeds } = useGameStore()
+  const { isHudVisible, basicNeeds, setBasicNeeds, isShowLoading, loadingText, setShowLoading, setIsInGame } = useGameStore()
   const { basicNeedHUDConfig } = useGameSettingStore()
   const { notifications } = usePhoneStore()
+  const { isEnableDevMode } = useDevModeStore()
 
   useWebUIMessage<[number]>('setHealth', ([health]) => {
     setBasicNeeds({ health })
+  })
+
+  useWebUIMessage<[number]>('setArmor', ([armor]) => {
+    setBasicNeeds({ armor })
+  })
+
+  useWebUIMessage<[number, number]>('setBasicNeeds', ([hunger, thirst]) => {
+    setBasicNeeds({ hunger, thirst })
   })
 
   const hudVariants = {
@@ -93,6 +105,15 @@ export const HUD = () => {
     }
   ]
 
+  useEffect(() => {
+    if (isEnableDevMode) {
+      setTimeout(() => {
+        setShowLoading(false)
+        setIsInGame(true)
+      }, 1000)
+    }
+  }, [isEnableDevMode])
+
   return (
     <AnimatePresence>
       {isHudVisible && (
@@ -148,6 +169,19 @@ export const HUD = () => {
           </div>
         </motion.div>
       )}
+      <Dialog open={isShowLoading} onOpenChange={setShowLoading}>
+        <DialogContent
+          className="outline-none! w-[400px]"
+          showCloseButton={false}
+          title="Loading"
+          onInteractOutside={(e) => e.preventDefault()}  
+        >
+          <div className="flex items-center justify-center py-8 px-4 gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span className="text-sm text-primary-foreground!">{loadingText}</span>
+          </div>
+        </DialogContent>
+      </Dialog>
     </AnimatePresence>
   )
 }

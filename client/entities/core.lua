@@ -1,6 +1,8 @@
 ---@class TPNRPClient
 ---@field player CPlayer
----@field ui CWebUI webUI entity
+---@field webUI CWebUI webUI entity
+---@field game CGame game entity
+---@field permission string permission
 TPNRPClient = {}
 TPNRPClient.__index = TPNRPClient
 
@@ -17,6 +19,10 @@ function TPNRPClient.new()
     self.player = nil
     self.shared = SHARED    -- Bind shared for other resources to use it via exports
     self.webUI = nil
+    self.game = nil -- Game entity
+
+    -- Permission
+    self.permission = 'player'
 
     ---Contructor function
     local function _contructor()
@@ -33,17 +39,22 @@ function TPNRPClient.new()
     ---Bind Helix events
     function self:bindHelixEvents()
         -- Helix event
-        -- RegisterClientEvent('HEvent:PlayerLoggedIn', function()
-        --     print('[TPN][CLIENT] HEvent:PlayerLoggedIn')
-        -- end)
+        RegisterClientEvent('HEvent:PlayerLoggedIn', function()
+            print('[TPN][CLIENT] HEvent:PlayerLoggedIn')
+            
+        end)
         
-        -- RegisterClientEvent('HEvent:PlayerLoaded', function()
-        --     print('[TPN][CLIENT] HEvent:PlayerLoaded')
-        -- end)    
-        -- -- On Player unpossessed
-        -- RegisterClientEvent('HEvent:PlayerUnPossessed', function()
-        --     print('[CLIENT] HEvent:PlayerUnPossessed')
-        -- end)
+        RegisterClientEvent('HEvent:PlayerLoaded', function()
+            print('[TPN][CLIENT] HEvent:PlayerLoaded')
+            
+        end)    
+        -- On Player unpossessed
+        RegisterClientEvent('HEvent:PlayerPossessed', function()
+            TriggerCallback('getPermissions', function(result)
+                self.webUI:sendEvent('setPermission', result)
+                self.permission = result
+            end, { citizenId = 'empty' })
+        end)
     end
 
     ---Bind TPN events
@@ -68,23 +79,36 @@ function TPNRPClient.new()
         -- On create character
         self.webUI:registerEventHandler('createCharacter', function(data)
             TriggerCallback('createCharacter', function(result)
-                if not result.success then return end
+                if not result.status then return end
                 -- Show notification
                 self:showNotification({
                     title = result.message,
                     type = 'success',
                     duration = 5000,
                 })
-                print('[CLIENT] On create character success: ', JSON.stringify(result))
                 -- Send event to WebUI
                 self.webUI:sendEvent('onCreateCharacterSuccess', result.playerData)
             end, data)
         end)
 
+        self.webUI:registerEventHandler('deleteCharacter', function(data)
+            TriggerCallback('deleteCharacter', function(result)
+                local type = 'success'
+                if not result.status then
+                    type = 'error'
+                end
+                
+                self:showNotification({
+                    title = result.message,
+                    type = type,
+                })
+            end, data)
+        end)
+
         -- On Player click join game
         self.webUI:registerEventHandler('joinGame', function(data)
-            MODEL.player.joinGame(data.citizenId, function(result)
-                if not result.success then
+            TriggerCallback('callbackOnPlayerJoinGame', function(result)
+                if not result.status then
                     self:showNotification({
                         title = SHARED.t('error.joinGameFailed'),
                         message = result.message,
@@ -100,7 +124,25 @@ function TPNRPClient.new()
                 self.webUI:sendEvent('joinGameSuccess', result.playerData)
                 -- Out focus from WebUI to focus on game
                 self.webUI:outFocus()
-            end)
+            end, data.citizenId)
+        end)
+
+        self.webUI:registerEventHandler('addItem', function(data)
+            TriggerCallback('devAddItem', function(result)
+                if not result.status then
+                    self:showNotification({
+                        title = result.message,
+                        type = 'error',
+                        duration = 5000,
+                    })
+                    return
+                end
+                self:showNotification({
+                    title = result.message,
+                    type = 'success',
+                    duration = 3000,
+                })
+            end, data)
         end)
     end
 
@@ -120,6 +162,12 @@ function TPNRPClient.new()
     function self:showNotification(notification)
         -- Show notification in UI
         self.webUI:sendEvent('showNotification', notification)
+    end
+    
+    ---Check if player is in game
+    ---@return boolean
+    function self:isInGame()
+        return self.player ~= nil
     end
 
     _contructor()

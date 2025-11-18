@@ -6,11 +6,13 @@ export type ConsoleMessage = {
 }
 
 type DevModeState = {
+  isEnableDevMode: boolean
   permission: string
   isDevModeOpen: boolean
   isConsoleOpen: boolean
   isUIPreviewOpen: boolean
   consoleMessages: ConsoleMessage[]
+  setEnableDevMode: (value: boolean) => void
   setDevModeOpen: (value: boolean) => void
   toggleDevMode: () => void
   setConsoleOpen: (value: boolean) => void
@@ -22,11 +24,13 @@ type DevModeState = {
 }
 
 export const useDevModeStore = create<DevModeState>((set) => ({
+  isEnableDevMode: false,
   permission: 'player',
   isDevModeOpen: false,
   isConsoleOpen: false,
   isUIPreviewOpen: false,
   consoleMessages: [],
+  setEnableDevMode: (value: boolean) => set({ isEnableDevMode: value }),
   setUIPreviewOpen: (value: boolean) => set({ isUIPreviewOpen: value }),
   setDevModeOpen: (value) => set({ isDevModeOpen: value }),
   toggleDevMode: () =>
@@ -40,7 +44,7 @@ export const useDevModeStore = create<DevModeState>((set) => ({
     })),
   appendConsoleMessage: (message) =>
     set((state) => ({
-      consoleMessages: [...state.consoleMessages, message],
+      consoleMessages: [...state.consoleMessages, { message: `> ${new Date().toISOString()} - ${message.message}`, index: message.index }],
     })),
   resetConsole: () => set({ consoleMessages: [] }),
   setPermission: (value) => set({ permission: value }),

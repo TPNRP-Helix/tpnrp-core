@@ -36,6 +36,14 @@ SHARED.randomInt = function(min, max)
     return math.random(min, max)
 end
 
+SHARED.randomId = function(length)
+    local length = length or 6
+    if type(length) ~= "number" or length <= 0 then
+        return ""
+    end
+    return SHARED.randomStr(length)
+end
+
 ----------------------------------------------------------------------
 --- Split String
 ----------------------------------------------------------------------
@@ -274,7 +282,7 @@ SHARED.getPermission = function(source)
         return 'player'
     end
     local license = playerState:GetHelixUserId()
-    for _, value in ipairs(SHARED.CONFIG.PERMISSIONS) do
+    for _, value in pairs(SHARED.CONFIG.PERMISSIONS) do
         if value.license == license then
             return value.role or 'player' -- fallback default role is player
         end
