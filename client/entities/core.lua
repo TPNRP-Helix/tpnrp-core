@@ -86,7 +86,6 @@ function TPNRPClient.new()
                     type = 'success',
                     duration = 5000,
                 })
-                print('[CLIENT] On create character success: ', JSON.stringify(result))
                 -- Send event to WebUI
                 self.webUI:sendEvent('onCreateCharacterSuccess', result.playerData)
             end, data)
@@ -109,7 +108,7 @@ function TPNRPClient.new()
         -- On Player click join game
         self.webUI:registerEventHandler('joinGame', function(data)
             TriggerCallback('callbackOnPlayerJoinGame', function(result)
-                if not result.success then
+                if not result.status then
                     self:showNotification({
                         title = SHARED.t('error.joinGameFailed'),
                         message = result.message,
@@ -126,6 +125,24 @@ function TPNRPClient.new()
                 -- Out focus from WebUI to focus on game
                 self.webUI:outFocus()
             end, data.citizenId)
+        end)
+
+        self.webUI:registerEventHandler('addItem', function(data)
+            TriggerCallback('devAddItem', function(result)
+                if not result.status then
+                    self:showNotification({
+                        title = result.message,
+                        type = 'error',
+                        duration = 5000,
+                    })
+                    return
+                end
+                self:showNotification({
+                    title = result.message,
+                    type = 'success',
+                    duration = 3000,
+                })
+            end, data)
         end)
     end
 

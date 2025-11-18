@@ -277,19 +277,13 @@ end
 ---@param source PlayerController player controller
 ---@return string role
 SHARED.getPermission = function(source)
-    print('[TPN][SHARED] getPermission - source: ', source)
     local playerState = source:GetLyraPlayerState()
-    print('[TPN][SHARED] getPermission - playerState: ', playerState)
     if not playerState then
-        print('[TPN][SHARED] getPermission - playerState not found')
         return 'player'
     end
     local license = playerState:GetHelixUserId()
-    print('[TPN][SHARED] getPermission - license: ', license)
     for _, value in pairs(SHARED.CONFIG.PERMISSIONS) do
-        print('[TPN][SHARED] getPermission - value: ', value)
         if value.license == license then
-            print('[TPN][SHARED] getPermission - value.role: ', value.role)
             return value.role or 'player' -- fallback default role is player
         end
     end

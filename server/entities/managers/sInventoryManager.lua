@@ -26,6 +26,27 @@ function SInventoryManager.new(core)
         RegisterCallback('onMoveInventoryItem', function(source, data)
             return self:onMoveInventoryItem(source, data)
         end)
+        RegisterCallback('devAddItem', function(source, data)
+            local player = self.core:getPlayerBySource(source)
+            if not player then
+                return {
+                    status = false,
+                    message = 'Player not found!',
+                }
+            end
+            local permission = SHARED.getPermission(source)
+            if permission ~= 'admin' then
+                return {
+                    status = false,
+                    message = SHARED.t('error.notAllowed'),
+                }
+            end
+            local result = player.inventory:addItem(data.itemName, data.amount)
+            return {
+                status = result.status,
+                message = result.message,
+            }
+        end)
     end
 
     ---/********************************/

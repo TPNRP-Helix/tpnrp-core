@@ -33,6 +33,8 @@ LOCALES.VI = {
         },
         noEmptySlotAvailable = "Không có ô trống trong túi đồ!",
         itemNotCloth = "Vật phẩm không phải là quần áo!",
+        inventoryWeightLimitReached = "Túi đồ đã đầy trọng lượng!",
+        inventoryFull = "Túi đồ đã đầy!",
     },
     success = {
         joinGame = "Đã vào game thành công",

@@ -91,6 +91,8 @@
   "inventory.canCarry": "Có thể mang",
   "inventory.noDescription": "Không có mô tả",
 
+  "inventory.equipment.notCloth": "Vật phẩm không phải là quần áo!",
+
   "inventory.other.crafting.title": "Chế tạo",
   "inventory.other.missions.title": "Nhiệm vụ",
 

@@ -96,22 +96,20 @@ function SInventory.new(player, inventoryType)
         if self.type == 'player' then
             inventoryCapacity = self.player.equipment:getBackpackCapacity()
         end
-        if not inventoryCapacity.status then
-            print(('[ERROR] SInventory.canAddItem: Inventory capacity not found for type %s!'):format(self.type))
-            return { status = false, message = 'Inventory capacity not found!' }
-        end
+        local totalInventoryWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + inventoryCapacity.weightLimit
+        local totalInventorySlots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
         -- Check if item weight is greater than backpack weight limit
-        if totalWeight > inventoryCapacity.weightLimit then
-            return { status = false, message = 'Inventory weight limit reached!' }
+        if totalWeight > totalInventoryWeight then
+            return { status = false, message = SHARED.t('error.inventoryWeightLimitReached') }
         end
         -- Check if item slots is greater than backpack slots limit
         local totalUsedSlots = #self.items
         local totalNewUsedSlots = totalUsedSlots + 1
-        if totalNewUsedSlots > inventoryCapacity.slots then
-            return { status = false, message = 'Inventory slots limit reached!' }
+        if totalNewUsedSlots > totalInventorySlots then
+            return { status = false, message = SHARED.t('error.inventoryFull') }
         end
 
-        return { status = true, message = 'Item can be added to inventory!' }
+        return { status = true, message = SHARED.t('inventory.added', { count = amount, item = itemData.label }) }
     end
 
     ---Find an empty slot in the inventory
@@ -122,19 +120,8 @@ function SInventory.new(player, inventoryType)
         if self.type == 'player' then
             inventoryCapacity = self.player.equipment:getBackpackCapacity()
         end
-        if not inventoryCapacity.status then
-            print(('[ERROR] SInventory.getEmptySlot: Inventory capacity not found for type %s!'):format(self.type))
-            return nil
-        end
-
-        -- If no capacity found, use default from config or return nil
-        local maxSlots = 0
-        if inventoryCapacity.status and inventoryCapacity.slots > 0 then
-            maxSlots = inventoryCapacity.slots
-        else
-            -- No capacity available
-            return nil
-        end
+        -- Max slots is default slots + inventory capacity slots
+        local maxSlots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
         
         -- Create a set of used slots for quick lookup
         local usedSlots = {}
@@ -434,16 +421,16 @@ function SInventory.new(player, inventoryType)
         
         -- Check if total amount meets the required amount
         if totalAmount >= amount then
-            return { 
-                status = true, 
-                message = string.format('Item found in inventory! (Has: %d, Required: %d)', totalAmount, amount), 
-                totalAmount = totalAmount 
+            return {
+                status = true,
+                message = string.format('Item found in inventory! (Has: %d, Required: %d)', totalAmount, amount),
+                totalAmount = totalAmount
             }
         else
-            return { 
-                status = false, 
-                message = string.format('Not enough items in inventory! (Has: %d, Required: %d)', totalAmount, amount), 
-                totalAmount = totalAmount 
+            return {
+                status = false,
+                message = string.format('Not enough items in inventory! (Has: %d, Required: %d)', totalAmount, amount),
+                totalAmount = totalAmount
             }
         end
     end
@@ -468,13 +455,24 @@ function SInventory.new(player, inventoryType)
             }
         end
         if data.type == 'player' then
-            inventory = self.items
+            -- Filter out nil values from inventory and convert to array
+            inventory = {}
+            for slot, item in pairs(self.items) do
+                if item ~= nil then
+                    table.insert(inventory, item)
+                end
+            end
         end
-
+        local backpackCapacity = self.player.equipment:getBackpackCapacity()
+        
         return {
             status = true,
             message = 'Inventory opened!',
             inventory = inventory,
+            capacity = {
+                weight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpackCapacity.weightLimit,
+                slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,
+            }
         }
     end
     

@@ -22,7 +22,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         if (item === null) {
             return null
         }
-        return `/assets/images/items/${item.name}.png`
+        return `./assets/images/items/${item.name}.png`
     }, [item])
 
     const itemLabel = useMemo(() => {

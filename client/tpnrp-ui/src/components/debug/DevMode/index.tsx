@@ -173,6 +173,13 @@ export const DevMode = () => {
                                     setDevModeOpen(false)
                                 }}>Open (42 slots)</Button>
                             </ButtonGroup>
+
+                            <ButtonGroup>
+                                <Button onClick={() => {
+                                    window.hEvent("addItem", { itemName: 'id_card', amount: 1 })
+                                }}>Add item id_card</Button>
+                                
+                            </ButtonGroup>
                         </TabsContent>
                         <TabsContent value="menu" className="grid gap-2">
                             <Button onClick={() => {

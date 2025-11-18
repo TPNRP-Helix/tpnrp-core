@@ -18,4 +18,8 @@ SHARED.CONFIG = {
         }
     },
     NEWBIE_INVENTORY = {'id_card', 'phone'},
+    INVENTORY_CAPACITY = {
+        WEIGHT = 15000, -- Weight in grams
+        SLOTS = 5, -- Slots count
+    },
 }

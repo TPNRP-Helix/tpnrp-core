@@ -48,7 +48,6 @@ function CWebUI.new(core)
         ---+-----------------------------------------------+
         -- | Bind callback                                 |
         ---+-----------------------------------------------/
-        print('[INFO] CWebUI.NEW - binding callback')
     end
 
 
@@ -93,7 +92,15 @@ function CWebUI.new(core)
             if not self.core:isInGame() then
                 return
             end
+            if self.isFocusing then
+                -- Close focus 
+                self:outFocus()
+                self:sendEvent('toggleSettings')
+                return
+            end
+            self._webUI:SetInputMode(EWebUIInputMode.UI)
             self:sendEvent('toggleSettings')
+            self.isFocusing = true
         end, 'Pressed')
 
         -- [ADMIN] [F7] Dev Mode menu
@@ -140,16 +147,7 @@ function CWebUI.new(core)
 
     ---Hide default UI
     function self:hideDefaultUI()
-        local actors = UE.TArray(UE.AActor)
-        UE.UGameplayStatics.GetAllActorsWithTag(HWorld, 'HWebUI', actors)
-        if not actors[1] then
-            print('[ERROR] CWebUI.HIDE_DEFAULT_UI - HWebUI actor not found')
-            return false
-        end
-        print('[INFO] CWebUI.HIDE_DEFAULT_UI - HWebUI actor found => Hide UI')
-        actors[1]:SetHUDVisibility(false, false, true, true, false)
-        
-        if not SetHUDVisibility then return end
+       if not SetHUDVisibility then return end
         SetHUDVisibility({
             Healthbar = false,
             Inventory = false,

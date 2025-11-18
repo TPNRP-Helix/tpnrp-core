@@ -91,6 +91,8 @@
   "inventory.canCarry": "Can carry",
   "inventory.noDescription": "No description",
 
+  "inventory.equipment.notCloth": "Item is not a cloth item!",
+
   "inventory.other.crafting.title": "Crafting",
   "inventory.other.missions.title": "Missions",
 

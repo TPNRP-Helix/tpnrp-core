@@ -23,7 +23,12 @@ export const Settings = () => {
     useWebUIMessage<[]>('toggleSettings', () => setSettingsOpen(!isSettingsOpen))
 
     return (
-        <Sheet open={isSettingsOpen} onOpenChange={setSettingsOpen}>
+        <Sheet open={isSettingsOpen} onOpenChange={(open) => {
+            setSettingsOpen(open)
+            if (!open) {
+                window.hEvent("doOutFocus")
+            }
+        }}>
             <SheetContent side="left" className="w-[800px] sm:max-w-[800px]" title={t("settings.title")}>
                 <div className="grid gap-4 p-4">
                     <SheetDescription>

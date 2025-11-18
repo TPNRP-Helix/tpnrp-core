@@ -68,6 +68,7 @@ function CInventory.new(player)
 
     ---Open inventory
     function self:openInventory()
+        ---@param result {status: boolean, message: string, inventory: SInventoryItemType[]} result
         TriggerCallback('onOpenInventory', function(result)
             if not result.status then
                 self.core:showNotification({
@@ -77,10 +78,9 @@ function CInventory.new(player)
                 })
                 return
             end
-            print('[INFO] CInventory.openInventory result: ', JSON.stringify(result))
             -- Open inventory
             self.core.webUI:focus()
-            self.core.webUI:sendEvent('openInventory')
+            self.core.webUI:sendEvent('openInventory', result)
         end, { type = 'player' })
     end
 

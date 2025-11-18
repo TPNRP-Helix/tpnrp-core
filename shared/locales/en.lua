@@ -33,6 +33,8 @@ LOCALES.EN = {
         },
         noEmptySlotAvailable = "No empty slot available!",
         itemNotCloth = "Item is not a cloth item!",
+        inventoryWeightLimitReached = "Inventory weight limit reached!",
+        inventoryFull = "Inventory is full!",
     },
     success = {
         joinGame = "Joined game successfully",

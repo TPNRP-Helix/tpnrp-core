@@ -10,7 +10,6 @@ import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useCallback, useState } from "react"
 import {
     Item,
-    ItemActions,
     ItemContent,
     ItemDescription,
     ItemTitle,
@@ -234,32 +233,35 @@ export const CreateCharacter = () => {
                                             ) : <>{t("selectCharacter.createNew")}</>}
                                         </ItemDescription>
                                     </ItemContent>
-                                    <ItemActions className="opacity-0 group-hover/item:opacity-100 transition-opacity">
-                                        {character ? null : (
-                                            <Button variant="default" size="sm" onClick={onClickCreateCharacter}>
-                                                {t("selectCharacter.create")}
-                                            </Button>
-                                        )}
-                                    </ItemActions>
                                 </Item>
                             )
                         })}
                         <Separator className="mt-2" />
                         <div className="flex flex-row items-center justify-center gap-2">
-                            <Button
-                                variant="secondary" size="sm" className="w-1/2"
-                                onClick={() => setIsShowConfirmDeleteCharacter(true)}
-                                disabled={selectedCitizenId === ''}
-                            >
-                                {t("selectCharacter.delete")}
-                            </Button>
-                            <Button
-                                variant="default" size="sm" className="w-1/2"
-                                onClick={() => onClickJoinGame()}
-                                disabled={selectedCitizenId === ''}
-                            >
-                                {t("selectCharacter.join")}
-                            </Button>
+                            {selectedCitizenId === '' ? (
+                                <>
+                                    <Button className="w-full" variant="default" size="sm" onClick={onClickCreateCharacter}>
+                                        {t("selectCharacter.create")}
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Button
+                                        variant="secondary" size="sm" className="w-1/2"
+                                        onClick={() => setIsShowConfirmDeleteCharacter(true)}
+                                        disabled={selectedCitizenId === ''}
+                                    >
+                                        {t("selectCharacter.delete")}
+                                    </Button>
+                                    <Button
+                                        variant="default" size="sm" className="w-1/2"
+                                        onClick={() => onClickJoinGame()}
+                                        disabled={selectedCitizenId === ''}
+                                    >
+                                        {t("selectCharacter.join")}
+                                    </Button>
+                                </>
+                            )}
                         </div>
                         <Separator className="mt-2" />
                         <Alert>

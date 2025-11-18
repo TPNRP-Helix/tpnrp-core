@@ -17,14 +17,27 @@ import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
 import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
 import { useDevModeStore } from "@/stores/useDevModeStore"
+import { toast } from "sonner"
+
+const DEFAULT_SLOT_COUNT = 5
+
+type TOpenInventoryResult = {
+    status: boolean
+    message: string
+    inventory: TInventoryItem[]
+    capacity: {
+        weight: number
+        slots: number
+    }
+}
 
 export const Inventory = () => {
     const {
         isOpenInventory,
         setOpenInventory,
         inventoryItems, setInventoryItems,
-        slotCount,
-        getTotalWeight,
+        slotCount, setSlotCount,
+        getTotalWeight, setTotalWeight,
         getTotalLimitWeight,
         moveInventoryItem
     } = useInventoryStore()
@@ -72,6 +85,9 @@ export const Inventory = () => {
         const isClothItem = item.name.startsWith('cloth_')
         // If item is not a cloth item and target group is equipment, don't allow to move
         if (!isClothItem && targetGroup === 'equipment') {
+            toast.error(t('inventory.equipment.notCloth'), {
+                duration: 3000
+            })
             setActiveDragItem(null)
             return
         }
@@ -108,7 +124,21 @@ export const Inventory = () => {
     const hotbarItems = inventoryItems.filter(item => item.slot >= 1 && item.slot <= 6).sort((a, b) => a.slot - b.slot)
     const backpackItems = inventoryItems.filter(item => item.slot >= 7).sort((a, b) => a.slot - b.slot)
 
-    useWebUIMessage<[]>('openInventory', () => setOpenInventory(true))
+    useWebUIMessage<[TOpenInventoryResult]>('openInventory', ([result]) => {
+        // Check if result.inventory is an array or object
+        if (Array.isArray(result.inventory)) {
+            // It's an array
+            setInventoryItems(result.inventory)
+        } else if (result.inventory && typeof result.inventory === 'object') {
+            // It's an object (not an array)
+            const inventoryItems: TInventoryItem[] = Object.values(result.inventory).filter(item => item !== null) as TInventoryItem[]
+            setInventoryItems(inventoryItems)
+        }
+        
+        setSlotCount(result.capacity.slots)
+        setTotalWeight(result.capacity.weight)
+        setOpenInventory(true)
+    })
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
     useWebUIMessage<[type: string, items: TInventoryItem[]]>('doSyncInventory', ([type, items]) => {
         if (type === 'sync') {
@@ -177,12 +207,12 @@ export const Inventory = () => {
                                 </div>
                                 <div className="relative mt-4 h-[calc(100%-154px)]">
                                     <SheetTitle>{t("inventory.backpack.title")}</SheetTitle>
-                                    <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount}</div>
+                                    <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount - DEFAULT_SLOT_COUNT}</div>
                                     <Separator className="relative mb-4 -top-px" />
                                     <ScrollArea className="h-[calc(100%-45px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed">
-                                        {slotCount > 0 ? (
+                                        {(slotCount - DEFAULT_SLOT_COUNT) > 0 ? (
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
-                                                {Array.from({ length: slotCount }, (_, i) => {
+                                                {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
                                                     const slot = i + 7
                                                     const item = backpackItems.find(item => item.slot === slot)
                                                     return <InventoryItem key={slot} item={item} slot={slot} />
@@ -216,7 +246,7 @@ export const Inventory = () => {
                 {activeDragItem?.item ? (
                     <div className="pointer-events-none select-none">
                         <img
-                            src={`/assets/images/items/${activeDragItem.item.name}.png`}
+                            src={`./assets/images/items/${activeDragItem.item.name}.png`}
                             alt={activeDragItem.item.label ?? activeDragItem.item.name}
                             className="w-16 h-16 object-contain drop-shadow-2xl"
                         />
