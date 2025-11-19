@@ -34,6 +34,7 @@ function SPlayer.new(core, playerController, playerData)
     self.properties = {}
     -- Player's custom methods
     self.methods = {}
+    
 
     ---/********************************/
     ---/*         Initializes          */
@@ -51,6 +52,8 @@ function SPlayer.new(core, playerController, playerData)
         self.equipment = SEquipment.new(self)
         -- Get player's missions
         self.missionManager = SMission.new(self)
+        -- Get player's permission
+        self.properties.permission = self.core:getPermission(self.playerController)
     end
 
     ---/********************************/
