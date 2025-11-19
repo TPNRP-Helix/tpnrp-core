@@ -41,7 +41,6 @@ DAO.player.save = function(player)
     local pCoords = player:getCoords()
     local pHeading = player:getHeading()
     if not playerData then
-        print('[ERROR] DAO.player.save: playerData is empty!')
         return false
     end
     -- Save player into database
@@ -65,7 +64,7 @@ DAO.player.save = function(player)
             JSON.stringify(playerData.characterInfo),
             JSON.stringify(playerData.job),
             JSON.stringify(playerData.gang),
-            JSON.stringify(pCoords),
+            JSON.stringify({ x = pCoords.x, y = pCoords.y, z = pCoords.z }),
             pHeading,
             JSON.stringify(playerData.metadata),
         })
