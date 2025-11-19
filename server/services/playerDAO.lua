@@ -22,6 +22,7 @@ DAO.player.get = function(citizenId)
             position = JSON.parse(rowData.position),
             metadata = JSON.parse(rowData.metadata),
             citizenId = rowData.citizen_id,
+            heading = rowData.heading,
         }
 
         return playerData

@@ -13,6 +13,7 @@
 ---@field job table
 ---@field gang table
 ---@field position Vector3
+---@field heading number
 ---@field metadata table
 ---@field netId number|nil
 

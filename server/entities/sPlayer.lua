@@ -146,7 +146,12 @@ function SPlayer.new(core, playerController, playerData)
         self.playerData.netId = PlayerState:GetPlayerId()
         self.playerData.license = PlayerState:GetHelixUserId()
         self.playerData.name = PlayerState:GetPlayerName()
-
+        -- Update Pawn position and heading
+        local ped = GetPlayerPawn(self.playerController)
+        if ped then
+            SetEntityCoords(ped, Vector(self.playerData.position.x, self.playerData.position.y, self.playerData.position.z))
+            SetEntityRotation(ped, self.playerData.heading)
+        end
         return self.playerData
     end
 
