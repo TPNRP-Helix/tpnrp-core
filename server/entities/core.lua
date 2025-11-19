@@ -251,7 +251,7 @@ function TPNRPServer.new()
         ---@return string role
         RegisterCallback('getPermissions', function(source, citizenId)
             -- Get player's role
-            return SHARED.getPermission(source)
+            return self:getPermission(source)
         end)
 
         -- Get player's language

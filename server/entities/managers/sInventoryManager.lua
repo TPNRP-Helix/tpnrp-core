@@ -34,7 +34,7 @@ function SInventoryManager.new(core)
                     message = 'Player not found!',
                 }
             end
-            local permission = SHARED.getPermission(source)
+            local permission = self.core:getPermission(source)
             if permission ~= 'admin' then
                 return {
                     status = false,
