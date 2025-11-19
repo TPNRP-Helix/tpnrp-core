@@ -26,3 +26,20 @@
 ---@field status boolean
 ---@field message string
 ---@field slot number
+
+---@class TContainer
+---@field id string -- Id of container
+---@field items table<number, SInventoryItemType> -- list items in container
+---@field entityId string -- Id of entity
+---@field entity unknown -- Entity of container
+
+---@class TInventoryOpenInventoryResultType -- Response object when called open inventory
+---@field status boolean -- Status of response
+---@field message string -- message
+---@field inventory table<number, SInventoryItemType> -- player's inventory
+---@field container {id: string; items: table<number, SInventoryItemType>}|nil -- container's inventory
+
+---@class TResponseCreateDropItem
+---@field status boolean -- Status of response
+---@field message string -- message
+---@field itemData { itemName: string; amount: number; fromSlot: number }

@@ -16,7 +16,12 @@ import { useDraggable, useDroppable } from "@dnd-kit/core"
 export const InventoryItem = (props: TInventoryItemProps) => {
     const { item = null, slot = null, isShowHotbarNumber = true, group = 'inventory' } = props
     const { t } = useI18n()
-    const { setIsOpenAmountDialog, setAmountDialogType, setDialogItem } = useInventoryStore()
+    const {
+        setIsOpenAmountDialog,
+        setAmountDialogType,
+        setDialogItem,
+        temporaryDroppedItems, setTemporaryDroppedItem
+    } = useInventoryStore()
 
     const itemImage = useMemo(() => {
         if (item === null) {
@@ -52,7 +57,21 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     }, [])
 
     const onClickDrop = useCallback((dropType: 'half' | 'one' | 'all') => {
-        console.log('onClickDrop', dropType)
+        if (item === null) {
+            return
+        }
+        let amount = 1
+        if (dropType === 'half') {
+            amount = Math.floor(item.amount / 2)
+        } else if (dropType === 'all') {
+            amount = item.amount
+        }
+        setTemporaryDroppedItem({...item, amount})
+        window.hEvent('createDropItem', {
+            itemName: item.name,
+            amount,
+            fromSlot: item.slot
+        })
     }, [])
     
     const onOpenAmountDialog = useCallback((dialogType: 'give' | 'drop') => {

@@ -15,7 +15,7 @@ import { PackageOpen } from "lucide-react"
 import { OtherInventory } from "./OtherInventory"
 import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
-import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
+import type { TInventoryGroup, TInventoryItem, TResponseCreateDropItem } from "@/types/inventory"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { toast } from "sonner"
 
@@ -39,7 +39,9 @@ export const Inventory = () => {
         slotCount, setSlotCount,
         getTotalWeight, setTotalWeight,
         getTotalLimitWeight,
-        moveInventoryItem
+        moveInventoryItem,
+        removeTemporaryDroppedItem,
+        rollbackTemporaryDroppedItem
     } = useInventoryStore()
     const { t } = useI18n()
     const { appendConsoleMessage } = useDevModeStore()
@@ -144,6 +146,16 @@ export const Inventory = () => {
         if (type === 'sync') {
             appendConsoleMessage({ message: `doSyncInventory: ${JSON.stringify(items)}`, index: 0 })
             setInventoryItems(items)
+        }
+    })
+
+    useWebUIMessage<[TResponseCreateDropItem]>('onCreateDropResponse', ([result]) => {
+        if (result.status) {
+            // Remove temporary item from temporaryDroppedItems
+            removeTemporaryDroppedItem(result.itemData)
+        } else {
+            // Rollback temporary item into inventory item
+            rollbackTemporaryDroppedItem(result.itemData)
         }
     })
     

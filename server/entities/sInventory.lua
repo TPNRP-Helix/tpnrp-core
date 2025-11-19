@@ -435,32 +435,14 @@ function SInventory.new(player, inventoryType)
         end
     end
 
-    ---Open inventory
-    ---@param data {type: 'player' | 'stack' | 'other_player' | ''} type of inventory to open
-    function self:openInventory(data)
-        if not data then
-            data = { type = 'player' }
-        end
-        if not data.type or type(data.type) ~= 'string' then
-            return {
-                status = false,
-                message = SHARED.t('error.invalidData'),
-            }
-        end
+    ---Open inventory of current player
+    function self:openInventory()
         local inventory = nil
-        if data.type == 'other_player' or data.type == 'stack' then
-            return {
-                status = false,
-                message = 'TODO: Feature not implemented yet!',
-            }
-        end
-        if data.type == 'player' then
-            -- Filter out nil values from inventory and convert to array
-            inventory = {}
-            for slot, item in pairs(self.items) do
-                if item ~= nil then
-                    table.insert(inventory, item)
-                end
+        -- Filter out nil values from inventory and convert to array
+        inventory = {}
+        for _, item in pairs(self.items) do
+            if item ~= nil then
+                table.insert(inventory, item)
             end
         end
         local backpackCapacity = self.player.equipment:getBackpackCapacity()

@@ -6,6 +6,8 @@ LOCALES.VI = {
         full = "Túi đã đầy!",
         added = "Đã thêm {count}x {item} vào túi.",
         removed = "Đã bỏ {count}x {item} khỏi túi.",
+        pickUp = "Nhặt",
+        open = "Mở",
     },
     player = {
         created = "Tạo nhân vật thành công.",

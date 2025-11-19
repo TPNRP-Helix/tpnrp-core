@@ -2,6 +2,12 @@ import { EEquipmentSlot } from "@/constants/enum"
 import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
 import { create } from "zustand"
 
+type TItemData = {
+  itemName: string
+  amount: number
+  fromSlot: number
+}
+
 type MoveInventoryItemParams = {
   sourceSlot: number
   targetSlot: number
@@ -33,6 +39,10 @@ type InventoryState = {
   selectOtherTab: 'ground' | 'crafting' | 'missions' | ''
   learnedCraftingRecipes: string[]
   selectCharacterTab: 'equipment' | 'skills' | 'stats'
+  temporaryDroppedItems: TInventoryItem[]
+  setTemporaryDroppedItem: (items: TInventoryItem) => void
+  removeTemporaryDroppedItem: (item: TItemData) => void
+  rollbackTemporaryDroppedItem: (item: TItemData) => void
   setLearnedCraftingRecipes: (recipes: string[]) => void
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => void
   setEquipmentItems: (items: TInventoryItem[]) => void
@@ -70,6 +80,127 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   selectOtherTab: 'crafting',
   learnedCraftingRecipes: [],
   selectCharacterTab: 'equipment',
+  temporaryDroppedItems: [],
+  setTemporaryDroppedItem: (item: TInventoryItem) => {
+    set((state) => {
+      const matchedItem = state.inventoryItems.find(
+        (inventoryItem) => inventoryItem.slot === item.slot && inventoryItem.name === item.name
+      )
+
+      if (!matchedItem) {
+        return {}
+      }
+
+      const removeAmount = Math.min(item.amount, matchedItem.amount)
+
+      if (removeAmount <= 0) {
+        return {}
+      }
+
+      const nextInventoryItems = state.inventoryItems.reduce<TInventoryItem[]>((acc, inventoryItem) => {
+        if (inventoryItem.slot !== matchedItem.slot || inventoryItem.name !== matchedItem.name) {
+          acc.push(inventoryItem)
+          return acc
+        }
+
+        const remainingAmount = inventoryItem.amount - removeAmount
+
+        if (remainingAmount > 0) {
+          acc.push({ ...inventoryItem, amount: remainingAmount })
+        }
+
+        return acc
+      }, [])
+
+      const nextTemporaryDroppedItems = [...state.temporaryDroppedItems]
+      const tempIndex = nextTemporaryDroppedItems.findIndex(
+        (tempItem) => tempItem.slot === item.slot && tempItem.name === item.name
+      )
+
+      if (tempIndex !== -1) {
+        const tempItem = nextTemporaryDroppedItems[tempIndex]
+        nextTemporaryDroppedItems[tempIndex] = {
+          ...tempItem,
+          amount: tempItem.amount + removeAmount,
+        }
+      } else {
+        nextTemporaryDroppedItems.push({ ...item, amount: removeAmount })
+      }
+
+      return {
+        inventoryItems: nextInventoryItems,
+        temporaryDroppedItems: nextTemporaryDroppedItems,
+      }
+    })
+  },
+  removeTemporaryDroppedItem: (item: TItemData) => {
+    set((state) => {
+      const temporaryDroppedItems = [...state.temporaryDroppedItems]
+      const tempIndex = temporaryDroppedItems.findIndex((tempItem) => tempItem.slot === item.fromSlot)
+      if (tempIndex !== -1) {
+        // Found temporary item, decrease it amount
+        temporaryDroppedItems[tempIndex].amount -= item.amount
+        // If amount is less than 0, remove the item
+        if (temporaryDroppedItems[tempIndex].amount <= 0) {
+          temporaryDroppedItems.splice(tempIndex, 1)
+        }
+      }
+      return { temporaryDroppedItems }
+    })
+  },
+  rollbackTemporaryDroppedItem: (item: TItemData) => {
+    set((state) => {
+      const temporaryDroppedItems = [...state.temporaryDroppedItems]
+      const tempIndex = temporaryDroppedItems.findIndex(
+        (tempItem) => tempItem.slot === item.fromSlot && tempItem.name === item.itemName
+      )
+      // Not found temporary item, return
+      if (tempIndex === -1) {
+        return {}
+      }
+
+      const tempItem = temporaryDroppedItems[tempIndex]
+      const rollbackAmount = item.amount
+      // If rollback amount is less than 0, return
+      if (rollbackAmount <= 0) {
+        return {}
+      }
+
+      // Found item in inventory, increase it amount
+      const inventoryItems = [...state.inventoryItems]
+      const inventoryIndex = inventoryItems.findIndex(
+        (inventoryItem) => inventoryItem.slot === tempItem.slot && inventoryItem.name === tempItem.name
+      )
+
+      // If not found item in inventory, add it to inventory
+      if (inventoryIndex !== -1) {
+        inventoryItems[inventoryIndex] = {
+          ...inventoryItems[inventoryIndex],
+          amount: inventoryItems[inventoryIndex].amount + rollbackAmount,
+        }
+      } else {
+        inventoryItems.push({
+          ...tempItem,
+          amount: rollbackAmount,
+        })
+      }
+
+      // If rollback amount is greater than temporary item amount, remove the temporary item
+      if (rollbackAmount >= tempItem.amount) {
+        temporaryDroppedItems.splice(tempIndex, 1)
+      } else {
+        temporaryDroppedItems[tempIndex] = {
+          ...tempItem,
+          amount: tempItem.amount - rollbackAmount,
+        }
+      }
+
+      return {
+        inventoryItems,
+        temporaryDroppedItems,
+      }
+    })
+  },
   setLearnedCraftingRecipes: (recipes: string[]) => set({ learnedCraftingRecipes: recipes }),
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => set({ selectOtherTab: value }),
   setEquipmentItems: (items: TInventoryItem[]) => set({ equipmentItems: items }),

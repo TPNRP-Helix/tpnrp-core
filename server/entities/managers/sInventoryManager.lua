@@ -12,6 +12,9 @@ function SInventoryManager.new(core)
     -- Core
     self.core = core
 
+    ---@type table<string, TContainer> Dictionary of containers managed by sInventoryManager, keyed by containerId
+    self.containers = {}
+
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
@@ -19,13 +22,24 @@ function SInventoryManager.new(core)
     ---Contructor function
     local function _contructor()
          --- In-game Events
+         --- Open Inventory
          RegisterCallback('onOpenInventory', function(source, data)
+            return self:onOpenInventory(source, data)
+        end)
+
+        --- Open Container Inventory
+        RegisterCallback('onOpenContainerInventory', function(source, data)
             return self:onOpenInventory(source, data)
         end)
 
         RegisterCallback('onMoveInventoryItem', function(source, data)
             return self:onMoveInventoryItem(source, data)
         end)
+
+        RegisterCallback('createDropItem', function(source, data)
+            return self:createDropItem(source, data)
+        end)
+
         RegisterCallback('devAddItem', function(source, data)
             local player = self.core:getPlayerBySource(source)
             if not player then
@@ -55,8 +69,8 @@ function SInventoryManager.new(core)
 
     ---On open inventory
     ---@param source PlayerController player controller
-    ---@param data table data
-    ---@return {status: boolean; message: string; inventory: table<number, SInventoryItemType>|nil} result
+    ---@param data {type:'player' | 'container'; containerId:string|nil} data
+    ---@return TInventoryOpenInventoryResultType result
     function self:onOpenInventory(source, data)
         local player = self.core:getPlayerBySource(source)
         if not player then
@@ -67,8 +81,21 @@ function SInventoryManager.new(core)
             }
         end
         print('[TPN][SERVER] onOpenInventory - data: ', JSON.stringify(data))
+        local result = player.inventory:openInventory()
+        if data.type == 'container' then
+            local container = self.containers[data.containerId]
+            if not container then
+                return {
+                    status = false,
+                    message = 'Container not found!',
+                }
+            end
+            result.container = {
+                id = container.id,
+                items = container.items
+            }
+        end
         -- Open inventory
-        local result = player.inventory:openInventory(data)
         print('[TPN][SERVER] onOpenInventory - result: ', JSON.stringify(result))
 
         return result
@@ -124,8 +151,8 @@ function SInventoryManager.new(core)
     ---@param player SPlayer player entity
     ---@param sourceItem SInventoryItemType|SEquipmentItemType source item data
     ---@param targetItem SInventoryItemType|SEquipmentItemType|nil target item data
-    ---@param sourceGroup 'inventory' | 'equipment' | 'other' source group type
-    ---@param targetGroup 'inventory' | 'equipment' | 'other' target group type
+    ---@param sourceGroup 'inventory' | 'equipment' | 'container' source group type
+    ---@param targetGroup 'inventory' | 'equipment' | 'container' target group type
     ---@param sourceSlot number source slot number
     ---@param targetSlot number target slot number
     ---@return {status: boolean; message: string; slot:number} result of moving item
@@ -194,22 +221,14 @@ function SInventoryManager.new(core)
         end
         
         -- [TODO] Moving from/to other groups (not implemented yet)
-        if sourceGroup == 'inventory' and targetGroup == 'other' then
+        if sourceGroup == 'inventory' and targetGroup == 'container' then
             return {
                 status = false,
                 message = 'Moving items to/from other groups is not implemented yet!',
             }
         end
         -- [TODO] Moving from/to other groups (not implemented yet)
-        if sourceGroup == 'other' and targetGroup == 'inventory' then
-            return {
-                status = false,
-                message = 'Moving items to/from other groups is not implemented yet!',
-            }
-        end
-
-        -- [TODO] Moving from/to other groups (not implemented yet)
-        if sourceGroup == 'other' and targetGroup == 'equipment' then
+        if sourceGroup == 'container' and targetGroup == 'inventory' then
             return {
                 status = false,
                 message = 'Moving items to/from other groups is not implemented yet!',
@@ -217,7 +236,15 @@ function SInventoryManager.new(core)
         end
 
         -- [TODO] Moving from/to other groups (not implemented yet)
-        if sourceGroup == 'equipment' and targetGroup == 'other' then
+        if sourceGroup == 'container' and targetGroup == 'equipment' then
+            return {
+                status = false,
+                message = 'Moving items to/from other groups is not implemented yet!',
+            }
+        end
+
+        -- [TODO] Moving from/to other groups (not implemented yet)
+        if sourceGroup == 'equipment' and targetGroup == 'container' then
             return {
                 status = false,
                 message = 'Moving items to/from other groups is not implemented yet!',
@@ -338,6 +365,127 @@ function SInventoryManager.new(core)
         return result or {
             status = false,
             message = 'Move operation failed!',
+        }
+    end
+
+    ---Create drop item
+    ---@param source PlayerController player controller
+    ---@param data {itemName: string, amount: number, fromSlot: number} data
+    ---@return TResponseCreateDropItem result of creating drop item
+    function self:createDropItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get player by source!')
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+                itemData = data,
+            }
+        end
+        local playerPawn = GetPlayerPawn(source)
+        local playerCoords = GetEntityCoords(playerPawn)
+        local PawnRotation = GetEntityRotation(playerPawn)
+        local ForwardVec = playerPawn:GetActorForwardVector()
+        local SpawnPosition = playerCoords + (ForwardVec * 200)
+        PawnRotation.Yaw = PawnRotation.Yaw
+        -- Get item from player's inventory
+        local item = player.inventory:findItemBySlot(data.fromSlot)
+        if not item then
+            print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get item by slot!')
+            self.core.cheatDetector:logCheater({
+                action = 'createDropItem',
+                player = player or nil,
+                citizenId = player.playerData.citizenId or '',
+                license = player.playerData.license or '',
+                name = player.playerData.name or '',
+                content = ('[ERROR] SInventoryManager.createDropItem: Item not found in inventory! Player trying to create drop item that they don\'t have in their inventory!'):format(data.fromSlot)
+            })
+            return {
+                status = false,
+                message = 'Item not found in inventory!',
+                itemData = data,
+            }
+        end
+        -- Remove item from player's inventory
+        local removeResult = player.inventory:removeItem(data.itemName, data.amount, data.fromSlot)
+        if not removeResult.status then
+            return {
+                status = false,
+                message = removeResult.message,
+                itemData = data,
+            }
+        end
+        -- Spawn bag
+        local spawnResult = self.core.gameManager:spawnStaticMesh({
+            entityPath = '/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag',
+            position = SpawnPosition,
+            rotation = PawnRotation,
+            scale = Vector(0.8, 0.8, 0.8),
+        })
+        if not spawnResult.status then
+            -- Spawn failed => Add item back to player's inventory
+            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, item.info)
+            return {
+                status = false,
+                message = spawnResult.message,
+                itemData = data,
+            }
+        end
+        local newDropId = SHARED.randomId(3) .. '-' .. SHARED.randomId(6)
+        local options = {
+            {
+                label = SHARED.t('inventory.open'),
+                icon = 'fas fa-bag',
+                action = function(Drop, Instigator)
+                    print('[TPN][SERVER] createDropItem - Open bag!')
+                    local Controller = Instigator and Instigator:GetController()
+                    if Controller then
+                        TriggerClientEvent(Controller, 'openContainerInventory', { containerId = newDropId })
+                    end
+                end,
+            },
+            -- {
+            --     label = SHARED.t('inventory.pickUp'),
+            --     icon = 'fas fa-hand-holding',
+            --     action = function()
+            --         -- TODO: Pick up item
+            --         print('[TPN][SERVER] createDropItem - Pick up item!')
+            --     end,
+            -- }
+        }
+        -- Spawn success
+        local addInteractableResult = self.core.gameManager:addInteractable({
+            entity = spawnResult.entity,
+            options = options,
+        })
+        if not addInteractableResult.status then
+            -- Add item back to player's inventory
+            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, item.info)
+            -- Destroy bag
+            self.core.gameManager:destroyEntity(spawnResult.entityId)
+            return {
+                status = false,
+                message = addInteractableResult.message,
+                itemData = data,
+            }
+        end
+
+        -- Set item slot to 1 (Because player are drop)
+        item.slot = 1
+        -- Add container to dictionary
+        self.containers[newDropId] = {
+            id = newDropId,
+            entityId = spawnResult.entityId,
+            entity = spawnResult.entity,
+            items = {
+                [1] = item,
+            },
+        }
+
+        return {
+            status = true,
+            message = 'Drop item created successfully!',
+            itemData = data,
         }
     end
 

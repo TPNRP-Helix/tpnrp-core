@@ -26,3 +26,23 @@ export type TInventoryItemProps = {
 export type TCraftingRecipe = {
     
 }
+
+export type TInventoryOpenInventoryResultType = {
+    status: boolean
+    message: string
+    inventory: TInventoryItem[]
+    container: {
+        id: string
+        items: TInventoryItem[]
+    } | null
+}
+
+export type TResponseCreateDropItem = {
+    status: boolean
+    message: string
+    itemData: {
+        itemName: string
+        amount: number
+        fromSlot: number
+    }
+}
