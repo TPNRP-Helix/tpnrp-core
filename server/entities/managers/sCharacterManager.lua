@@ -18,30 +18,7 @@ function SCharacterManager.new(core)
 
     ---Contructor function
     local function _contructor()
-         
-        -- Create character
-        ---@param source PlayerController player controller
-        ---@param data table data
-        ---@return table result
-        RegisterCallback('createCharacter', function(source, data)
-            return self:onCreateCharacter(source, data)
-        end)
-        
-        -- Delete character
-        ---@param source PlayerController player controller
-        ---@param citizenId string citizen id
-        ---@return table result
-        RegisterCallback('deleteCharacter', function(source, citizenId)
-            return self:onDeleteCharacter(source, citizenId)
-        end)
-
-        -- On Player join game
-        ---@param source PlayerController player controller
-        ---@param citizenId string citizen id
-        ---@return table result
-        RegisterCallback('callbackOnPlayerJoinGame', function(source, citizenId)
-            return self:onPlayerJoinGame(source, citizenId)
-        end)
+        self:bindCallbackEvents()
     end
 
     ---/********************************/
@@ -52,7 +29,7 @@ function SCharacterManager.new(core)
     ---@param source PlayerController player controller
     ---@param data table data
     ---@return {status: boolean; message: string; playerData: table|nil} result
-    function self:onCreateCharacter(source, data)
+    local function onCreateCharacter(source, data)
         local license = self.core:getLicenseBySource(source)
         if not license then
             print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
@@ -102,7 +79,7 @@ function SCharacterManager.new(core)
     ---@param source PlayerController player controller
     ---@param citizenId string citizen id
     ---@return {status: boolean; message: string} result
-    function self:onDeleteCharacter(source, citizenId)
+    local function onDeleteCharacter(source, citizenId)
         local license = self.core:getLicenseBySource(source)
         if not license then
             print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
@@ -129,7 +106,7 @@ function SCharacterManager.new(core)
     ---@param source PlayerController player controller
     ---@param citizenId string citizen id
     ---@return {status: boolean; message: string; playerData: table|nil} result
-    function self:onPlayerJoinGame(source, citizenId)
+    local function onPlayerJoinGame(source, citizenId)
         local license = self.core:getLicenseBySource(source)
         if not license then
             print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get license by source!')
@@ -170,6 +147,32 @@ function SCharacterManager.new(core)
             message = SHARED.t('success.joinGame'),
             playerData = playerData,
         }
+    end
+
+    function self:bindCallbackEvents()
+        -- Create character
+        ---@param source PlayerController player controller
+        ---@param data table data
+        ---@return table result
+        RegisterCallback('createCharacter', function(source, data)
+            return onCreateCharacter(source, data)
+        end)
+        
+        -- Delete character
+        ---@param source PlayerController player controller
+        ---@param citizenId string citizen id
+        ---@return table result
+        RegisterCallback('deleteCharacter', function(source, citizenId)
+            return onDeleteCharacter(source, citizenId)
+        end)
+
+        -- On Player join game
+        ---@param source PlayerController player controller
+        ---@param citizenId string citizen id
+        ---@return table result
+        RegisterCallback('callbackOnPlayerJoinGame', function(source, citizenId)
+            return onPlayerJoinGame(source, citizenId)
+        end)
     end
 
     _contructor()
