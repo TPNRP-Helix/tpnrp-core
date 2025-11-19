@@ -240,6 +240,8 @@ function TPNRPServer.new()
                 print('[ERROR] TPNRPServer.onShutdown - Failed to save player!')
             end
         end
+        -- Save all containers
+        self.inventoryManager:onShutdown()
         -- All save done then close DB
         DAO.DB.Close()
     end

@@ -36,7 +36,7 @@ DAO.inventory.save = function(inventory)
             items = excluded.items
     ]]
     local params = {
-        inventory.type,
+        'player',
         citizenId,
         JSON.stringify(formattedItems),
     }

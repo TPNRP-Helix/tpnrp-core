@@ -1,24 +1,31 @@
----@class SInventory
+---@class SContainer
 ---@field core TPNRPServer
----@field player SPlayer
+---@field citizenId string Citizen ID
 ---@field items table<number, SInventoryItemType>
----@field type 'player' | 'stack' | ''
-SInventory = {}
-SInventory.__index = SInventory
+---@field maxSlot number Max slot count
+---@field maxWeight number Max weight in grams
+SContainer = {}
+SContainer.__index = SContainer
 
----@param player SPlayer player entity
----@param inventoryType 'player' | 'stack' | ''
----@return SInventory
-function SInventory.new(player, inventoryType)
-    ---@class SInventory
-    local self = setmetatable({}, SInventory)
+---@param core TPNRPServer Core
+---@param containerId string Container ID
+---@param citizenId string Citizen ID
+---@return SContainer
+function SContainer.new(core, containerId, citizenId)
+    ---@class SContainer
+    local self = setmetatable({}, SContainer)
 
     -- Core
-    self.core = player.core
-    -- Player's entity
-    self.player = player
-    self.type = inventoryType
+    self.core = core
+    self.citizenId = citizenId -- Citizen ID of the player who owns this container
+    self.containerId = containerId
+    -- items
     self.items = {}
+
+    -- Max slot count of this container
+    self.maxSlot = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+    -- Max weight in grams
+    self.maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT
 
     ---/********************************/
     ---/*         Initializes          */
@@ -26,43 +33,43 @@ function SInventory.new(player, inventoryType)
 
     ---Contructor function
     local function _contructor()
-        -- type is player then load it
-        if inventoryType == 'player' then
-            self:load('player')
-        end
+    end
+
+    ---Init entity data
+    ---@param data {entityId:string; entity:unknown; items:table<number, SInventoryItemType>; maxSlot:number; maxWeight:number} data
+    function self:initEntity(data)
+        self.entityId = data.entityId
+        self.entity = data.entity
+        self.items = data.items
+        self.maxSlot = data.maxSlot
+        self.maxWeight = data.maxWeight
     end
 
     ---/********************************/
     ---/*           Functions          */
     ---/********************************/
 
-    function self:sync()
-        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', self.items)
-    end
-
-    ---Save inventory
+    ---Save container
     ---@return boolean status success status
     function self:save()
-        return DAO.inventory.save(self)
+        local result = DAO.container.save(self, self.citizenId)
+        if result then
+            return true
+        end
+        return false
     end
 
-    ---Load inventory
----@param inventoryType 'player' | 'stack' | ''
+    --- Manually load container if require
     ---@return boolean status success status
-    function self:load(inventoryType)
-        -- Type is empty then don't load inventory
-        if inventoryType == '' then
-            return false
+    function self:load()
+        local container = DAO.container.get(self.containerId)
+        if container then
+            self.items = container.items
+            self.maxSlot = container.maxSlot
+            self.maxWeight = container.maxWeight
+            return true
         end
-        -- Assign type
-        self.type = inventoryType
-        -- Get inventory items
-        local inventories = DAO.inventory.get(self.player.playerData.citizenId, self.type)
-        if inventories then
-            self.items = inventories
-        end
-        
-        return true
+        return false
     end
 
     ---Calculate total inventory weight
@@ -79,33 +86,27 @@ function SInventory.new(player, inventoryType)
     ---Check if item can be added to inventory
     ---@param itemName string item name
     ---@param amount number item amount
-    ---@return SInventoryCanAddItemResultType {status=boolean, message = string} is this item can add to inventory or not
+    ---@return { status: boolean; message: string; } result is this item can add to inventory or not
     function self:canAddItem(itemName, amount)
         -- Get item data
         local itemData = SHARED.items[itemName:lower()]
         if not itemData then
-            print(('[ERROR] SInventory.canAddItem: Item %s not found!'):format(itemName))
+            print(('[ERROR] SContainer.canAddItem: Item %s not found!'):format(itemName))
             return { status = false, message = 'Item not found!' }
         end
         -- Total item weight
         local itemWeight = itemData.weight * amount
-        local inventoryWeight = self:calculateTotalWeight()
-        local totalWeight = inventoryWeight + itemWeight
-        local inventoryCapacity = { status = false, slots = 0, weightLimit = 0 }
-        -- Get inventory capacity by self.type
-        if self.type == 'player' then
-            inventoryCapacity = self.player.equipment:getBackpackCapacity()
-        end
-        local totalInventoryWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + inventoryCapacity.weightLimit
-        local totalInventorySlots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
+        local containerWeight = self:calculateTotalWeight()
+        local totalWeight = containerWeight + itemWeight
+
         -- Check if item weight is greater than backpack weight limit
-        if totalWeight > totalInventoryWeight then
+        if totalWeight > self.maxWeight then
             return { status = false, message = SHARED.t('error.inventoryWeightLimitReached') }
         end
         -- Check if item slots is greater than backpack slots limit
         local totalUsedSlots = #self.items
         local totalNewUsedSlots = totalUsedSlots + 1
-        if totalNewUsedSlots > totalInventorySlots then
+        if totalNewUsedSlots > self.maxSlot then
             return { status = false, message = SHARED.t('error.inventoryFull') }
         end
 
@@ -115,14 +116,6 @@ function SInventory.new(player, inventoryType)
     ---Find an empty slot in the inventory
     ---@return number | nil number slot number, or nil if no empty slot found
     function self:getEmptySlot()
-        -- Get inventory capacity
-        local inventoryCapacity = { status = false, slots = 0, weightLimit = 0 }
-        if self.type == 'player' then
-            inventoryCapacity = self.player.equipment:getBackpackCapacity()
-        end
-        -- Max slots is default slots + inventory capacity slots
-        local maxSlots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
-        
         -- Create a set of used slots for quick lookup
         local usedSlots = {}
         for _, item in pairs(self.items) do
@@ -130,7 +123,7 @@ function SInventory.new(player, inventoryType)
         end
         
         -- Find first empty slot
-        for slot = 1, maxSlots do
+        for slot = 1, self.maxSlot do
             if not usedSlots[slot] then
                 return slot
             end
@@ -143,7 +136,7 @@ function SInventory.new(player, inventoryType)
     ---Find an item by name and return its slot number
     ---@param itemName string item name to search for
     ---@return number | nil slot number of the item, or nil if item not found
-    function self:findItemSlot(itemName)
+    function self:findItemSlotByName(itemName)
         if not itemName then
             return nil
         end
@@ -178,7 +171,7 @@ function SInventory.new(player, inventoryType)
     ---@param amount number item amount
     ---@param slotNumber number | nil slot number (optional)
     ---@param info table | nil item info (optional)
-    ---@return SInventoryAddItemResultType {status=boolean, message=string, slot=number} result of adding item
+    ---@return SContainerAddItemResultType {status=boolean, message=string, slot=number} result of adding item
     function self:addItem(itemName, amount, slotNumber, info)
         -- Validate inputs
         if not itemName or type(itemName) ~= 'string' then
@@ -252,7 +245,7 @@ function SInventory.new(player, inventoryType)
             else
                 -- Non-unique items can stack with existing items
                 -- Try to find existing item slot to stack
-                targetSlot = self:findItemSlot(itemName)
+                targetSlot = self:findItemSlotByName(itemName)
                 
                 -- If not found, find empty slot
                 if not targetSlot then
@@ -296,16 +289,7 @@ function SInventory.new(player, inventoryType)
                 info = info or {}
             }
         end
-        -- Tell player that item is added to inventory
-        -- TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, self.items[targetSlot])
-        -- Trigger mission action
-        self.player.missionManager:triggerAction('add_item', {
-            name = itemName,
-            amount = amount,
-            info = info or {}
-        })
-        -- Sync inventory to client
-        self:sync()
+
         return { status = true, message = SHARED.t('inventory.added'), slot = targetSlot }
     end
 
@@ -346,7 +330,7 @@ function SInventory.new(player, inventoryType)
             targetSlot = slotNumber
         else
             -- No slot number provided, find the first item matching the name
-            targetSlot = self:findItemSlot(itemName)
+            targetSlot = self:findItemSlotByName(itemName)
             if not targetSlot then
                 return { status = false, message = 'Item not found in inventory!', slot = -1 }
             end
@@ -370,17 +354,11 @@ function SInventory.new(player, inventoryType)
         
         -- Calculate remaining amount
         local remainingAmount = item.amount - amount
-        -- Tell player that item is remove from inventory
-        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'remove', amount, itemName)
-        -- Trigger mission action
-        self.player.missionManager:triggerAction('remove_item', {
-            name = itemName,
-            amount = amount,
-        })
+        
         -- If remaining amount is 0 or less, remove the item entirely from the slot
         if remainingAmount <= 0 then
             self.items[targetSlot] = nil
-            return { status = true, message = 'Item removed from inventory!', slot = targetSlot }
+            return { status = true, message = SHARED.t('inventory.removed'), slot = targetSlot }
         else
             -- Update the item amount
             self.items[targetSlot].amount = remainingAmount
@@ -435,8 +413,8 @@ function SInventory.new(player, inventoryType)
         end
     end
 
-    ---Open inventory of current player
-    function self:openInventory()
+    ---Open container
+    function self:openContainer()
         local inventory = nil
         -- Filter out nil values from inventory and convert to array
         inventory = {}
@@ -445,20 +423,19 @@ function SInventory.new(player, inventoryType)
                 table.insert(inventory, item)
             end
         end
-        local backpackCapacity = self.player.equipment:getBackpackCapacity()
-        
+
         return {
             status = true,
-            message = 'Inventory opened!',
+            message = 'Container opened!',
             inventory = inventory,
             capacity = {
-                weight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpackCapacity.weightLimit,
-                slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,
+                weight = self.maxWeight,
+                slots = self.maxSlot,
             }
         }
     end
     
-    ---Move item to slot
+    ---Move item to slot (From same container)
     ---@param item SInventoryItemType item data
     ---@param targetSlot number target slot number
     ---@return {status:boolean, message:string, slot:number} result of moving item
@@ -497,4 +474,4 @@ function SInventory.new(player, inventoryType)
     return self
 end
 
-return SInventory
+return SContainer

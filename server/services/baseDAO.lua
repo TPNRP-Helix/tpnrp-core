@@ -44,6 +44,9 @@ DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS inventories (
         citizen_id VARCHAR(11),
         "type" TEXT,
+        container_id VARCHAR(255),
+        max_slot INTEGER,
+        max_weight INTEGER,
         items TEXT
     );
 ]])

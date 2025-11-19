@@ -1,6 +1,6 @@
 ---@class SInventoryManager
 ---@field core TPNRPServer Core
----@field containers table<string, TContainer> Dictionary of containers managed by sInventoryManager, keyed by containerId
+---@field containers table<string, SContainer> Dictionary of containers managed by sInventoryManager, keyed by containerId
 SInventoryManager = {}
 SInventoryManager.__index = SInventoryManager
 
@@ -13,15 +13,19 @@ function SInventoryManager.new(core)
     -- Core
     self.core = core
 
-    ---@type table<string, TContainer> Dictionary of containers managed by sInventoryManager, keyed by containerId
+    ---@type table<string, SContainer> Dictionary of containers managed by sInventoryManager, keyed by containerId
     self.containers = {}
 
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
 
+    local function onServerLoad()
+    end
+
     ---Contructor function
     local function _contructor()
+
          --- In-game Events
          --- Open Inventory
          RegisterCallback('onOpenInventory', function(source, data)
@@ -62,6 +66,14 @@ function SInventoryManager.new(core)
                 message = result.message,
             }
         end)
+    end
+
+    ---On shutdown
+    function self:onShutdown()
+        print('[TPN][SERVER] SInventoryManager.onShutdown - Saving containers...')
+        for _, container in pairs(self.containers) do
+            container:save()
+        end
     end
 
     ---/********************************/
@@ -483,14 +495,17 @@ function SInventoryManager.new(core)
         -- Set item slot to 1 (Because player are drop)
         item.slot = 1
         -- Add container to dictionary
-        self.containers[newDropId] = {
-            id = newDropId,
+        local container = SContainer.new(self.core, newDropId, player.playerData.citizenId)
+        container:initEntity({
             entityId = spawnResult.entityId,
             entity = spawnResult.entity,
             items = {
                 [1] = item,
             },
-        }
+            maxSlot = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS,
+            maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
+        })
+        self.containers[newDropId] = container
 
         return {
             status = true,

@@ -4,10 +4,11 @@ LOCALES.EN = {
     },
     inventory = {
         full = "Inventory is full ({current}/{limit}).",
-        added = "Added {count}x {item} to inventory.",
+        added = "Item added to inventory.",
         removed = "Removed {count}x {item} from inventory.",
         pickUp = "Pick up",
         open = "Open",
+        canAddItem = "Item can be add to inventory.",
     },
     player = {
         created = "Player created successfully.",

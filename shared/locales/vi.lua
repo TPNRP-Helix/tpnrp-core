@@ -4,10 +4,11 @@ LOCALES.VI = {
     },
     inventory = {
         full = "Túi đã đầy!",
-        added = "Đã thêm {count}x {item} vào túi.",
+        added = "Đã thêm vật phẩm vào túi.",
         removed = "Đã bỏ {count}x {item} khỏi túi.",
         pickUp = "Nhặt",
         open = "Mở",
+        canAddItem = "Vật phẩm có thể được thêm vào túi.",
     },
     player = {
         created = "Tạo nhân vật thành công.",
