@@ -1,14 +1,14 @@
----@class SGame
+---@class SGameManager
 ---@field core TPNRPServer Core
----@field entities table<string, TEntity> Dictionary of entities managed by sGame, keyed by entityId
-SGame = {}
-SGame.__index = SGame
+---@field entities table<string, TEntity> Dictionary of entities managed by SGameManager, keyed by entityId
+SGameManager = {}
+SGameManager.__index = SGameManager
 
 ---@param core TPNRPServer Core
----@return SGame
-function SGame.new(core)
-    ---@class SGame
-    local self = setmetatable({}, SGame)
+---@return SGameManager
+function SGameManager.new(core)
+    ---@class SGameManager
+    local self = setmetatable({}, SGameManager)
 
     -- Core
     self.core = core
@@ -38,7 +38,7 @@ function SGame.new(core)
         local entityPath = params.entityPath or ''
 
         if entityPath == '' then
-            print('[ERROR] SGame.SPAWN_STATIC_MESH - Entity path is empty!')
+            print('[ERROR] SGameManager.SPAWN_STATIC_MESH - Entity path is empty!')
             return {
                 status = false,
                 entityId = nil,
@@ -49,7 +49,7 @@ function SGame.new(core)
 
         local entity = StaticMesh(spawnPosition, spawnRotation, entityPath, ECollisionType.StaticOnly)
         if not entity then
-            print('[ERROR] SGame.SPAWN_STATIC_MESH - Failed to spawn static mesh!')
+            print('[ERROR] SGameManager.SPAWN_STATIC_MESH - Failed to spawn static mesh!')
             return {
                 status = false,
                 entityId = nil,
@@ -82,7 +82,7 @@ function SGame.new(core)
         local entity = params.entity
         local options = params.options
         if not entity or not options then
-            print('[ERROR] SGame.ADD_INTERACTABLE - Entity or options is empty!')
+            print('[ERROR] SGameManager.ADD_INTERACTABLE - Entity or options is empty!')
             return {
                 status = false,
                 message = 'Entity or options is empty!',
@@ -111,7 +111,7 @@ function SGame.new(core)
     function self:destroyEntity(id)
         local entity = self.entities[id]
         if not entity then
-            print('[ERROR] SGame.DESTROY_ENTITY - Entity not found!')
+            print('[ERROR] SGameManager.DESTROY_ENTITY - Entity not found!')
             return {
                 status = false,
                 message = 'Entity not found!',
@@ -136,4 +136,4 @@ function SGame.new(core)
     return self
 end
 
-return SGame
+return SGameManager

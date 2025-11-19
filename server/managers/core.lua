@@ -1,5 +1,9 @@
 ---@class TPNRPServer
 ---@field players table<number, SPlayer>
+---@field shared SHARED shared entity
+---@field useableItems table<string, function> Dictionary of useable items, keyed by item name
+---@field cheatDetector SCheatDetector cheat detector entity
+---@field gameManager SGameManager game manager entity
 TPNRPServer = {}
 TPNRPServer.__index = TPNRPServer
 
@@ -19,7 +23,7 @@ function TPNRPServer.new()
 
     ---@type SCheatDetector cheat detector entity
     self.cheatDetector = nil
-    ---@type SGame game manager entity
+    ---@type SGameManager game manager entity
     self.gameManager = nil
 
     --- Manager
@@ -35,7 +39,7 @@ function TPNRPServer.new()
     ---Contructor function
     local function _contructor()
         self.cheatDetector = SCheatDetector.new(self)
-        self.gameManager = SGame.new(self)
+        self.gameManager = SGameManager.new(self)
         -- Bind all events, callback for inventory
         self.inventoryManager = SInventoryManager.new(self)
         self.characterManager = SCharacterManager.new(self)
