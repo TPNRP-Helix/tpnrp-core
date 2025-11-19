@@ -1,5 +1,6 @@
 ---@class SInventoryManager
 ---@field core TPNRPServer Core
+---@field containers table<string, TContainer> Dictionary of containers managed by sInventoryManager, keyed by containerId
 SInventoryManager = {}
 SInventoryManager.__index = SInventoryManager
 
@@ -126,7 +127,7 @@ function SInventoryManager.new(core)
 
     ---Get item from a specific group and slot
     ---@param player SPlayer player entity
-    ---@param group 'inventory' | 'equipment' | 'other' group type
+    ---@param group 'inventory' | 'equipment' group type
     ---@param slot number slot number (numeric for inventory, equipment slot number for equipment)
     ---@return table | nil item data or nil
     local function getItemFromGroup(player, group, slot)
@@ -139,12 +140,21 @@ function SInventoryManager.new(core)
             if not clothType then
                 return nil
             end
-            return player.equipment.items[clothType]
-        elseif group == 'other' then
-            -- TODO: Handle other inventory types (ground, other player, etc.)
-            return nil
+            return player.equipment:findItemByClothType(clothType)
         end
         return nil
+    end
+
+    ---Get item from container
+    ---@param containerId string container id
+    ---@param slot number slot number
+    ---@return SInventoryItemType | nil item data, or nil if item not found
+    local function getItemFromContainer(containerId, slot)
+        local container = self.containers[containerId]
+        if not container then
+            return nil
+        end
+        return container.items[slot] or nil
     end
 
     ---Move item between different groups

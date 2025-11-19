@@ -32,6 +32,8 @@
 ---@field items table<number, SInventoryItemType> -- list items in container
 ---@field entityId string -- Id of entity
 ---@field entity unknown -- Entity of container
+---@field maxSlot number -- Max slot count
+---@field maxWeight number -- Max weight in grams
 
 ---@class TInventoryOpenInventoryResultType -- Response object when called open inventory
 ---@field status boolean -- Status of response
