@@ -16,8 +16,8 @@ DAO.inventory.save = function(inventory)
     local items = inventory.items
     local formattedItems = {}
     for _, item in pairs(items) do
-        local item = SHARED.items[item.name:lower()]
-        if item then
+        local rawItem = SHARED.items[item.name:lower()]
+        if rawItem then
             -- Only format the item if it is in the shared/items.lua
             formattedItems[#formattedItems + 1] = {
                 name = item.name,
@@ -40,7 +40,13 @@ DAO.inventory.save = function(inventory)
         citizenId,
         JSON.stringify(formattedItems),
     }
+    -- Log query details for debugging
+    print(('[DEBUG] DAO.inventory.save: Executing query for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, citizenId))
+    print(('[DEBUG] SQL: %s'):format(sql))
+    print(('[DEBUG] Params: type=%s, citizen_id=%s, items_length=%d'):format(params[1], params[2], #formattedItems))
+    print(('[DEBUG] Items JSON: %s'):format(params[3]))
     local result = DAO.DB.Execute(sql, params)
+    print(('[DEBUG] Execute result: %s'):format(tostring(result)))
     if result then
         DAO.DB.Execute('COMMIT;')
         print(('[LOG] Saved inventory for %s (Citizen ID: %s)'):format(inventory.player.playerData.name, inventory.player.playerData.citizenId))

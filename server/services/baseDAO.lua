@@ -48,8 +48,14 @@ DAO.DB.Execute([[
         container_id VARCHAR(255),
         max_slot INTEGER,
         max_weight INTEGER,
-        items TEXT
+        items TEXT,
+        UNIQUE(citizen_id, "type")
     );
+]])
+-- Create unique index for existing databases (if table already exists without constraint)
+DAO.DB.Execute([[
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_inventories_citizen_type 
+    ON inventories(citizen_id, "type");
 ]])
 
 --- Init table 'levels'

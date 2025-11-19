@@ -20,7 +20,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setIsOpenAmountDialog,
         setAmountDialogType,
         setDialogItem,
-        temporaryDroppedItems, setTemporaryDroppedItem
+        setTemporaryDroppedItem
     } = useInventoryStore()
 
     const itemImage = useMemo(() => {

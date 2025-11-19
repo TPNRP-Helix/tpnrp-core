@@ -410,7 +410,8 @@ export const CreateCharacter = () => {
                 className="outline-none! w-[400px]"
                 showCloseButton={false}
                 title={t("selectCharacter.delete")}
-                onInteractOutside={(e) => e.preventDefault()}  
+                onInteractOutside={(e) => e.preventDefault()}
+                aria-describedby={undefined}
                 >
                     <div className="flex flex-row items-center justify-center py-8 px-4 gap-2">
                         {t("selectCharacter.deleteConfirmDesc", { citizenId: selectedCitizenId })}

@@ -70,7 +70,6 @@ function SInventoryManager.new(core)
 
     ---On shutdown
     function self:onShutdown()
-        print('[TPN][SERVER] SInventoryManager.onShutdown - Saving containers...')
         for _, container in pairs(self.containers) do
             container:save()
         end
@@ -439,7 +438,7 @@ function SInventoryManager.new(core)
         end
         -- Spawn bag
         local spawnResult = self.core.gameManager:spawnStaticMesh({
-            entityPath = '/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag',
+            entityPath = SHARED.dropItems[data.itemName].worldItemPath,
             position = SpawnPosition,
             rotation = PawnRotation,
             scale = Vector(0.8, 0.8, 0.8),

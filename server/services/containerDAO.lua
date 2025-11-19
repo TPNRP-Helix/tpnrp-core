@@ -12,8 +12,8 @@ DAO.container.save = function(container, citizenId)
     local items = container.items
     local formattedItems = {}
     for _, item in pairs(items) do
-        local item = SHARED.items[item.name:lower()]
-        if item then
+        local rawItem = SHARED.items[item.name:lower()]
+        if rawItem then
             -- Only format the item if it is in the shared/items.lua
             formattedItems[#formattedItems + 1] = {
                 name = item.name,

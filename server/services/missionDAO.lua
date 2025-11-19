@@ -22,7 +22,11 @@ DAO.mission.save = function(player)
         print('[ERROR] DAO.mission.save: Invalid player data!')
         return false
     end
-    local citizenId = player.playerData.citizenId or nil
+    if not player.missionManager then
+        print('[ERROR] DAO.mission.save: Invalid mission manager!')
+        return false
+    end
+    local citizenId = player.playerData.citizenId
     if not citizenId then
         print('[ERROR] DAO.mission.save: Invalid citizen id!')
         return false
@@ -37,7 +41,7 @@ DAO.mission.save = function(player)
 	]]
 	local params = {
 		citizenId,
-		JSON.stringify(player.missionManager.missions),
+		JSON.stringify(player.missionManager.missions or {}),
 	}
 	local result = DAO.DB.Execute(sql, params)
 	if result then

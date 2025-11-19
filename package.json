@@ -6,6 +6,7 @@
         "shared/index.lua",
         "shared/config.lua",
         "shared/items.lua",
+        "shared/dropItems.lua",
         "shared/default.lua",
         "shared/enums.lua",
         "shared/types/*.lua"

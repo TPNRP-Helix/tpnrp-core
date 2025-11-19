@@ -197,6 +197,7 @@ export const Inventory = () => {
                     isHaveBackdropFilter
                     title={t("inventory.title")}
                     onContextMenu={(e) => e.preventDefault()}
+                    aria-describedby={undefined}
                 >
                     <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-full overflow-hidden h-full">
                         <div className="col-span-2 h-full overflow-hidden p-2">
