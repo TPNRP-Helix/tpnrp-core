@@ -436,12 +436,13 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
+        local worldItem = SHARED.getWorldItemPath(data.itemName)
         -- Spawn bag
         local spawnResult = self.core.gameManager:spawnStaticMesh({
-            entityPath = SHARED.dropItems[data.itemName].worldItemPath,
+            entityPath = worldItem.path,
             position = SpawnPosition,
             rotation = PawnRotation,
-            scale = Vector(0.8, 0.8, 0.8),
+            scale = worldItem.scale,
         })
         if not spawnResult.status then
             -- Spawn failed => Add item back to player's inventory

@@ -45,3 +45,8 @@
 ---@field status boolean -- Status of response
 ---@field message string -- message
 ---@field itemData { itemName: string; amount: number; fromSlot: number }
+
+
+---@class TWorldItem
+---@field path string   - Path to origin resource
+---@field scale Vector3 - Scale of this entity in world
