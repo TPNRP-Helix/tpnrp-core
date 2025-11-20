@@ -53,6 +53,7 @@ function TPNRPClient.new()
             TriggerCallback('getPermissions', function(result)
                 self.webUI:sendEvent('setPermission', result)
                 self.permission = result
+                self.webUI:sendEvent('syncItemsLibrary', SHARED.items)
             end, { citizenId = 'empty' })
         end)
     end

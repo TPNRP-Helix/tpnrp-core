@@ -14,13 +14,14 @@ export type TInventoryItem = {
     }
 }
 
-export type TInventoryGroup = 'equipment' | 'inventory' | 'other'
+export type TInventoryGroup = 'equipment' | 'inventory' | 'other' | 'dev-library'
 
 export type TInventoryItemProps = {
     item?: TInventoryItem
     slot?: number
     group?: TInventoryGroup
     isShowHotbarNumber?: boolean
+    isDragDropDisabled?: boolean
 }
 
 export type TCraftingRecipe = {

@@ -18,6 +18,8 @@
   "settings.basicNeedsHUD.showThirst": "Show Thirst Badge When Smaller Than",
   "settings.basicNeedsHUD.showStamina": "Show Stamina Badge When Smaller Than",
 
+  "library.title": "Library",
+
   "selectCharacter.title": "Select Character",
   "selectCharacter.delete": "Delete",
   "selectCharacter.emptySlot": "Empty slot {n}",
@@ -114,6 +116,7 @@
   "inventory.one": "One",
   "inventory.all": "All",
   "inventory.other": "Other",
+  "inventory.add": "Add",
 
   "inventory.item.label.id_card": "ID Card",
   "inventory.item.label.driver_license": "Drivers License",

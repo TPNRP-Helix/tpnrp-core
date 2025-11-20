@@ -8,13 +8,20 @@ import { useCallback, useId, useMemo } from "react"
 import { useI18n } from "@/i18n"
 import { RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
-import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf } from "lucide-react"
+import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf, Plus } from "lucide-react"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Progress } from "@/components/ui/progress"
 import { useDraggable, useDroppable } from "@dnd-kit/core"
+import { useDevModeStore } from "@/stores/useDevModeStore"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
-    const { item = null, slot = null, isShowHotbarNumber = true, group = 'inventory' } = props
+    const {
+        item = null,
+        slot = null,
+        isShowHotbarNumber = true,
+        group = 'inventory',
+        isDragDropDisabled = false
+    } = props
     const { t } = useI18n()
     const {
         setIsOpenAmountDialog,
@@ -22,6 +29,8 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setDialogItem,
         setTemporaryDroppedItem
     } = useInventoryStore()
+
+    const { permission } = useDevModeStore()
 
     const itemImage = useMemo(() => {
         if (item === null) {
@@ -94,7 +103,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     const hasItem = !!item
     const { attributes, listeners, setNodeRef: setDraggableNodeRef, isDragging } = useDraggable({
         id: dndId,
-        disabled: !hasItem || slotId === null,
+        disabled: !hasItem || slotId === null || isDragDropDisabled,
         data: {
             slot: slotId,
             group,
@@ -103,6 +112,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     })
     const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
         id: dndId,
+        disabled: isDragDropDisabled,
         data: {
             slot: slotId,
             group
@@ -114,6 +124,16 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setDraggableNodeRef(node)
     }, [setDroppableNodeRef, setDraggableNodeRef])
 
+    const onClickAddItemToInventory = useCallback(() => {
+        if (permission !== 'admin') {
+            return
+        }
+        window.hEvent('devAddItem', {
+            itemName: item?.name,
+            amount: 1
+        })
+    }, [])
+
     const slotClasses = useMemo(() => {
         const base = ["w-24 h-24 bg-accent rounded transition-all duration-150 ease-out"]
         if (isOver) {
@@ -124,14 +144,20 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         }
         return base.join(" ")
     }, [isDragging, isOver])
-    const cursorClass = hasItem ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-default"
+    const cursorClass = isDragDropDisabled
+        ? "cursor-default"
+        : hasItem
+            ? (isDragging ? "cursor-grabbing" : "cursor-grab")
+            : "cursor-default"
+    const draggableAttributes = isDragDropDisabled ? undefined : attributes
+    const draggableListeners = isDragDropDisabled ? undefined : listeners
 
     return (
         <ContextMenu>
             <HoverCard>
                 <ContextMenuTrigger asChild>
                     <HoverCardTrigger asChild>
-                        <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...attributes} {...listeners}>
+                        <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...(draggableAttributes ?? {})} {...(draggableListeners ?? {})}>
                             <Item className="relative gap-1 p-0 w-full h-full border-none">
                                 {slot !== null && slot <= 5 && isShowHotbarNumber ? (
                                     <Badge className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
@@ -224,7 +250,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                     </HoverCardContent>
                 )}
             </HoverCard>
-            {!!item && (
+            {!!item && group === 'inventory' && (
                 <ContextMenuContent>
                     {item.useable && (
                         <ContextMenuItem onClick={onClickUse}><Hand className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.use')}</ContextMenuItem>
@@ -280,6 +306,11 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                             <ContextMenuItem onClick={onClickAttach}><Paperclip className="w-4 h-4 text-muted-foreground mr-2" /> Phụ kiện</ContextMenuItem>
                         </>
                     )} */}
+                </ContextMenuContent>
+            )}
+            {!!item && group === 'dev-library' && (
+                <ContextMenuContent>
+                    <ContextMenuItem onClick={onClickAddItemToInventory}><Plus className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.add')}</ContextMenuItem>
                 </ContextMenuContent>
             )}
         </ContextMenu>
