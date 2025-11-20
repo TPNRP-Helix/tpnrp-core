@@ -38,12 +38,21 @@ local en = {
         itemNotCloth = "Item is not a cloth item!",
         inventoryWeightLimitReached = "Inventory weight limit reached!",
         inventoryFull = "Inventory is full!",
+        playerNotFound = "Player not found!",
     },
     success = {
         joinGame = "Joined game successfully",
         createCharacter = "Character created successfully!",
         deleteCharacter = "Character deleted successfully!",
     },
+    npc = {
+        citizen_identification_officer = 'Citizen Identification Officer',
+    },
+    mission = {
+        notFound = 'Mission not found!',
+        notMetRequirements = 'Player does not meet mission requirements!',
+        taken = 'Mission taken successfully!',
+    }
 }
 
 return en

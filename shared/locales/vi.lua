@@ -38,12 +38,21 @@ local vi = {
         itemNotCloth = "Vật phẩm không phải là quần áo!",
         inventoryWeightLimitReached = "Túi đồ đã đầy trọng lượng!",
         inventoryFull = "Túi đồ đã đầy!",
+        playerNotFound = "Không tìm thấy nhân vật!",
     },
     success = {
         joinGame = "Đã vào game thành công",
         createCharacter = "Tạo nhân vật thành công!",
         deleteCharacter = "Xóa nhân vật thành công!",
     },
+    npc = {
+        citizen_identification_officer = 'Trưởng phòng công dân',
+    },
+    mission = {
+        notFound = 'Không tìm thấy nhiệm vụ!',
+        notMetRequirements = 'Bạn không đủ điều kiện để nhận nhiệm vụ này!',
+        taken = 'Bạn đã nhận nhiệm vụ thành công!',
+    }
 }
 
 return vi
