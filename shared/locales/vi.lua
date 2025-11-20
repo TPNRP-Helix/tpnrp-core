@@ -1,4 +1,4 @@
-LOCALES.VI = {
+local vi = {
     core = {
         unknown_key = "Thiếu bản dịch: {key}",
     },
@@ -46,4 +46,4 @@ LOCALES.VI = {
     },
 }
 
-
+return vi

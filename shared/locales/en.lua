@@ -1,4 +1,4 @@
-LOCALES.EN = {
+local en = {
     core = {
         unknown_key = "Unknown translation: {key}",
     },
@@ -46,4 +46,4 @@ LOCALES.EN = {
     },
 }
 
-
+return en
