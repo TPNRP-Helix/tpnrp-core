@@ -140,7 +140,7 @@ export const Library = () => {
                                     Permission: {permission}
                                 </div>
                             </div>
-                            <div className="h-full overflow-hidden">
+                            <div className="h-full gap-2 overflow-hidden">
                                 <div className="grid grid-cols-3 gap-2">
                                     <div className="col-span-2">
                                         <Input type="text" placeholder="Animation name" value={animationName} onChange={(e) => setAnimationName(e.target.value)} />
@@ -169,14 +169,16 @@ export const Library = () => {
                                 Library
                             </div>
                             <div className="h-full overflow-hidden">
-                                {itemLibrary.map((item, index) => (
-                                    <InventoryItem
-                                        key={`${item.name}-${index}`}
-                                        item={item}
-                                        isDragDropDisabled={true}
-                                        group="dev-library"
-                                    />
-                                ))}
+                                <div className="grid grid-cols-[repeat(10,96px)] gap-4 grid-wrap justify-center">
+                                    {itemLibrary.map((item, index) => (
+                                        <InventoryItem
+                                            key={`${item.name}-${index}`}
+                                            item={item}
+                                            isDragDropDisabled={true}
+                                            group="dev-library"
+                                        />
+                                    ))}
+                                    </div>
                             </div>
                         </div>
                     </div>

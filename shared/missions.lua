@@ -1,5 +1,36 @@
 ---@type table<string, TMissionData>
 SHARED.missions = {
+    newbie_0 = {
+        id = 'newbie_0',
+        title = {
+            en = 'Welcome to the Newbie Mission',
+            vi = 'Chào mừng đến với nhiệm vụ Newbie'
+        },
+        description = {
+            en = 'To survive and exist in this city, you need to have an ID card. To get an ID card, you need to go to the nearest police station and register!',
+            vi = 'Để sinh sống và tồn tại trong thành phố này bạn cần phải có 1 căn cước công dân. Để lấy căn cước công dân bạn cần đến đồn cảnh sát gần nhất và thực hiện đăng ký!'
+        },
+        rewardSuccessMessage = {
+            en = 'Thank you for registering. Here is your ID card!',
+            vi = 'Cảm ơn bạn đã đăng ký. Đây là căn cước công dân của bạn!'
+        },
+        requirements = {
+            {
+                type = 'talk_npc',
+                name = 'citizen_identification_officer'
+            }
+        },
+        requireToTakeMission = {
+            level = 1,
+        },
+        rewards = {
+            {
+                type = 'item',
+                name = 'id_card',
+                amount = 1
+            }
+        }
+    },
     newbie_1 = {
         id = 'newbie_1',
         title = {
