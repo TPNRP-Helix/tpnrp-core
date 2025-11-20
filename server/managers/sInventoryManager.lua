@@ -443,6 +443,8 @@ function SInventoryManager.new(core)
             position = SpawnPosition,
             rotation = PawnRotation,
             scale = worldItem.scale,
+            collisionType = ECollisionType.IgnoreOnlyPawn,
+            mobilityType = EMobilityType.Movable,
         })
         if not spawnResult.status then
             -- Spawn failed => Add item back to player's inventory

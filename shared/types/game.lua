@@ -49,10 +49,12 @@
 ---@field name? string player name
 
 ---@class TSpawnStaticMeshParams
----@field entityPath string Path to entity (Ex: '/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag)
+---@field entityPath string Path to entity (Ex: /Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag)
 ---@field position Vector3 position to spawn
 ---@field scale Vector3 Scale of mesh
 ---@field rotation Rotator Rotation of mesh
+---@field collisionType ECollisionType Collision type of mesh
+---@field mobilityType EMobilityType Mobility type of mesh
 
 ---@alias TInteractAction fun(actor: unknown, instigator: PlayerController)
 

@@ -36,6 +36,8 @@ function SGameManager.new(core)
         local spawnRotation = params.rotation
         local spawnScale = params.scale
         local entityPath = params.entityPath or ''
+        local collisionType = params.collisionType or ECollisionType.StaticOnly
+        local mobilityType = params.mobilityType or EMobilityType.Stationary
 
         if entityPath == '' then
             print('[ERROR] SGameManager.SPAWN_STATIC_MESH - Entity path is empty!')
@@ -47,7 +49,7 @@ function SGameManager.new(core)
             }
         end
 
-        local entity = StaticMesh(spawnPosition, spawnRotation, entityPath, ECollisionType.StaticOnly)
+        local entity = StaticMesh(spawnPosition, spawnRotation, entityPath, collisionType)
         if not entity then
             print('[ERROR] SGameManager.SPAWN_STATIC_MESH - Failed to spawn static mesh!')
             return {
@@ -58,7 +60,8 @@ function SGameManager.new(core)
             }
         end
         entity:SetActorScale3D(spawnScale)
-        local entityId = string.format('sm-%d', self.core.shared.randomId(6))
+        entity:SetMobility(mobilityType)
+        local entityId = string.format('sm-%d', SHARED.randomId(6))
 
         -- Push entity to list for manage later
         self.entities[entityId] = {

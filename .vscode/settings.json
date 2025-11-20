@@ -30,7 +30,8 @@
         "Interactable",
         "Color",
         "SetEntityCoords",
-        "SetEntityRotation"
+        "SetEntityRotation",
+        "EComponentMobility"
     ],
     "Lua.diagnostics.disable": [
         "undefined-doc-name"
