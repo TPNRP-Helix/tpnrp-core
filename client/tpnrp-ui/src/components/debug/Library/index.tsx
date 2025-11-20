@@ -149,16 +149,17 @@ export const Library = () => {
                                         <Button onClick={() => playAnimation()}>Play</Button>
                                     </div>
                                 </div>
-                                <Button onClick={() => toast.success('Test toast', {
-                                        description: 'Test toast description',
-                                        duration: 3000
-                                    })}>Test toast</Button>
-                                <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
-                                <Button onClick={() => {
-                                    toggleSettings()
-                                    setDevModeOpen(false)
-                                }}>Toggle Settings</Button>
-                                <Button onClick={() => setUIPreviewOpen(true)}>Toggle UIPreview</Button>
+                                <div className="flex flex-row gap-2">
+                                    <Button onClick={() => toast.success('Test toast', {
+                                            description: 'Test toast description',
+                                            duration: 3000
+                                        })}>Test toast</Button>
+                                    <Button onClick={() => toggleHud()}>Toggle Basic needs HUD</Button>
+                                    <Button onClick={() => {
+                                        toggleSettings()
+                                        setDevModeOpen(false)
+                                    }}>Toggle Settings</Button>
+                                </div>
                             </div>
                         </div>
                         <div className={cn("grid grid-cols-[120px_1fr] w-full h-full", {
