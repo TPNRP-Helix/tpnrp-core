@@ -169,6 +169,12 @@ function SEquipment.new(player)
         return self.items[clothType] or nil
     end
 
+    ---Get equipment
+    ---@return table<EEquipmentClothType, SEquipmentItemType> equipment
+    function self:getEquipment()
+        return self.items
+    end
+
     _contructor()
     ---- END ----
     return self

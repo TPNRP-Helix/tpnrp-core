@@ -436,6 +436,7 @@ function SInventory.new(player, inventoryType)
     end
 
     ---Open inventory of current player
+    ---@return TInventoryOpenInventoryResultType result
     function self:openInventory()
         local inventory = nil
         -- Filter out nil values from inventory and convert to array
@@ -446,11 +447,13 @@ function SInventory.new(player, inventoryType)
             end
         end
         local backpackCapacity = self.player.equipment:getBackpackCapacity()
-        
+        local equipment = self.player.equipment:getEquipment()
+
         return {
             status = true,
             message = 'Inventory opened!',
             inventory = inventory,
+            equipment = equipment,
             capacity = {
                 weight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpackCapacity.weightLimit,
                 slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,

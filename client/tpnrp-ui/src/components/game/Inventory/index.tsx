@@ -25,6 +25,7 @@ type TOpenInventoryResult = {
     status: boolean
     message: string
     inventory: TInventoryItem[]
+    equipment: TInventoryItem[]
     capacity: {
         weight: number
         slots: number
@@ -36,6 +37,7 @@ export const Inventory = () => {
         isOpenInventory,
         setOpenInventory,
         inventoryItems, setInventoryItems,
+        setEquipmentItems,
         slotCount, setSlotCount,
         getTotalWeight, setTotalWeight,
         getTotalLimitWeight,
@@ -127,6 +129,7 @@ export const Inventory = () => {
     const backpackItems = inventoryItems.filter(item => item.slot >= 7).sort((a, b) => a.slot - b.slot)
 
     useWebUIMessage<[TOpenInventoryResult]>('openInventory', ([result]) => {
+        ///////////////////////////////////////////////////////////////////////////
         // Check if result.inventory is an array or object
         if (Array.isArray(result.inventory)) {
             // It's an array
@@ -136,7 +139,18 @@ export const Inventory = () => {
             const inventoryItems: TInventoryItem[] = Object.values(result.inventory).filter(item => item !== null) as TInventoryItem[]
             setInventoryItems(inventoryItems)
         }
-        
+        ///////////////////////////////////////////////////////////////////////////
+        appendConsoleMessage({ message: `openInventory: ${JSON.stringify(result.equipment)}`, index: 0 })
+        // Check if result.equipment is an array or object
+        if (Array.isArray(result.equipment)) {
+            // It's an array
+            setEquipmentItems(result.equipment)
+        } else if (result.equipment && typeof result.equipment === 'object') {
+            // It's an object (not an array)
+            const equipmentItems: TInventoryItem[] = Object.values(result.equipment).filter(item => item !== null) as TInventoryItem[]
+            setEquipmentItems(equipmentItems)
+        }
+        ///////////////////////////////////////////////////////////////////////////
         setSlotCount(result.capacity.slots)
         setTotalWeight(result.capacity.weight)
         setOpenInventory(true)

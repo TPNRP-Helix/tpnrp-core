@@ -92,7 +92,7 @@ function SInventoryManager.new(core)
                 message = SHARED.t('error.failedToGetPlayer'),
             }
         end
-        print('[TPN][SERVER] onOpenInventory - data: ', JSON.stringify(data))
+        -- Get player's inventory and equipment
         local result = player.inventory:openInventory()
         if data.type == 'container' then
             local container = self.containers[data.containerId]
