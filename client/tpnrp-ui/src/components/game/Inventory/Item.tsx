@@ -24,6 +24,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     } = props
     const { t } = useI18n()
     const {
+        otherItemsId,
         setIsOpenAmountDialog,
         setAmountDialogType,
         setDialogItem,
@@ -107,7 +108,8 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         data: {
             slot: slotId,
             group,
-            item
+            item,
+            groupId: group === 'container' ? otherItemsId : null
         }
     })
     const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
@@ -115,7 +117,8 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         disabled: isDragDropDisabled,
         data: {
             slot: slotId,
-            group
+            group,
+            groupId: group === 'container' ? otherItemsId : null
         }
     })
 
@@ -308,7 +311,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                     )} */}
                 </ContextMenuContent>
             )}
-            {!!item && group === 'dev-library' && (
+            {!!item && group === 'devLibrary' && (
                 <ContextMenuContent>
                     <ContextMenuItem onClick={onClickAddItemToInventory}><Plus className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.add')}</ContextMenuItem>
                 </ContextMenuContent>

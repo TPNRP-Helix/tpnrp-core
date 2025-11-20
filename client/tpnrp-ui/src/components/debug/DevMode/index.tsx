@@ -37,6 +37,17 @@ export const DevMode = () => {
     useWebUIMessage<[TInventoryItem[]]>('syncItemsLibrary', ([items]) => {
         appendConsoleMessage({ message: `syncItemsLibrary: ${JSON.stringify(items)}`, index: 0 })
         // setItemLibrary(items)
+        const devLibrary: TInventoryItem[] = []
+        Object.entries(items).forEach(([_, value]) => {
+            devLibrary.push({
+                amount: value.amount,
+                name: value.name,
+                label: value.label,
+                weight: value.weight,
+                slot: value.slot
+            })
+        })
+        setItemLibrary(devLibrary)
     })
 
     useEffect(() => {

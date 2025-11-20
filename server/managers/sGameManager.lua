@@ -59,17 +59,15 @@ function SGameManager.new(core)
                 message = 'Failed to spawn static mesh!',
             }
         end
-        entity:SetActorScale3D(spawnScale)
+        entity:SetActorScale3D(Vector(spawnScale.x, spawnScale.y, spawnScale.z))
         entity:SetMobility(mobilityType)
-        local entityId = string.format('sm-%d', SHARED.randomId(6))
-
+        local entityId = SHARED.randomId(3) .. '-' .. SHARED.randomInt(11111,99999)
         -- Push entity to list for manage later
         self.entities[entityId] = {
             id = entityId,
             entity = entity,
             isInteractable = false,
         }
-
         return {
             status = true,
             entityId = entityId,
@@ -82,6 +80,7 @@ function SGameManager.new(core)
     ---@param params TAddInteractableParams
     ---@return {status:boolean; message: string} returnValue 
     function self:addInteractable(params)
+        local entityId = params.entityId
         local entity = params.entity
         local options = params.options
         if not entity or not options then
@@ -91,18 +90,14 @@ function SGameManager.new(core)
                 message = 'Entity or options is empty!',
             }
         end
-
-        local entityInteractable = Interactable({
-            options,
-        })
-
+        local entityInteractable = Interactable(options)
         -- Attach the interactable to our existing cube
         entityInteractable:SetInteractableProp(entity)
         entityInteractable.BoxCollision:SetCollisionResponseToChannel(UE.ECollisionChannel.ECC_Pawn, UE.ECollisionResponse.ECR_Overlap)
-        
-        -- Update entity interactable
-        self.entities[entity.id].isInteractable = true
-
+        if self.entities[entityId] then
+            -- Update entity interactable
+            self.entities[entityId].isInteractable = true
+        end
         return {
             status = true,
             message = 'Interactable added successfully!',

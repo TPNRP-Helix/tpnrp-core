@@ -27,8 +27,9 @@ type MoveInventoryItemOptions = {
 type InventoryState = {
   isOpenInventory: boolean
   otherItems: TInventoryItem[]
-  otherItemsType: 'ground' | 'player' | 'stack' | ''
+  otherItemsType: 'ground' | 'player' | 'stack' | 'container' | ''
   otherItemsSlotCount: number
+  otherItemsId: string
   isOpenAmountDialog: boolean
   amountDialogType: 'give' | 'drop'
   dialogItem: TInventoryItem | null
@@ -55,7 +56,7 @@ type InventoryState = {
   resetAmountDialog: () => void
   setDialogItem: (item: TInventoryItem) => void
   setOtherItems: (items: TInventoryItem[]) => void
-  setOtherItemsType: (value: 'ground' | 'player' | 'stack') => void
+  setOtherItemsType: (value: 'ground' | 'player' | 'stack' | 'container') => void
   setOtherItemsSlotCount: (value: number) => void
   getEquipmentItem: (equipSlot: EEquipmentSlot) => TInventoryItem | undefined
   isHaveOtherItems: () => boolean
@@ -63,6 +64,7 @@ type InventoryState = {
   getTotalWeight: () => number
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => void
   moveInventoryItem: (params: MoveInventoryItemParams, options?: MoveInventoryItemOptions) => boolean
+  setOtherItemsId: (value: string) => void
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
@@ -76,6 +78,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   otherItems: [],
   otherItemsType: 'ground',
   otherItemsSlotCount: 0,
+  otherItemsId: '',
   equipmentItems: [],
   selectOtherTab: 'crafting',
   learnedCraftingRecipes: [],
@@ -217,7 +220,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   setDialogItem: (item: TInventoryItem) => set({ dialogItem: item }),
   setInventoryItems: (items: TInventoryItem[]) => set({ inventoryItems: items }),
   setOtherItems: (items: TInventoryItem[]) => set({ otherItems: items }),
-  setOtherItemsType: (value: 'ground' | 'player' | 'stack') => set({ otherItemsType: value }),
+  setOtherItemsType: (value: 'ground' | 'player' | 'stack' | 'container') => set({ otherItemsType: value }),
   setOtherItemsSlotCount: (value: number) => set({ otherItemsSlotCount: value }),
   getEquipmentItem: (equipSlot: EEquipmentSlot) => get().equipmentItems.find((item: TInventoryItem) => item.slot === equipSlot),
   isHaveOtherItems: () => {
@@ -260,7 +263,8 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
       const collections: Record<TInventoryGroup, TInventoryItem[]> = {
         inventory: inventoryItems,
         equipment: equipmentItems,
-        other: otherItems,
+        container: otherItems,
+        devLibrary: [],
       }
 
       const sourceList = collections[sourceGroup]
@@ -327,5 +331,6 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
     return isSuccess
   },
+  setOtherItemsId: (value: string) => set({ otherItemsId: value }),
 }))
 

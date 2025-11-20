@@ -171,7 +171,7 @@ function SContainer.new(core, containerId, citizenId)
     ---@param amount number item amount
     ---@param slotNumber number | nil slot number (optional)
     ---@param info table | nil item info (optional)
-    ---@return SContainerAddItemResultType {status=boolean, message=string, slot=number} result of adding item
+    ---@return {status:boolean, message:string, slot:number} result of adding item
     function self:addItem(itemName, amount, slotNumber, info)
         -- Validate inputs
         if not itemName or type(itemName) ~= 'string' then

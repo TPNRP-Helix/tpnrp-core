@@ -66,6 +66,7 @@
 ---@field ability string|nil (TODO: MORE DOCUMENTATION NEEDED!)
 
 ---@class TAddInteractableParams
+---@field entityId string Entity id
 ---@field entity unknown Entity (TODO: MORE DOCUMENTATION NEEDED!)
 ---@field options TInteractableOption[] List of option
 

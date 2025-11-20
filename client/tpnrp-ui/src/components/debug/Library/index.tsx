@@ -27,8 +27,7 @@ export const Library = () => {
         isDevModeOpen, setDevModeOpen,
         libraryTab, setLibraryTab,
         isEnableDevMode, permission,
-        itemLibrary,
-        setUIPreviewOpen
+        itemLibrary
     } = useDevModeStore()
     const { toggleSelectCharacter, setMaxCharacters, setPlayerCharacters, toggleCreateCharacter } = useCreateCharacterStore()
     const {
@@ -169,13 +168,13 @@ export const Library = () => {
                                 Library
                             </div>
                             <div className="h-full overflow-hidden">
-                                <div className="grid grid-cols-[repeat(10,96px)] gap-4 grid-wrap justify-center">
+                                <div className="grid grid-cols-[repeat(12,96px)] gap-4 grid-wrap justify-center">
                                     {itemLibrary.map((item, index) => (
                                         <InventoryItem
                                             key={`${item.name}-${index}`}
                                             item={item}
                                             isDragDropDisabled={true}
-                                            group="dev-library"
+                                            group="devLibrary"
                                         />
                                     ))}
                                     </div>

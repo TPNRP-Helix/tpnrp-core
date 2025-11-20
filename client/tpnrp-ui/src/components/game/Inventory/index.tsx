@@ -26,6 +26,14 @@ type TOpenInventoryResult = {
     message: string
     inventory: TInventoryItem[]
     equipment: TInventoryItem[]
+    container?: {
+        items: TInventoryItem[]
+        id: string
+        capacity: {
+            weight: number
+            slots: number
+        }
+    } | null
     capacity: {
         weight: number
         slots: number
@@ -40,6 +48,10 @@ export const Inventory = () => {
         setEquipmentItems,
         slotCount, setSlotCount,
         getTotalWeight, setTotalWeight,
+        setOtherItems,
+        setOtherItemsId,
+        setOtherItemsType,
+        setOtherItemsSlotCount,
         getTotalLimitWeight,
         moveInventoryItem,
         removeTemporaryDroppedItem,
@@ -81,6 +93,8 @@ export const Inventory = () => {
         const targetSlot = over?.data.current?.slot
         const activeGroup = active.data.current?.group
         const targetGroup = over?.data.current?.group
+        const targetGroupId = over?.data.current?.groupId
+        const activeGroupId = active.data.current?.groupId
         const item: TInventoryItem = active.data.current?.item
 
         const isGroup = (value: unknown): value is TInventoryGroup =>
@@ -110,7 +124,7 @@ export const Inventory = () => {
             }, {
                 onSuccess: () => {
                     appendConsoleMessage({ message: `Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`, index: 0 })
-                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup })
+                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup, sourceGroupId: activeGroupId, targetGroupId: targetGroupId })
                 },
                 onFail: () => {
                     appendConsoleMessage({ message: `Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`, index: 0 })
@@ -151,6 +165,20 @@ export const Inventory = () => {
             setEquipmentItems(equipmentItems)
         }
         ///////////////////////////////////////////////////////////////////////////
+        if (result.container) {
+            // Check if result.container is an array or object
+            if (Array.isArray(result.container.items)) {
+                // It's an array
+                setOtherItems(result.container.items)
+            } else if (result.container && typeof result.container === 'object') {
+                // It's an object (not an array)
+                const containerItems: TInventoryItem[] = Object.values(result.container.items).filter(item => item !== null) as TInventoryItem[]
+                setOtherItems(containerItems)
+            }
+            setOtherItemsId(result.container.id)
+            setOtherItemsType('container')
+            setOtherItemsSlotCount(result.container.capacity.slots)
+        }
         setSlotCount(result.capacity.slots)
         setTotalWeight(result.capacity.weight)
         setOpenInventory(true)

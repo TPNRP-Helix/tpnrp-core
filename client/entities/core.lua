@@ -128,7 +128,7 @@ function TPNRPClient.new()
             end, data.citizenId)
         end)
 
-        self.webUI:registerEventHandler('addItem', function(data)
+        self.webUI:registerEventHandler('devAddItem', function(data)
             TriggerCallback('devAddItem', function(result)
                 if not result.status then
                     self:showNotification({

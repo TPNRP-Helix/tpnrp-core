@@ -40,7 +40,7 @@ ECollisionType = {
 
 ---@enum EMobilityType
 EMobilityType = {
-    Static = EComponentMobility.Static,
-    Movable = EComponentMobility.Movable,
-    Stationary = EComponentMobility.Stationary
+    Static = UE.EComponentMobility.Static,
+    Movable = UE.EComponentMobility.Movable,
+    Stationary = UE.EComponentMobility.Stationary
 }

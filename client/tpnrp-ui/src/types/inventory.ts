@@ -14,7 +14,7 @@ export type TInventoryItem = {
     }
 }
 
-export type TInventoryGroup = 'equipment' | 'inventory' | 'other' | 'dev-library'
+export type TInventoryGroup = 'equipment' | 'inventory' | 'container' | 'devLibrary'
 
 export type TInventoryItemProps = {
     item?: TInventoryItem
