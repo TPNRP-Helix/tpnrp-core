@@ -460,9 +460,9 @@ function SInventoryManager.new(core)
                 icon = 'fas fa-bag',
                 action = function(Drop, Instigator)
                     print('[TPN][SERVER] createDropItem - Open bag!')
-                    local Controller = Instigator and Instigator:GetController()
-                    if Controller then
-                        TriggerClientEvent(Controller, 'openContainerInventory', { containerId = newDropId })
+                    local controller = Instigator and Instigator:GetController()
+                    if controller then
+                        TriggerClientEvent(controller, 'openContainerInventory', { containerId = newDropId })
                     end
                 end,
             },

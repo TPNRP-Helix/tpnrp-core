@@ -95,7 +95,8 @@ function SGameManager.new(core)
 
         -- Attach the interactable to our existing cube
         entityInteractable:SetInteractableProp(entity)
-
+        entityInteractable.BoxCollision:SetCollisionResponseToChannel(UE.ECollisionChannel.ECC_Pawn, UE.ECollisionResponse.ECR_Overlap)
+        
         -- Update entity interactable
         self.entities[entity.id].isInteractable = true
 
