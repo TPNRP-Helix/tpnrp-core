@@ -22,6 +22,7 @@
 
 ---@class PlayerController
 ---@field GetLyraPlayerState fun(): LyraPlayerState
+---@field Kick fun(self: PlayerController, reason: string): nil
 
 ---@class WebUI
 ---@field SendEvent fun(self: WebUI, event: string, ...: any): nil

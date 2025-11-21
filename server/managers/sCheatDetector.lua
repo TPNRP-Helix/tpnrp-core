@@ -43,6 +43,19 @@ function SCheatDetector.new(core)
         -- TODO: Warning to discord via webhook
     end
 
+    ---Kick player
+    ---@param player SPlayer player entity
+    ---@param reason string reason to kick player
+    function self:kickPlayer(player, reason)
+        if not player then
+            return
+        end
+        if not reason or type(reason) ~= 'string' then
+            reason = 'You are kicked from the server'
+        end
+        player.playerController:Kick(reason)
+    end
+
     _contructor()
     ---- END ----
     return self

@@ -101,7 +101,7 @@ export const CreateCharacter = () => {
         setShowSelectCharacter(true)
     })
 
-    useWebUIMessage<[TCreateCharacterResponse]>('joinGameSuccess', ([playerData]) => {
+    useWebUIMessage('joinGameSuccess', () => {
         // Hide Select Character
         setShowSelectCharacter(false)
         // Hide Create Character Dialog
