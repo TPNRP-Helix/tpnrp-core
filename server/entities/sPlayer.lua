@@ -150,7 +150,7 @@ function SPlayer.new(core, playerController, playerData)
         local ped = GetPlayerPawn(self.playerController)
         if ped then
             SetEntityCoords(ped, Vector(self.playerData.position.x, self.playerData.position.y, self.playerData.position.z))
-            SetEntityRotation(ped, self.playerData.heading)
+            SetEntityRotation(ped, Rotator(0, self.playerData.heading, 0))
         end
         return self.playerData
     end

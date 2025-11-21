@@ -20,9 +20,6 @@ function SInventoryManager.new(core)
     ---/*         Initializes          */
     ---/********************************/
 
-    local function onServerLoad()
-    end
-
     ---Contructor function
     local function _contructor()
 
@@ -86,7 +83,6 @@ function SInventoryManager.new(core)
     function self:onOpenInventory(source, data)
         local player = self.core:getPlayerBySource(source)
         if not player then
-            print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get player by source!')
             return {
                 status = false,
                 message = SHARED.t('error.failedToGetPlayer'),
@@ -95,6 +91,7 @@ function SInventoryManager.new(core)
         -- Get player's inventory and equipment
         local result = player.inventory:openInventory()
         if data.type == 'container' then
+            ---@type SContainer|nil container
             local container = self.containers[data.containerId]
             if not container then
                 return {
@@ -103,7 +100,7 @@ function SInventoryManager.new(core)
                 }
             end
             result.container = {
-                id = container.id,
+                id = container.containerId,
                 items = container.items,
                 capacity = {
                     weight = container.maxWeight,
@@ -111,8 +108,6 @@ function SInventoryManager.new(core)
                 }
             }
         end
-        -- Open inventory
-        print('[TPN][SERVER] onOpenInventory - result: ', JSON.stringify(result))
 
         return result
     end

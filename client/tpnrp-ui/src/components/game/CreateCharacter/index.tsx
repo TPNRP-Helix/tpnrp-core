@@ -5,7 +5,6 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
-import { useDevModeStore } from "@/stores/useDevModeStore"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useCallback, useState } from "react"
 import {
@@ -47,7 +46,6 @@ type TCreateCharacterResponse = {
 }
 
 export const CreateCharacter = () => {
-    const { appendConsoleMessage } = useDevModeStore()
     const { t } = useI18n()
     const { language, setLanguage } = useGameSettingStore()
     const {
@@ -69,9 +67,6 @@ export const CreateCharacter = () => {
     const { toggleHud, setIsInGame, setShowLoading } = useGameStore()
     
     useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
-        // TPN Log
-        appendConsoleMessage({ message: `Max char: ${maxCharacters} - characters ${JSON.stringify(characters)}`, index: 0 })
-
         // Set max characters
         setMaxCharacters(maxCharacters)
         // Format characters
@@ -92,7 +87,6 @@ export const CreateCharacter = () => {
     })
 
     useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
-        appendConsoleMessage({ message: `Character created successfully: ${JSON.stringify(playerData)}`, index: 0 })
         // Set preview character info
         setPlayerCharacters([...playerCharacters, {
             name: playerData?.name ?? '',
@@ -108,7 +102,6 @@ export const CreateCharacter = () => {
     })
 
     useWebUIMessage<[TCreateCharacterResponse]>('joinGameSuccess', ([playerData]) => {
-        appendConsoleMessage({ message: `Character joined successfully: ${JSON.stringify(playerData)}`, index: 0 })
         // Hide Select Character
         setShowSelectCharacter(false)
         // Hide Create Character Dialog
@@ -131,19 +124,16 @@ export const CreateCharacter = () => {
         setIsSubmitting(true)
         if (!firstName || firstName.trim() === '') {
             console.log(t('error.firstNameRequired'), firstName)
-            appendConsoleMessage({ message: t('error.firstNameRequired'), index: 0 })
             setError({ type: 'firstName', message: t('error.firstNameRequired') })
             setIsSubmitting(false)
             return
         }
         if (!lastName || lastName.trim() === '') {
-            appendConsoleMessage({ message: t('error.lastNameRequired'), index: 0 })
             setError({ type: 'lastName', message: t('error.lastNameRequired') })
             setIsSubmitting(false)
             return
         }
         if (!dateOfBirth) {
-            appendConsoleMessage({ message: t('error.dobRequired'), index: 0 })
             setError({ type: 'dateOfBirth', message: t('error.dobRequired') })
             setIsSubmitting(false)
             return

@@ -10,8 +10,6 @@ import { Inventory } from "./components/game/Inventory"
 
 declare global {
   interface Window {
-    onLogMessage: (message: string, index: number) => void;
-    onToggleConsole: () => void;
     hEvent: (event: string, data?: Record<string, unknown>) => void;
   }
 }

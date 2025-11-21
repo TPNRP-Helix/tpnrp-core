@@ -6,13 +6,14 @@ import { Badge } from "@/components/ui/badge"
 import type { TInventoryItemProps } from "@/types/inventory"
 import { useCallback, useId, useMemo } from "react"
 import { useI18n } from "@/i18n"
-import { RARE_LEVELS } from "@/constants"
+import { FALLBACK_DEFAULT_IMAGE_PATH, RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
 import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf, Plus } from "lucide-react"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Progress } from "@/components/ui/progress"
 import { useDraggable, useDroppable } from "@dnd-kit/core"
 import { useDevModeStore } from "@/stores/useDevModeStore"
+import { Image } from "@/components/ui/image"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
     const {
@@ -175,7 +176,13 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                             </div>
                                         )}
                                         <ItemMedia className="relative z-10 w-full object-cover p-4">
-                                            <img src={itemImage ?? ''} alt="Item" className="w-11/12 h-11/12 object-cover select-none pointer-events-none" draggable={false} />
+                                            <Image
+                                                src={itemImage ?? ''}
+                                                alt={item?.label ?? item?.name}
+                                                className="w-11/12 h-11/12 object-cover select-none pointer-events-none"
+                                                draggable={false}
+                                                fallbackSrc={FALLBACK_DEFAULT_IMAGE_PATH}
+                                            />
                                         </ItemMedia>
                                         {item.info?.durability && (
                                             <div className="absolute bottom-0 left-0 w-full">
@@ -194,15 +201,14 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                         <div className="flex flex-col justify-between space-x-4">
                             <div className="flex flex-row justify-between space-x-4">
                                 <div className='w-16 h-16'>
-                                    <img
+                                    <Image
                                         src={itemImage ?? ''}
                                         alt={item?.label ?? item?.name}
+                                        className="h-full w-full object-cover"
+                                        draggable={false}
                                         width={128}
                                         height={128}
-                                        className="h-full w-full object-cover"
-                                        // style={{
-                                        //     filter: rareLevel?.color ? `drop-shadow(0 0 26px ${rareLevel?.color})` : 'none'
-                                        // }}
+                                        fallbackSrc={FALLBACK_DEFAULT_IMAGE_PATH}
                                     />
                                 </div>
                                 <div className='flex-1 px-2'>

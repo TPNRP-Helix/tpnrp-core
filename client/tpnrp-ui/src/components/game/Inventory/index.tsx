@@ -16,7 +16,6 @@ import { OtherInventory } from "./OtherInventory"
 import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
 import type { TInventoryGroup, TInventoryItem, TResponseCreateDropItem } from "@/types/inventory"
-import { useDevModeStore } from "@/stores/useDevModeStore"
 import { toast } from "sonner"
 
 const DEFAULT_SLOT_COUNT = 5
@@ -58,7 +57,6 @@ export const Inventory = () => {
         rollbackTemporaryDroppedItem
     } = useInventoryStore()
     const { t } = useI18n()
-    const { appendConsoleMessage } = useDevModeStore()
     const [activeDragItem, setActiveDragItem] = useState<{
         item: TInventoryItem | null
         slot: number | null
@@ -123,11 +121,11 @@ export const Inventory = () => {
                 targetGroup
             }, {
                 onSuccess: () => {
-                    appendConsoleMessage({ message: `Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`, index: 0 })
+                    console.log(`Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`)
                     window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup, sourceGroupId: activeGroupId, targetGroupId: targetGroupId })
                 },
                 onFail: () => {
-                    appendConsoleMessage({ message: `Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`, index: 0 })
+                    console.log(`Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`)
                 }
             })
         }
@@ -154,7 +152,7 @@ export const Inventory = () => {
             setInventoryItems(inventoryItems)
         }
         ///////////////////////////////////////////////////////////////////////////
-        appendConsoleMessage({ message: `openInventory: ${JSON.stringify(result.equipment)}`, index: 0 })
+        console.log(`openInventory: ${JSON.stringify(result.equipment)}`)
         // Check if result.equipment is an array or object
         if (Array.isArray(result.equipment)) {
             // It's an array
@@ -175,6 +173,7 @@ export const Inventory = () => {
                 const containerItems: TInventoryItem[] = Object.values(result.container.items).filter(item => item !== null) as TInventoryItem[]
                 setOtherItems(containerItems)
             }
+            console.log('[UI] openInventory - container result: ', JSON.stringify(result.container))
             setOtherItemsId(result.container.id)
             setOtherItemsType('container')
             setOtherItemsSlotCount(result.container.capacity.slots)
@@ -186,7 +185,6 @@ export const Inventory = () => {
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
     useWebUIMessage<[type: string, items: TInventoryItem[]]>('doSyncInventory', ([type, items]) => {
         if (type === 'sync') {
-            appendConsoleMessage({ message: `doSyncInventory: ${JSON.stringify(items)}`, index: 0 })
             setInventoryItems(items)
         }
     })

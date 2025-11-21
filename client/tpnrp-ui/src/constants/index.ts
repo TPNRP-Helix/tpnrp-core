@@ -25,3 +25,5 @@ export const RARE_LEVELS = [
         color: '#9810FA'
     },
 ]
+
+export const FALLBACK_DEFAULT_IMAGE_PATH = './assets/images/items/default.png'

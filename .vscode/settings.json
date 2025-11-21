@@ -31,7 +31,8 @@
         "Color",
         "SetEntityCoords",
         "SetEntityRotation",
-        "EComponentMobility"
+        "EComponentMobility",
+        "Rotator"
     ],
     "Lua.diagnostics.disable": [
         "undefined-doc-name"

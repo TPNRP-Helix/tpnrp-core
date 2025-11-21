@@ -40,7 +40,6 @@ function SGameManager.new(core)
         local mobilityType = params.mobilityType or EMobilityType.Stationary
 
         if entityPath == '' then
-            print('[ERROR] SGameManager.SPAWN_STATIC_MESH - Entity path is empty!')
             return {
                 status = false,
                 entityId = nil,
@@ -51,7 +50,6 @@ function SGameManager.new(core)
 
         local entity = StaticMesh(spawnPosition, spawnRotation, entityPath, collisionType)
         if not entity then
-            print('[ERROR] SGameManager.SPAWN_STATIC_MESH - Failed to spawn static mesh!')
             return {
                 status = false,
                 entityId = nil,
@@ -84,7 +82,6 @@ function SGameManager.new(core)
         local entity = params.entity
         local options = params.options
         if not entity or not options then
-            print('[ERROR] SGameManager.ADD_INTERACTABLE - Entity or options is empty!')
             return {
                 status = false,
                 message = 'Entity or options is empty!',
@@ -110,7 +107,6 @@ function SGameManager.new(core)
     function self:destroyEntity(id)
         local entity = self.entities[id]
         if not entity then
-            print('[ERROR] SGameManager.DESTROY_ENTITY - Entity not found!')
             return {
                 status = false,
                 message = 'Entity not found!',
