@@ -4,7 +4,7 @@ import { ItemMedia } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
 import type { TInventoryItemProps } from "@/types/inventory"
-import { useCallback, useId, useMemo } from "react"
+import { useCallback, useId, useMemo, useState } from "react"
 import { useI18n } from "@/i18n"
 import { FALLBACK_DEFAULT_IMAGE_PATH, RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
@@ -156,9 +156,27 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     const draggableAttributes = isDragDropDisabled ? undefined : attributes
     const draggableListeners = isDragDropDisabled ? undefined : listeners
 
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
+    const [isHoverCardOpen, setIsHoverCardOpen] = useState(false)
+
+    const handleContextMenuOpenChange = useCallback((open: boolean) => {
+        setIsContextMenuOpen(open)
+        if (open) {
+            setIsHoverCardOpen(false)
+        }
+    }, [])
+
+    const handleHoverCardOpenChange = useCallback((open: boolean) => {
+        if (isContextMenuOpen) {
+            setIsHoverCardOpen(false)
+            return
+        }
+        setIsHoverCardOpen(open)
+    }, [isContextMenuOpen])
+
     return (
-        <ContextMenu>
-            <HoverCard>
+        <ContextMenu onOpenChange={handleContextMenuOpenChange}>
+            <HoverCard open={!isContextMenuOpen && isHoverCardOpen} onOpenChange={handleHoverCardOpenChange}>
                 <ContextMenuTrigger asChild>
                     <HoverCardTrigger asChild>
                         <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...(draggableAttributes ?? {})} {...(draggableListeners ?? {})}>
