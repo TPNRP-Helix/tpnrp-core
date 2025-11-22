@@ -18,6 +18,8 @@
   "settings.basicNeedsHUD.showThirst": "Hiện Khát khi nhỏ hơn",
   "settings.basicNeedsHUD.showStamina": "Hiện Thể lực khi nhỏ hơn",
 
+  "library.title": "Thư viện",
+  
   "selectCharacter.title": "Chọn nhân vật",
   "selectCharacter.delete": "Xóa",
   "selectCharacter.emptySlot": "Ô trống {n}",
@@ -118,6 +120,7 @@
   "inventory.one": "Một",
   "inventory.all": "Tất cả",
   "inventory.other": "Khác",
+  "inventory.add": "Thêm",
 
   "inventory.item.label.id_card": "CCCD",
   "inventory.item.label.driver_license": "Giấy phép lái xe",

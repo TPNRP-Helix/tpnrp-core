@@ -37,3 +37,10 @@ ECollisionType = {
     IgnoreOnlyPawn = CollisionType.IgnoreOnlyPawn, -- Ignores player and NPCs, but collides with everything else
     Auto = CollisionType.Auto, -- Chooses the best setting automatically
 }
+
+---@enum EMobilityType
+EMobilityType = {
+    Static = UE.EComponentMobility.Static,
+    Movable = UE.EComponentMobility.Movable,
+    Stationary = UE.EComponentMobility.Stationary
+}

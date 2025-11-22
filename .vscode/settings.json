@@ -28,7 +28,11 @@
         "Vector",
         "CollisionType",
         "Interactable",
-        "Color"
+        "Color",
+        "SetEntityCoords",
+        "SetEntityRotation",
+        "EComponentMobility",
+        "Rotator"
     ],
     "Lua.diagnostics.disable": [
         "undefined-doc-name"

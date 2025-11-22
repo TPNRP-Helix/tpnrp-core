@@ -1,8 +1,10 @@
-LOCALES = {}
+local EN = require('shared/locales/en')
+local VI = require('shared/locales/vi')
+
 -- Load your language here
 local LANGUAGES = {
-    en = LOCALES.EN,
-    vi = LOCALES.VI,
+    en = EN or {},
+    vi = VI or {},
     -- Add more languages by appending here, e.g.:
     -- es = require('shared/locales/es'),
 }

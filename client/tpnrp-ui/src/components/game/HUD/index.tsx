@@ -174,7 +174,8 @@ export const HUD = () => {
           className="outline-none! w-[400px]"
           showCloseButton={false}
           title="Loading"
-          onInteractOutside={(e) => e.preventDefault()}  
+          onInteractOutside={(e) => e.preventDefault()}
+          aria-describedby={undefined}
         >
           <div className="flex items-center justify-center py-8 px-4 gap-2">
             <Loader2 className="w-4 h-4 animate-spin" />

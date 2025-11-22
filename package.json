@@ -6,6 +6,7 @@
         "shared/index.lua",
         "shared/config.lua",
         "shared/items.lua",
+        "shared/dropItems.lua",
         "shared/default.lua",
         "shared/enums.lua",
         "shared/types/*.lua"
@@ -21,8 +22,9 @@
         "server/services/inventoryDAO.lua",
         "server/services/equipmentDAO.lua",
         "server/services/missionDAO.lua",
+        "server/services/containerDAO.lua",
+        "server/managers/*.lua",
         "server/entities/*.lua",
-        "server/entities/managers/*.lua",
         "server/main.lua"
     ]
 }

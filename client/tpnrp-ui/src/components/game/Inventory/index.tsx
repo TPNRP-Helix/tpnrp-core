@@ -15,8 +15,7 @@ import { PackageOpen } from "lucide-react"
 import { OtherInventory } from "./OtherInventory"
 import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
-import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
-import { useDevModeStore } from "@/stores/useDevModeStore"
+import type { TInventoryGroup, TInventoryItem, TResponseCreateDropItem } from "@/types/inventory"
 import { toast } from "sonner"
 
 const DEFAULT_SLOT_COUNT = 5
@@ -25,6 +24,15 @@ type TOpenInventoryResult = {
     status: boolean
     message: string
     inventory: TInventoryItem[]
+    equipment: TInventoryItem[]
+    container?: {
+        items: TInventoryItem[]
+        id: string
+        capacity: {
+            weight: number
+            slots: number
+        }
+    } | null
     capacity: {
         weight: number
         slots: number
@@ -36,13 +44,19 @@ export const Inventory = () => {
         isOpenInventory,
         setOpenInventory,
         inventoryItems, setInventoryItems,
+        setEquipmentItems,
         slotCount, setSlotCount,
         getTotalWeight, setTotalWeight,
+        setOtherItems,
+        setOtherItemsId,
+        setOtherItemsType,
+        setOtherItemsSlotCount,
         getTotalLimitWeight,
-        moveInventoryItem
+        moveInventoryItem,
+        removeTemporaryDroppedItem,
+        rollbackTemporaryDroppedItem
     } = useInventoryStore()
     const { t } = useI18n()
-    const { appendConsoleMessage } = useDevModeStore()
     const [activeDragItem, setActiveDragItem] = useState<{
         item: TInventoryItem | null
         slot: number | null
@@ -77,6 +91,8 @@ export const Inventory = () => {
         const targetSlot = over?.data.current?.slot
         const activeGroup = active.data.current?.group
         const targetGroup = over?.data.current?.group
+        const targetGroupId = over?.data.current?.groupId
+        const activeGroupId = active.data.current?.groupId
         const item: TInventoryItem = active.data.current?.item
 
         const isGroup = (value: unknown): value is TInventoryGroup =>
@@ -105,11 +121,11 @@ export const Inventory = () => {
                 targetGroup
             }, {
                 onSuccess: () => {
-                    appendConsoleMessage({ message: `Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`, index: 0 })
-                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup })
+                    console.log(`Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`)
+                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup, sourceGroupId: activeGroupId, targetGroupId: targetGroupId })
                 },
                 onFail: () => {
-                    appendConsoleMessage({ message: `Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`, index: 0 })
+                    console.log(`Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`)
                 }
             })
         }
@@ -125,6 +141,7 @@ export const Inventory = () => {
     const backpackItems = inventoryItems.filter(item => item.slot >= 7).sort((a, b) => a.slot - b.slot)
 
     useWebUIMessage<[TOpenInventoryResult]>('openInventory', ([result]) => {
+        ///////////////////////////////////////////////////////////////////////////
         // Check if result.inventory is an array or object
         if (Array.isArray(result.inventory)) {
             // It's an array
@@ -134,7 +151,33 @@ export const Inventory = () => {
             const inventoryItems: TInventoryItem[] = Object.values(result.inventory).filter(item => item !== null) as TInventoryItem[]
             setInventoryItems(inventoryItems)
         }
-        
+        ///////////////////////////////////////////////////////////////////////////
+        console.log(`openInventory: ${JSON.stringify(result.equipment)}`)
+        // Check if result.equipment is an array or object
+        if (Array.isArray(result.equipment)) {
+            // It's an array
+            setEquipmentItems(result.equipment)
+        } else if (result.equipment && typeof result.equipment === 'object') {
+            // It's an object (not an array)
+            const equipmentItems: TInventoryItem[] = Object.values(result.equipment).filter(item => item !== null) as TInventoryItem[]
+            setEquipmentItems(equipmentItems)
+        }
+        ///////////////////////////////////////////////////////////////////////////
+        if (result.container) {
+            // Check if result.container is an array or object
+            if (Array.isArray(result.container.items)) {
+                // It's an array
+                setOtherItems(result.container.items)
+            } else if (result.container && typeof result.container === 'object') {
+                // It's an object (not an array)
+                const containerItems: TInventoryItem[] = Object.values(result.container.items).filter(item => item !== null) as TInventoryItem[]
+                setOtherItems(containerItems)
+            }
+            console.log('[UI] openInventory - container result: ', JSON.stringify(result.container))
+            setOtherItemsId(result.container.id)
+            setOtherItemsType('container')
+            setOtherItemsSlotCount(result.container.capacity.slots)
+        }
         setSlotCount(result.capacity.slots)
         setTotalWeight(result.capacity.weight)
         setOpenInventory(true)
@@ -142,8 +185,17 @@ export const Inventory = () => {
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
     useWebUIMessage<[type: string, items: TInventoryItem[]]>('doSyncInventory', ([type, items]) => {
         if (type === 'sync') {
-            appendConsoleMessage({ message: `doSyncInventory: ${JSON.stringify(items)}`, index: 0 })
             setInventoryItems(items)
+        }
+    })
+
+    useWebUIMessage<[TResponseCreateDropItem]>('onCreateDropResponse', ([result]) => {
+        if (result.status) {
+            // Remove temporary item from temporaryDroppedItems
+            removeTemporaryDroppedItem(result.itemData)
+        } else {
+            // Rollback temporary item into inventory item
+            rollbackTemporaryDroppedItem(result.itemData)
         }
     })
     
@@ -185,6 +237,7 @@ export const Inventory = () => {
                     isHaveBackdropFilter
                     title={t("inventory.title")}
                     onContextMenu={(e) => e.preventDefault()}
+                    aria-describedby={undefined}
                 >
                     <div className="grid grid-cols-8 gap-6 p-4 flex-1 min-h-full overflow-hidden h-full">
                         <div className="col-span-2 h-full overflow-hidden p-2">

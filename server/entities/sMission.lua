@@ -49,7 +49,7 @@ function SMission.new(player)
 
     ---Trigger an action to update mission required
     ---@param actionName TMissionActionType action name 
-    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
+    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil; dialogNode:number|nil; optionId:string|nil; isResolved:boolean|nil} data
     function self:triggerAction(actionName, data)
         -- Get current mission
         local currentMission = self:getCurrentActiveMission()
@@ -89,9 +89,47 @@ function SMission.new(player)
         self.activeMissionName = missionName
     end
 
+    ---Take a mission
+    ---@param missionName string mission name
+    ---@return {status:boolean, message:string} result of taking mission
+    function self:takeMission(missionName)
+        local missionData = self:getMissionData(missionName)
+        if not missionData then
+            return {
+                status = false,
+                message = SHARED.t('mission.notFound')
+            }
+        end
+        if not self:canTakeMission(missionData) then
+            return {
+                status = false,
+                message = SHARED.t('mission.notMetRequirements')
+            }
+         end
+        self:setActiveMission(missionName)
+        return {
+            status = true,
+            message = SHARED.t('mission.taken')
+        }
+    end
+
     ---/********************************/
     ---/*            Local             */
     ---/********************************/
+
+    ---[PRIVATE] Check if player meets mission requirements
+    ---@param missionData TMissionData
+    ---@return boolean isMet
+    function self:canTakeMission(missionData)
+        if not missionData then return false end
+        if not missionData.requireToTakeMission then return true end
+        local playerLevelController = self.player.level
+        if not playerLevelController then return false end
+        if missionData.requireToTakeMission.level and playerLevelController.level < missionData.requireToTakeMission.level then
+            return false
+        end
+        return true
+    end
 
     ---[PRIVATE] Initialize and increment progress amount
     ---@param progress TMissionProgress progress entry
@@ -148,14 +186,25 @@ function SMission.new(player)
     ---[PRIVATE] Validate and update NPC talk progress
     ---@param progress TMissionProgress progress entry
     ---@param requirement TMissionRequirement requirement
-    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
+    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil; dialogNode:number|nil; optionId:string|nil; isResolved:boolean|nil} data
     ---@return boolean status success status
     local function updateTalkNpcProgress(progress, requirement, data)
-        if not requirement.npcName or not data.npcName or requirement.npcName ~= data.npcName then
+        local requirementNpcName = requirement.npcName or requirement.name
+        if not requirementNpcName or not data.npcName or requirementNpcName ~= data.npcName then
             return false
         end
         incrementProgressAmount(progress, 1)
         progress.isTalkedToNPC = true
+        progress.dialogState = progress.dialogState or {}
+        if data.dialogNode then
+            progress.dialogState.nodeId = data.dialogNode
+        end
+        if data.optionId then
+            progress.dialogState.lastOptionId = data.optionId
+        end
+        if data.isResolved ~= nil then
+            progress.dialogState.resolved = data.isResolved
+        end
         return true
     end
 
@@ -188,8 +237,11 @@ function SMission.new(player)
             return false
         end
         
-        if requirement.npcName and progress.npcName ~= requirement.npcName then
-            return false
+        if requirement.npcName then
+            local npcName = requirement.npcName
+            if progress.npcName ~= npcName and progress.name ~= npcName then
+                return false
+            end
         end
         
         return true
@@ -201,6 +253,9 @@ function SMission.new(player)
     ---@return boolean isMet
     local function isRequirementMet(progress, requirement)
         if requirement.type == 'talk_npc' then
+            if progress.dialogState and progress.dialogState.resolved then
+                return true
+            end
             return progress.isTalkedToNPC or false
         end
         
@@ -231,7 +286,7 @@ function SMission.new(player)
 
     ---Update mission progress
     ---@param requirement TMissionRequirement requirement
-    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil} data
+    ---@param data {npcName:string|nil; amount:number|nil; name:string|nil; dialogNode:number|nil; optionId:string|nil; isResolved:boolean|nil} data
     ---@return boolean status is update success or not
     function self:updateActiveMissionProgress(requirement, data)
         if not data then return false end

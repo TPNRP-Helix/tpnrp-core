@@ -74,7 +74,7 @@ function CWebUI.new(core)
                 self:outFocus()
                 return
             end
-            -- Open focus and open console
+            -- Toggle focus mode
             self._webUI:SetInputMode(EWebUIInputMode.UI)
             self.isFocusing = true
         end, 'Pressed')
@@ -116,32 +116,11 @@ function CWebUI.new(core)
                     self:sendEvent('setDevModeOpen', false)
                     return
                 end
-                -- Open focus and open console
+                -- Open focus and open dev tools
                 self._webUI:SetInputMode(EWebUIInputMode.UI)
                 self:sendEvent('setDevModeOpen', true)
                 self.isFocusing = true
             end)
-        end, 'Pressed')
-
-        -- [ADMIN] [F8] Console
-        Input.BindKey('F8', function()
-            TriggerCallback('getPermissions', function(result)
-                if result ~= 'admin' then
-                    return
-                end
-                -- Player is admin
-                if self.isFocusing then
-                    -- Close focus and close console
-                    self:outFocus()
-                    self:sendEvent('setConsoleOpen', false)
-                    return
-                end
-                -- Open focus and open console
-                self._webUI:SetInputMode(EWebUIInputMode.UI)
-                self:sendEvent('setConsoleOpen', true)
-                self.isFocusing = true
-            end)
-            
         end, 'Pressed')
     end
 
@@ -208,60 +187,6 @@ function CWebUI.new(core)
         end
         self._webUI:SetInputMode(EWebUIInputMode.None)
         self.isFocusing = false
-    end
-
-    function self:getActorsWithTag(tag)
-        ---@diagnostic disable-next-line: undefined-global
-        local actors = UE.TArray(UE.AActor)
-        ---@diagnostic disable-next-line: undefined-global
-        UE.UGameplayStatics.GetAllActorsWithTag(HWorld, tag, actors)
-        return actors[1]
-    end
-    
-    --- [HELIX Team are working on this]
-    function self:bindLog()
-        Timer.SetInterval(function()
-            if not self.nucleus then
-                self.nucleus = self:getActorsWithTag("HNucleus")
-                if not self.nucleus then
-                    print('[HX_CONSOLE] Nucleus actor not found')
-                    return
-                end
-                print('[HX_CONSOLE] Nucleus actor found!')
-            end
-            
-            local logsJson = self.nucleus:GetLocalLogs()
-            
-            if logsJson and logsJson ~= "" then
-                local success, logsData = pcall(function()
-                    return JSON.parse(logsJson)
-                end)
-                
-                if success and logsData and logsData.logs then
-                    local sentCount = 0
-                    for i, logEntry in ipairs(logsData.logs) do
-                        if logEntry ~= "" then
-                            self:sendEvent('onLogMessage', {
-                                message = logEntry,
-                                index = self.lastLogIndex + i
-                            })
-                            sentCount = sentCount + 1
-                        end
-                    end
-                    
-                    if #logsData.logs > 0 then
-                        self.lastLogIndex = self.lastLogIndex + #logsData.logs
-                        if sentCount > 0 then
-                            print('[HX_CONSOLE] Sent ' .. sentCount .. ' logs to UI')
-                        end
-                    end
-                else
-                    if not success then
-                        print('[HX_CONSOLE] Failed to parse JSON: ' .. tostring(logsData))
-                    end
-                end
-            end
-        end, 2000)
     end
 
     _contructor()

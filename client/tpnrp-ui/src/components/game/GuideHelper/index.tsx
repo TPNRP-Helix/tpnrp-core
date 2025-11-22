@@ -22,7 +22,7 @@ const MotionButton = motion(Button)
 export const GuideHelper = () => {
     const { t } = useI18n()
     const [open, setOpen] = useState(false)
-    const { permission, toggleDevMode, toggleConsole } = useDevModeStore()
+    const { permission, toggleDevMode } = useDevModeStore()
     const { toastConfig, setToastConfig, uiConfig, setSettingsOpen } = useGameSettingStore()
     const { isInGame } = useGameStore()
     const { setOpenInventory } = useInventoryStore()
@@ -46,11 +46,7 @@ export const GuideHelper = () => {
         helperItems.push({ id: 'devMode', label: "helper.toggleDevMode", shortcut: "F7", onClick: () => {
             toggleDevMode()
             setOpen(false)
-        } })
-        helperItems.push({ id: 'console', label: "helper.toggleConsole", shortcut: "F8", onClick: () => {
-            toggleConsole()
-            setOpen(false)
-        } })
+        }})
     }
 
     useWebUIMessage<[boolean]>('toggleGuideHelper', () => {

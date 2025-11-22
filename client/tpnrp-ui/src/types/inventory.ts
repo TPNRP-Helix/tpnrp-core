@@ -14,15 +14,36 @@ export type TInventoryItem = {
     }
 }
 
-export type TInventoryGroup = 'equipment' | 'inventory' | 'other'
+export type TInventoryGroup = 'equipment' | 'inventory' | 'container' | 'devLibrary'
 
 export type TInventoryItemProps = {
     item?: TInventoryItem
     slot?: number
     group?: TInventoryGroup
     isShowHotbarNumber?: boolean
+    isDragDropDisabled?: boolean
 }
 
 export type TCraftingRecipe = {
     
+}
+
+export type TInventoryOpenInventoryResultType = {
+    status: boolean
+    message: string
+    inventory: TInventoryItem[]
+    container: {
+        id: string
+        items: TInventoryItem[]
+    } | null
+}
+
+export type TResponseCreateDropItem = {
+    status: boolean
+    message: string
+    itemData: {
+        itemName: string
+        amount: number
+        fromSlot: number
+    }
 }

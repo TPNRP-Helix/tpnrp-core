@@ -34,6 +34,7 @@ function SPlayer.new(core, playerController, playerData)
     self.properties = {}
     -- Player's custom methods
     self.methods = {}
+    
 
     ---/********************************/
     ---/*         Initializes          */
@@ -51,6 +52,8 @@ function SPlayer.new(core, playerController, playerData)
         self.equipment = SEquipment.new(self)
         -- Get player's missions
         self.missionManager = SMission.new(self)
+        -- Get player's permission
+        self.properties.permission = self.core:getPermission(self.playerController)
     end
 
     ---/********************************/
@@ -143,7 +146,12 @@ function SPlayer.new(core, playerController, playerData)
         self.playerData.netId = PlayerState:GetPlayerId()
         self.playerData.license = PlayerState:GetHelixUserId()
         self.playerData.name = PlayerState:GetPlayerName()
-
+        -- Update Pawn position and heading
+        local ped = GetPlayerPawn(self.playerController)
+        if ped then
+            SetEntityCoords(ped, Vector(self.playerData.position.x, self.playerData.position.y, self.playerData.position.z))
+            SetEntityRotation(ped, Rotator(0, self.playerData.heading, 0))
+        end
         return self.playerData
     end
 
