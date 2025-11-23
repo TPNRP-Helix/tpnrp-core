@@ -11,14 +11,15 @@ DAO.equipment.save = function(equipment)
     local citizen_id = equipment.player.playerData.citizenId
     local items = equipment.items
     local formattedItems = {}
-    for _, item in pairs(items) do
-        local item = SHARED.items[item.name:lower()]
-        if item then
+    for _, equipmentItem in pairs(items) do
+        local baseItem = SHARED.items[equipmentItem.name:lower()]
+        if baseItem then
             -- Only format the item if it is in the shared/items.lua
+            -- Preserve the actual equipment item's info and slot, not the base definition's
             formattedItems[#formattedItems + 1] = {
-                name = item.name,
-                info = item.info,
-                slot = item.slot,
+                name = baseItem.name,
+                info = equipmentItem.info,
+                slot = equipmentItem.slot,
             }
         end
     end

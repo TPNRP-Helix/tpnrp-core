@@ -1,5 +1,9 @@
 ---@class TPNRPServer
 ---@field players table<number, SPlayer>
+---@field shared SHARED shared entity
+---@field useableItems table<string, function> Dictionary of useable items, keyed by item name
+---@field cheatDetector SCheatDetector cheat detector entity
+---@field gameManager SGameManager game manager entity
 TPNRPServer = {}
 TPNRPServer.__index = TPNRPServer
 
@@ -19,7 +23,7 @@ function TPNRPServer.new()
 
     ---@type SCheatDetector cheat detector entity
     self.cheatDetector = nil
-    ---@type SGame game manager entity
+    ---@type SGameManager game manager entity
     self.gameManager = nil
 
     --- Manager
@@ -35,7 +39,7 @@ function TPNRPServer.new()
     ---Contructor function
     local function _contructor()
         self.cheatDetector = SCheatDetector.new(self)
-        self.gameManager = SGame.new(self)
+        self.gameManager = SGameManager.new(self)
         -- Bind all events, callback for inventory
         self.inventoryManager = SInventoryManager.new(self)
         self.characterManager = SCharacterManager.new(self)
@@ -103,7 +107,7 @@ function TPNRPServer.new()
     end
 
     ---/********************************/
-    ---/*          Functions           */
+    ---/*     [PUBLIC] Functions       */
     ---/********************************/
 
     ---Create a new useable item
@@ -120,27 +124,31 @@ function TPNRPServer.new()
         return self.useableItems[itemName] ~= nil
     end
 
+    ---Get player's permission
+    ---@param source PlayerController player controller
+    ---@return string permission 'player' | 'admin'
+    function self:getPermission(source)
+        local playerState = source:GetLyraPlayerState()
+        if not playerState then
+            return 'player'
+        end
+        local license = playerState:GetHelixUserId()
+        for _, value in pairs(SHARED.CONFIG.PERMISSIONS) do
+            if value.license == license then
+                return value.role or 'player' -- fallback default role is player
+            end
+        end
+        -- Default role is player
+        return 'player'
+    end
+
     ---/********************************/
     ---/*           Events             */
     ---/********************************/
-    
-    ---Bind Helix events
-    function self:bindHelixEvents()
-        --- Base-game event
-        RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) self:onPlayerUnloaded(playerController) end)
-        RegisterServerEvent('HEvent:PlayerPossessed', function(playerController) self:onPlayerPossessed(playerController) end)
-        RegisterServerEvent('HEvent:PlayerReady', function(playerController) self:onPlayerReady(playerController) end)
-    end
-
-    ---Bind TPN events
-    function self:bindTPNEvents()
-        -- TPN events
-        RegisterServerEvent('TPN:player:syncPlayer', function(playerController) self:onPlayerSync(playerController) end)
-    end
 
     ---On Player Unloaded
     ---@param source PlayerController player source
-    function self:onPlayerUnloaded(source)
+    local function onPlayerUnloaded(source)
         ---@type SPlayer | nil
         local player = self:getPlayerBySource(source)
         if not player then
@@ -152,7 +160,7 @@ function TPNRPServer.new()
 
     ---On Player Sync
     ---@param source PlayerController player source
-    function self:onPlayerSync(source)
+    local function onPlayerSync(source)
         ---@type SPlayer | nil
         local player = self:getPlayerBySource(source)
         if not player then
@@ -170,7 +178,7 @@ function TPNRPServer.new()
 
     ---On Player Possessed
     ---@param source PlayerController player controller
-    function self:onPlayerPossessed(source)
+    local function onPlayerPossessed(source)
         local playerState = source:GetLyraPlayerState()
         local license = playerState:GetHelixUserId()
         local maxCharacters = SHARED.CONFIG.MAX_CHARACTERS or 5 -- Maximum number of characters per player
@@ -191,7 +199,7 @@ function TPNRPServer.new()
 
     ---On Player Ready
     ---@param playerController PlayerController player controller
-    function self:onPlayerReady(playerController)
+    local function onPlayerReady(playerController)
         local license = self:getLicenseBySource(playerController)
         if not license then
             print('[ERROR] TPNRPServer.onPlayerReady - Failed to get license by source!')
@@ -210,6 +218,34 @@ function TPNRPServer.new()
         })
     end
 
+    ---Bind Helix events
+    function self:bindHelixEvents()
+        --- Base-game event
+        RegisterServerEvent('HEvent:PlayerUnloaded', function(playerController) onPlayerUnloaded(playerController) end)
+        RegisterServerEvent('HEvent:PlayerPossessed', function(playerController) onPlayerPossessed(playerController) end)
+        RegisterServerEvent('HEvent:PlayerReady', function(playerController) onPlayerReady(playerController) end)
+    end
+
+    ---Bind TPN events
+    function self:bindTPNEvents()
+        -- TPN events
+        RegisterServerEvent('TPN:player:syncPlayer', function(playerController) onPlayerSync(playerController) end)
+    end
+
+    function self:onShutdown()
+        -- Save all current player
+        for _, player in pairs(self.players) do
+            local isSaved = player:save()
+            if not isSaved then
+                print('[ERROR] TPNRPServer.onShutdown - Failed to save player!')
+            end
+        end
+        -- Save all containers
+        self.inventoryManager:onShutdown()
+        -- All save done then close DB
+        DAO.DB.Close()
+    end
+
     ---/********************************/
     ---/*       Callback Events        */
     ---/********************************/
@@ -221,8 +257,7 @@ function TPNRPServer.new()
         ---@return string role
         RegisterCallback('getPermissions', function(source, citizenId)
             -- Get player's role
-            local permission = SHARED.getPermission(source)
-            return permission
+            return self:getPermission(source)
         end)
 
         -- Get player's language

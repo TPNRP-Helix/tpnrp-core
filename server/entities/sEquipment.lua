@@ -162,14 +162,17 @@ function SEquipment.new(player)
         return { status = true, message = SHARED.t('equipment.unequipped', { item = item.name }) }
     end
 
-    ---Find item by slot number
-    ---@param slotNumber number slot number
+    ---Find item by cloth type
+    ---@param clothType EEquipmentClothType cloth type
     ---@return SEquipmentItemType | nil item data, or nil if item not found
-    function self:findItemBySlot(slotNumber)
-        if not slotNumber then
-            return nil
-        end
-        return self.items[slotNumber] or nil
+    function self:findItemByClothType(clothType)
+        return self.items[clothType] or nil
+    end
+
+    ---Get equipment
+    ---@return table<EEquipmentClothType, SEquipmentItemType> equipment
+    function self:getEquipment()
+        return self.items
     end
 
     _contructor()

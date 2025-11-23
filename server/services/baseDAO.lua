@@ -26,7 +26,7 @@ end
 --- Init table 'missions'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS player_missions (
-        citizen_id VARCHAR(11),
+        citizen_id VARCHAR(11) NOT NULL UNIQUE,
         missions TEXT
     );
 ]])
@@ -34,7 +34,7 @@ DAO.DB.Execute([[
 --- Init table 'equipments'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS equipments (
-        citizen_id VARCHAR(11),
+        citizen_id VARCHAR(11) NOT NULL UNIQUE,
         items TEXT
     );
 ]])
@@ -42,16 +42,26 @@ DAO.DB.Execute([[
 --- Init table 'inventories'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS inventories (
+        inventory_id INTEGER PRIMARY KEY AUTOINCREMENT,
         citizen_id VARCHAR(11),
         "type" TEXT,
-        items TEXT
+        container_id VARCHAR(255),
+        max_slot INTEGER,
+        max_weight INTEGER,
+        items TEXT,
+        UNIQUE(citizen_id, "type")
     );
+]])
+-- Create unique index for existing databases (if table already exists without constraint)
+DAO.DB.Execute([[
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_inventories_citizen_type 
+    ON inventories(citizen_id, "type");
 ]])
 
 --- Init table 'levels'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS levels (
-        citizen_id VARCHAR(11),
+        citizen_id VARCHAR(11) NOT NULL UNIQUE,
         "level" INTEGER,
         "exp" INTEGER,
         skills TEXT

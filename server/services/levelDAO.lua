@@ -35,15 +35,16 @@ end
 ---@return boolean status success status
 DAO.level.save = function(level)
 	-- Validate data
-	if not level or not level.player.playerController or not level.player.playerData then
+	if not level or not level.player or not level.player.playerData then
 		print('[ERROR] DAO.level.save: Invalid level or player data!')
 		return false
 	end
 	local playerData = level.player.playerData
 	if not playerData then
+		print('[ERROR] DAO.level.save: Invalid citizen id!')
 		return false
 	end
-	local citizen_id = playerData.citizenId or ''
+	local citizen_id = playerData.citizenId
 	-- Begin transaction
 	DAO.DB.Execute('BEGIN TRANSACTION;')
 	local sql = [[

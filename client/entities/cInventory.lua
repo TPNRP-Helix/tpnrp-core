@@ -22,8 +22,15 @@ function CInventory.new(player)
     ---Contructor function
     local function _contructor()
         -- On Update inventory
+        ---@param items table<number, SInventoryItemType> item data
         RegisterClientEvent('TPN:inventory:sync', function(items)
             self:onSyncInventory(items)
+        end)
+
+        --- Open drop inventory
+        ---@param data {containerId:string}
+        RegisterClientEvent('openContainerInventory', function(data)
+            self:openInventory({ type = 'container', containerId = data.containerId })
         end)
         -- Bind key
         -- [Player] [TAB] Inventory
@@ -31,7 +38,7 @@ function CInventory.new(player)
             if not self.core:isInGame() then
                 return
             end
-            self:openInventory()
+            self:openInventory({ type = 'player' })
         end, 'Pressed')
 
         -- On close inventory
@@ -41,15 +48,20 @@ function CInventory.new(player)
 
         -- On move inventory item
         self.core.webUI:registerEventHandler('onMoveInventoryItem', function(data)
+            print('[CLIENT][INVENTORY] onMoveInventoryItem - data: ', JSON.stringify(data))
             TriggerCallback('onMoveInventoryItem', function(result)
-                print('[CLIENT][INFO] CInventory.onMoveInventoryItem - result: ', JSON.stringify(result))
                 if not result.status then
                     return
                 end
             end, data)
         end)
-    end
 
+        -- On create drop item
+        ---@param data {itemName: string, amount: number, fromSlot: number} item data
+        self.core.webUI:registerEventHandler('createDropItem', function(data)
+            self:createDropItem(data)
+        end)
+    end
 
     ---/********************************/
     ---/*          Functions           */
@@ -66,9 +78,10 @@ function CInventory.new(player)
         })
     end
 
-    ---Open inventory
-    function self:openInventory()
-        ---@param result {status: boolean, message: string, inventory: SInventoryItemType[]} result
+    ---Call open inventory
+    ---@param data {type:'player' | 'container'; containerId:string|nil} data
+    function self:openInventory(data)
+        ---@param result TInventoryOpenInventoryResultType result
         TriggerCallback('onOpenInventory', function(result)
             if not result.status then
                 self.core:showNotification({
@@ -81,7 +94,7 @@ function CInventory.new(player)
             -- Open inventory
             self.core.webUI:focus()
             self.core.webUI:sendEvent('openInventory', result)
-        end, { type = 'player' })
+        end, data)
     end
 
     ---Close inventory
@@ -108,6 +121,14 @@ function CInventory.new(player)
         end
 
         return matchedItems
+    end
+
+    ---Create drop item
+    ---@param data {itemName: string, amount: number, fromSlot: number} item data
+    function self:createDropItem(data)
+        TriggerCallback('createDropItem', function(result)
+            self.core.webUI:sendEvent('onCreateDropResponse', result)
+        end, data)
     end
 
     _contructor()

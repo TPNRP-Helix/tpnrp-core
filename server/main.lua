@@ -4,7 +4,8 @@
 TPNRPServer = TPNRPServer.new()
 
 function onShutdown()
-    DAO.DB.Close()
+    -- Shutdown server
+    TPNRPServer:onShutdown()
 end
 
 -- Exports for other resources

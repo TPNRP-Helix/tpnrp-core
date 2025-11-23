@@ -4,19 +4,35 @@ import { ItemMedia } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
 import type { TInventoryItemProps } from "@/types/inventory"
-import { useCallback, useId, useMemo } from "react"
+import { useCallback, useId, useMemo, useState } from "react"
 import { useI18n } from "@/i18n"
-import { RARE_LEVELS } from "@/constants"
+import { FALLBACK_DEFAULT_IMAGE_PATH, RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
-import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf } from "lucide-react"
+import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf, Plus } from "lucide-react"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Progress } from "@/components/ui/progress"
 import { useDraggable, useDroppable } from "@dnd-kit/core"
+import { useDevModeStore } from "@/stores/useDevModeStore"
+import { Image } from "@/components/ui/image"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
-    const { item = null, slot = null, isShowHotbarNumber = true, group = 'inventory' } = props
+    const {
+        item = null,
+        slot = null,
+        isShowHotbarNumber = true,
+        group = 'inventory',
+        isDragDropDisabled = false
+    } = props
     const { t } = useI18n()
-    const { setIsOpenAmountDialog, setAmountDialogType, setDialogItem } = useInventoryStore()
+    const {
+        otherItemsId,
+        setIsOpenAmountDialog,
+        setAmountDialogType,
+        setDialogItem,
+        setTemporaryDroppedItem
+    } = useInventoryStore()
+
+    const { permission } = useDevModeStore()
 
     const itemImage = useMemo(() => {
         if (item === null) {
@@ -52,7 +68,21 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     }, [])
 
     const onClickDrop = useCallback((dropType: 'half' | 'one' | 'all') => {
-        console.log('onClickDrop', dropType)
+        if (item === null) {
+            return
+        }
+        let amount = 1
+        if (dropType === 'half') {
+            amount = Math.floor(item.amount / 2)
+        } else if (dropType === 'all') {
+            amount = item.amount
+        }
+        setTemporaryDroppedItem({...item, amount})
+        window.hEvent('createDropItem', {
+            itemName: item.name,
+            amount,
+            fromSlot: item.slot
+        })
     }, [])
     
     const onOpenAmountDialog = useCallback((dialogType: 'give' | 'drop') => {
@@ -75,18 +105,21 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     const hasItem = !!item
     const { attributes, listeners, setNodeRef: setDraggableNodeRef, isDragging } = useDraggable({
         id: dndId,
-        disabled: !hasItem || slotId === null,
+        disabled: !hasItem || slotId === null || isDragDropDisabled,
         data: {
             slot: slotId,
             group,
-            item
+            item,
+            groupId: group === 'container' ? otherItemsId : null
         }
     })
     const { setNodeRef: setDroppableNodeRef, isOver } = useDroppable({
         id: dndId,
+        disabled: isDragDropDisabled,
         data: {
             slot: slotId,
-            group
+            group,
+            groupId: group === 'container' ? otherItemsId : null
         }
     })
 
@@ -94,6 +127,16 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setDroppableNodeRef(node)
         setDraggableNodeRef(node)
     }, [setDroppableNodeRef, setDraggableNodeRef])
+
+    const onClickAddItemToInventory = useCallback(() => {
+        if (permission !== 'admin') {
+            return
+        }
+        window.hEvent('devAddItem', {
+            itemName: item?.name,
+            amount: 1
+        })
+    }, [])
 
     const slotClasses = useMemo(() => {
         const base = ["w-24 h-24 bg-accent rounded transition-all duration-150 ease-out"]
@@ -105,14 +148,38 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         }
         return base.join(" ")
     }, [isDragging, isOver])
-    const cursorClass = hasItem ? (isDragging ? "cursor-grabbing" : "cursor-grab") : "cursor-default"
+    const cursorClass = isDragDropDisabled
+        ? "cursor-default"
+        : hasItem
+            ? (isDragging ? "cursor-grabbing" : "cursor-grab")
+            : "cursor-default"
+    const draggableAttributes = isDragDropDisabled ? undefined : attributes
+    const draggableListeners = isDragDropDisabled ? undefined : listeners
+
+    const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
+    const [isHoverCardOpen, setIsHoverCardOpen] = useState(false)
+
+    const handleContextMenuOpenChange = useCallback((open: boolean) => {
+        setIsContextMenuOpen(open)
+        if (open) {
+            setIsHoverCardOpen(false)
+        }
+    }, [])
+
+    const handleHoverCardOpenChange = useCallback((open: boolean) => {
+        if (isContextMenuOpen) {
+            setIsHoverCardOpen(false)
+            return
+        }
+        setIsHoverCardOpen(open)
+    }, [isContextMenuOpen])
 
     return (
-        <ContextMenu>
-            <HoverCard>
+        <ContextMenu onOpenChange={handleContextMenuOpenChange}>
+            <HoverCard open={!isContextMenuOpen && isHoverCardOpen} onOpenChange={handleHoverCardOpenChange}>
                 <ContextMenuTrigger asChild>
                     <HoverCardTrigger asChild>
-                        <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...attributes} {...listeners}>
+                        <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...(draggableAttributes ?? {})} {...(draggableListeners ?? {})}>
                             <Item className="relative gap-1 p-0 w-full h-full border-none">
                                 {slot !== null && slot <= 5 && isShowHotbarNumber ? (
                                     <Badge className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
@@ -127,7 +194,13 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                             </div>
                                         )}
                                         <ItemMedia className="relative z-10 w-full object-cover p-4">
-                                            <img src={itemImage ?? ''} alt="Item" className="w-11/12 h-11/12 object-cover select-none pointer-events-none" draggable={false} />
+                                            <Image
+                                                src={itemImage ?? ''}
+                                                alt={item?.label ?? item?.name}
+                                                className="w-11/12 h-11/12 object-cover select-none pointer-events-none"
+                                                draggable={false}
+                                                fallbackSrc={FALLBACK_DEFAULT_IMAGE_PATH}
+                                            />
                                         </ItemMedia>
                                         {item.info?.durability && (
                                             <div className="absolute bottom-0 left-0 w-full">
@@ -146,15 +219,14 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                         <div className="flex flex-col justify-between space-x-4">
                             <div className="flex flex-row justify-between space-x-4">
                                 <div className='w-16 h-16'>
-                                    <img
+                                    <Image
                                         src={itemImage ?? ''}
                                         alt={item?.label ?? item?.name}
+                                        className="h-full w-full object-cover"
+                                        draggable={false}
                                         width={128}
                                         height={128}
-                                        className="h-full w-full object-cover"
-                                        // style={{
-                                        //     filter: rareLevel?.color ? `drop-shadow(0 0 26px ${rareLevel?.color})` : 'none'
-                                        // }}
+                                        fallbackSrc={FALLBACK_DEFAULT_IMAGE_PATH}
                                     />
                                 </div>
                                 <div className='flex-1 px-2'>
@@ -205,7 +277,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                     </HoverCardContent>
                 )}
             </HoverCard>
-            {!!item && (
+            {!!item && group === 'inventory' && (
                 <ContextMenuContent>
                     {item.useable && (
                         <ContextMenuItem onClick={onClickUse}><Hand className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.use')}</ContextMenuItem>
@@ -261,6 +333,11 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                             <ContextMenuItem onClick={onClickAttach}><Paperclip className="w-4 h-4 text-muted-foreground mr-2" /> Phụ kiện</ContextMenuItem>
                         </>
                     )} */}
+                </ContextMenuContent>
+            )}
+            {!!item && group === 'devLibrary' && (
+                <ContextMenuContent>
+                    <ContextMenuItem onClick={onClickAddItemToInventory}><Plus className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.add')}</ContextMenuItem>
                 </ContextMenuContent>
             )}
         </ContextMenu>

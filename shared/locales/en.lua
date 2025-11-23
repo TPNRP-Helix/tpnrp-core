@@ -1,11 +1,15 @@
-LOCALES.EN = {
+local en = {
     core = {
         unknown_key = "Unknown translation: {key}",
     },
     inventory = {
         full = "Inventory is full ({current}/{limit}).",
-        added = "Added {count}x {item} to inventory.",
+        added = "Item added to inventory.",
         removed = "Removed {count}x {item} from inventory.",
+        pickUp = "Pick up",
+        open = "Open",
+        canAddItem = "Item can be add to inventory.",
+        openDrop = "Open Drop",
     },
     player = {
         created = "Player created successfully.",
@@ -35,12 +39,21 @@ LOCALES.EN = {
         itemNotCloth = "Item is not a cloth item!",
         inventoryWeightLimitReached = "Inventory weight limit reached!",
         inventoryFull = "Inventory is full!",
+        playerNotFound = "Player not found!",
     },
     success = {
         joinGame = "Joined game successfully",
         createCharacter = "Character created successfully!",
         deleteCharacter = "Character deleted successfully!",
     },
+    npc = {
+        citizen_identification_officer = 'Citizen Identification Officer',
+    },
+    mission = {
+        notFound = 'Mission not found!',
+        notMetRequirements = 'Player does not meet mission requirements!',
+        taken = 'Mission taken successfully!',
+    }
 }
 
-
+return en

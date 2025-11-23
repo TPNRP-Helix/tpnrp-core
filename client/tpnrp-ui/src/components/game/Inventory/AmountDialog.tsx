@@ -19,7 +19,7 @@ export const AmountDialog = () => {
 
     return (
         <Dialog open={isOpenAmountDialog} onOpenChange={setIsOpenAmountDialog}>
-            <DialogContent>
+            <DialogContent className="max-w-md">
                 <DialogHeader>
                     <DialogTitle>{t('inventory.amountDialog.title', { type: amountDialogType === 'give' ? 'give' : 'drop', item: dialogItem?.label ?? '' })}</DialogTitle>
                     <DialogDescription>

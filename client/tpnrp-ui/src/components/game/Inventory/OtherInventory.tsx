@@ -17,6 +17,7 @@ export const OtherInventory = () => {
         otherItemsType,
         otherItemsSlotCount,
         otherItems,
+        otherItemsId,
         isHaveOtherItems,
         selectOtherTab,
         setSelectOtherTab
@@ -27,7 +28,7 @@ export const OtherInventory = () => {
         <Tabs value={selectOtherTab} onValueChange={(value) => setSelectOtherTab(value as 'ground' | 'crafting' | 'missions')} className="relative w-full h-full flex flex-col">
             <TabsListHelix className="gap-px shrink-0">
                 {isHaveOtherItems() && (
-                    <TabsTriggerHelix value={otherItemsType}>{t(`inventory.other.${otherItemsType}`)}</TabsTriggerHelix>
+                    <TabsTriggerHelix value={otherItemsType}>{otherItemsId}</TabsTriggerHelix>
                 )}
                 <TabsTriggerHelix value="crafting">{t('inventory.other.crafting.title')}</TabsTriggerHelix>
                 <TabsTriggerHelix value="missions">{t('inventory.other.missions.title')}</TabsTriggerHelix>
@@ -39,7 +40,7 @@ export const OtherInventory = () => {
                         {Array.from({ length: otherItemsSlotCount }, (_, i) => {
                             const slot = i + 1
                             const item = otherItems.find(item => item.slot === slot)
-                            return <InventoryItem key={slot} item={item} slot={slot} group="other" isShowHotbarNumber={false} />
+                            return <InventoryItem key={slot} item={item} slot={slot} group="container" isShowHotbarNumber={false} />
                         })}
                     </div>
                 </ScrollArea>

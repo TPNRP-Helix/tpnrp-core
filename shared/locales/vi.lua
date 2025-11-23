@@ -1,11 +1,15 @@
-LOCALES.VI = {
+local vi = {
     core = {
         unknown_key = "Thiếu bản dịch: {key}",
     },
     inventory = {
         full = "Túi đã đầy!",
-        added = "Đã thêm {count}x {item} vào túi.",
+        added = "Đã thêm vật phẩm vào túi.",
         removed = "Đã bỏ {count}x {item} khỏi túi.",
+        pickUp = "Nhặt",
+        open = "Mở",
+        canAddItem = "Vật phẩm có thể được thêm vào túi.",
+        openDrop = "Mở",
     },
     player = {
         created = "Tạo nhân vật thành công.",
@@ -35,12 +39,21 @@ LOCALES.VI = {
         itemNotCloth = "Vật phẩm không phải là quần áo!",
         inventoryWeightLimitReached = "Túi đồ đã đầy trọng lượng!",
         inventoryFull = "Túi đồ đã đầy!",
+        playerNotFound = "Không tìm thấy nhân vật!",
     },
     success = {
         joinGame = "Đã vào game thành công",
         createCharacter = "Tạo nhân vật thành công!",
         deleteCharacter = "Xóa nhân vật thành công!",
     },
+    npc = {
+        citizen_identification_officer = 'Trưởng phòng công dân',
+    },
+    mission = {
+        notFound = 'Không tìm thấy nhiệm vụ!',
+        notMetRequirements = 'Bạn không đủ điều kiện để nhận nhiệm vụ này!',
+        taken = 'Bạn đã nhận nhiệm vụ thành công!',
+    }
 }
 
-
+return vi

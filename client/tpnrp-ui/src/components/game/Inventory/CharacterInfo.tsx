@@ -6,7 +6,6 @@ import { useI18n } from "@/i18n"
 import { EEquipmentSlot } from "@/constants/enum"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import type { TInventoryItem } from "@/types/inventory"
-import { useDevModeStore } from "@/stores/useDevModeStore"
 import { useMemo } from "react"
 
 export const CharacterInfo = () => {
@@ -18,12 +17,10 @@ export const CharacterInfo = () => {
     } = useInventoryStore()
     
     const { t } = useI18n()
-    const { appendConsoleMessage } = useDevModeStore()
 
     useWebUIMessage<{ type: 'sync', items: TInventoryItem[] }>('doSyncEquipment', (data) => {
         if (data.type === 'sync') {
             console.log('doSyncEquipment', JSON.stringify(data.items))
-            appendConsoleMessage({ message: `doSyncEquipment: ${JSON.stringify(data.items)}`, index: 0 })
             setEquipmentItems(data.items)
         }
     })
