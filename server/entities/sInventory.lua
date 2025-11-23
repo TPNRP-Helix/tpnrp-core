@@ -81,6 +81,7 @@ function SInventory.new(player, inventoryType)
     ---@param amount number item amount
     ---@return SInventoryCanAddItemResultType {status=boolean, message = string} is this item can add to inventory or not
     function self:canAddItem(itemName, amount)
+        print('[TPN][SERVER] SInventory.canAddItem - itemName: ', itemName, amount)
         -- Get item data
         local itemData = SHARED.items[itemName:lower()]
         if not itemData then
@@ -102,11 +103,33 @@ function SInventory.new(player, inventoryType)
         if totalWeight > totalInventoryWeight then
             return { status = false, message = SHARED.t('error.inventoryWeightLimitReached') }
         end
+        
+        -- Determine if item is unique (cannot stack)
+        local isUnique = itemData.unique or false
+        
+        -- Check if item already exists in inventory and can be stacked
+        local existingItemSlot = self:findItemSlot(itemName)
+        local needsNewSlot = true
+        
+        if existingItemSlot and not isUnique then
+            -- Item exists and can stack, no new slot needed
+            needsNewSlot = false
+        end
+        
         -- Check if item slots is greater than backpack slots limit
-        local totalUsedSlots = #self.items
-        local totalNewUsedSlots = totalUsedSlots + 1
-        if totalNewUsedSlots > totalInventorySlots then
-            return { status = false, message = SHARED.t('error.inventoryFull') }
+        if needsNewSlot then
+            -- Count only non-nil items (filter out nil slots)
+            local totalUsedSlots = 0
+            for _, item in pairs(self.items) do
+                if item ~= nil then
+                    totalUsedSlots = totalUsedSlots + 1
+                end
+            end
+            local totalNewUsedSlots = totalUsedSlots + 1
+            if totalNewUsedSlots > totalInventorySlots then
+                print('[TPN][SERVER] SInventory.canAddItem - totalNewUsedSlots: ', totalNewUsedSlots, ' | ', totalInventorySlots)
+                return { status = false, message = SHARED.t('error.inventoryFull') }
+            end
         end
 
         return { status = true, message = SHARED.t('inventory.canAddItem') }

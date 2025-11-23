@@ -103,11 +103,32 @@ function SContainer.new(core, containerId, citizenId)
         if totalWeight > self.maxWeight then
             return { status = false, message = SHARED.t('error.inventoryWeightLimitReached') }
         end
+        
+        -- Determine if item is unique (cannot stack)
+        local isUnique = itemData.unique or false
+        
+        -- Check if item already exists in inventory and can be stacked
+        local existingItemSlot = self:findItemSlotByName(itemName)
+        local needsNewSlot = true
+        
+        if existingItemSlot and not isUnique then
+            -- Item exists and can stack, no new slot needed
+            needsNewSlot = false
+        end
+        
         -- Check if item slots is greater than backpack slots limit
-        local totalUsedSlots = #self.items
-        local totalNewUsedSlots = totalUsedSlots + 1
-        if totalNewUsedSlots > self.maxSlot then
-            return { status = false, message = SHARED.t('error.inventoryFull') }
+        if needsNewSlot then
+            -- Count only non-nil items (filter out nil slots)
+            local totalUsedSlots = 0
+            for _, item in pairs(self.items) do
+                if item ~= nil then
+                    totalUsedSlots = totalUsedSlots + 1
+                end
+            end
+            local totalNewUsedSlots = totalUsedSlots + 1
+            if totalNewUsedSlots > self.maxSlot then
+                return { status = false, message = SHARED.t('error.inventoryFull') }
+            end
         end
 
         return { status = true, message = SHARED.t('inventory.canAddItem') }

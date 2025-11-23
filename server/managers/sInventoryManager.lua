@@ -183,6 +183,13 @@ function SInventoryManager.new(core)
     ---@param targetGroupId string|nil target group id
     ---@return {status: boolean; message: string; slot:number} result of moving item
     local function moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot, sourceGroupId, targetGroupId)
+        print('[TPN][SERVER] moveItemDifferentGroup - sourceItem: ', JSON.stringify(sourceItem))
+        print('[TPN][SERVER] moveItemDifferentGroup - targetItem: ', JSON.stringify(targetItem))
+        print('[TPN][SERVER] moveItemDifferentGroup - sourceGroup: ', sourceGroup)
+        print('[TPN][SERVER] moveItemDifferentGroup - targetGroup: ', targetGroup)
+        print('[TPN][SERVER] moveItemDifferentGroup - sourceSlot: ', sourceSlot)
+        print('[TPN][SERVER] moveItemDifferentGroup - targetSlot: ', targetSlot)
+        print('[TPN][SERVER] moveItemDifferentGroup - sourceGroupId: ', sourceGroupId)
         -- Moving from inventory to equipment
         if sourceGroup == 'inventory' and targetGroup == 'equipment' then
             local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
@@ -282,31 +289,43 @@ function SInventoryManager.new(core)
         end
         -- Moving from container to inventory
         if sourceGroup == 'container' and targetGroup == 'inventory' then
+            print('[TPN][SERVER] moveItemDifferentGroup - container: ', sourceGroupId)
+            for k, v in pairs(self.containers) do
+                print('[TPN][SERVER] moveItemDifferentGroup - container: ', k, ' | ', v.containerId)
+            end
             ---@type SContainer|nil container
             local container = self.containers[sourceGroupId]
             if not container then
+                print('[TPN][SERVER] moveItemDifferentGroup - container not found!')
                 return {
                     status = false,
                     message = 'Container not found!',
                 }
             end
             local removeResult = container:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+            print('[TPN][SERVER] moveItemDifferentGroup - removeResult: ', JSON.stringify(removeResult))
             if not removeResult.status then
+                print('[TPN][SERVER] moveItemDifferentGroup - removeResult not status!')
                 return {
                     status = false,
                     message = removeResult.message,
                 }
             end
+            print('[TPN][SERVER] moveItemDifferentGroup - sourceItem: ', JSON.stringify(sourceItem))
             local addResult = player.inventory:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info)
+            print('[TPN][SERVER] moveItemDifferentGroup - addResult: ', JSON.stringify(addResult))
             if not addResult.status then
+                print('[TPN][SERVER] moveItemDifferentGroup - addResult not status!')
                 -- Rollback item to container
                 container:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
+                print('[TPN][SERVER] moveItemDifferentGroup - rollback item to container!')
                 return {
                     status = false,
                     message = addResult.message,
                 }
             end
 
+            print('[TPN][SERVER] moveItemDifferentGroup - success!')
             return {
                 status = true,
                 message = 'Item moved from container to inventory!',
@@ -438,6 +457,7 @@ function SInventoryManager.new(core)
             -- Same group => Move item to target slot
             result = moveItemSameGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, targetSlot)
         else
+            print('[TPN][SERVER] onMoveInventoryItem - sourceItem: ', JSON.stringify(sourceItem))
             -- Different group => Move item to target slot
             result = moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot, sourceGroupId, targetGroupId)
         end
@@ -487,6 +507,41 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
+        
+        -- Verify item name matches
+        if item.name:lower() ~= data.itemName:lower() then
+            return {
+                status = false,
+                message = 'Item at slot does not match requested item!',
+                itemData = data,
+            }
+        end
+        
+        -- Check if item has enough amount
+        if item.amount < data.amount then
+            return {
+                status = false,
+                message = string.format('Not enough items! (Has: %d, Requested: %d)', item.amount, data.amount),
+                itemData = data,
+            }
+        end
+        
+        -- Create a copy of the item with the requested amount for the drop
+        local dropItem = {
+            name = item.name,
+            label = item.label,
+            weight = item.weight,
+            type = item.type,
+            image = item.image,
+            unique = item.unique,
+            useable = item.useable,
+            shouldClose = item.shouldClose,
+            description = item.description,
+            amount = data.amount,
+            slot = 1, -- Will be set to 1 for the drop container
+            info = item.info and JSON.parse(JSON.stringify(item.info)) or {} -- Deep copy info if it exists
+        }
+        
         -- Remove item from player's inventory
         local removeResult = player.inventory:removeItem(data.itemName, data.amount, data.fromSlot)
         if not removeResult.status then
@@ -497,6 +552,8 @@ function SInventoryManager.new(core)
             }
         end
         local worldItem = SHARED.getWorldItemPath(data.itemName)
+        -- TODO: Need a native function to get ground Z
+        SpawnPosition.Z = SpawnPosition.Z - 90
         -- Spawn bag
         local spawnResult = self.core.gameManager:spawnStaticMesh({
             entityPath = worldItem.path,
@@ -508,7 +565,7 @@ function SInventoryManager.new(core)
         })
         if not spawnResult.status then
             -- Spawn failed => Add item back to player's inventory
-            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, item.info)
+            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
             return {
                 status = false,
                 message = spawnResult.message,
@@ -518,7 +575,7 @@ function SInventoryManager.new(core)
         
         local options = {
             {
-                Text = 'Open Drop',
+                Text = SHARED.t('inventory.openDrop'),
                 Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
                 Action = function(Drop, Instigator)
                     print('[TPN][SERVER] createDropItem - Open bag!')
@@ -537,7 +594,7 @@ function SInventoryManager.new(core)
         })
         if not addInteractableResult.status then
             -- Add item back to player's inventory
-            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, item.info)
+            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
             -- Destroy bag
             self.core.gameManager:destroyEntity(spawnResult.entityId)
             return {
@@ -547,17 +604,15 @@ function SInventoryManager.new(core)
             }
         end
 
-        -- Set item slot to 1 (Because player are drop)
-        item.slot = 1
-        -- Add container to dictionary
+        -- Add container to dictionary (dropItem already has slot = 1)
         local container = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
         container:initEntity({
             entityId = spawnResult.entityId,
             entity = spawnResult.entity,
             items = {
-                [1] = item,
+                [1] = dropItem,
             },
-            maxSlot = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS,
+            maxSlot = 1, -- Drop item should only have 1 slot
             maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
         })
         self.containers[spawnResult.entityId] = container

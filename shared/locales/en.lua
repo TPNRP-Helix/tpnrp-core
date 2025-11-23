@@ -9,6 +9,7 @@ local en = {
         pickUp = "Pick up",
         open = "Open",
         canAddItem = "Item can be add to inventory.",
+        openDrop = "Open Drop",
     },
     player = {
         created = "Player created successfully.",

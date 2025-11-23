@@ -48,6 +48,7 @@ function CInventory.new(player)
 
         -- On move inventory item
         self.core.webUI:registerEventHandler('onMoveInventoryItem', function(data)
+            print('[CLIENT][INVENTORY] onMoveInventoryItem - data: ', JSON.stringify(data))
             TriggerCallback('onMoveInventoryItem', function(result)
                 if not result.status then
                     return

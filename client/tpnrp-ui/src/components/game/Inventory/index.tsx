@@ -17,6 +17,8 @@ import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
 import type { TInventoryGroup, TInventoryItem, TResponseCreateDropItem } from "@/types/inventory"
 import { toast } from "sonner"
+import { FALLBACK_DEFAULT_IMAGE_PATH } from "@/constants"
+import { Image } from "@/components/ui/image"
 
 const DEFAULT_SLOT_COUNT = 5
 
@@ -96,7 +98,13 @@ export const Inventory = () => {
         const item: TInventoryItem = active.data.current?.item
 
         const isGroup = (value: unknown): value is TInventoryGroup =>
-            value === "inventory" || value === "equipment" || value === "other"
+            value === "inventory" || value === "equipment" || value === "container"
+        
+        console.log('[UI] handleDragEnd - activeGroup: ', activeGroup)
+        console.log('[UI] handleDragEnd - targetGroup: ', targetGroup)
+        console.log('[UI] handleDragEnd - targetGroupId: ', targetGroupId)
+        console.log('[UI] handleDragEnd - activeGroupId: ', activeGroupId)
+        console.log('[UI] handleDragEnd - item: ', JSON.stringify(item))
         
         const isClothItem = item.name.startsWith('cloth_')
         // If item is not a cloth item and target group is equipment, don't allow to move
@@ -122,7 +130,7 @@ export const Inventory = () => {
             }, {
                 onSuccess: () => {
                     console.log(`Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`)
-                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup, sourceGroupId: activeGroupId, targetGroupId: targetGroupId })
+                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup, sourceGroupId: activeGroupId ?? '', targetGroupId: targetGroupId ?? '' })
                 },
                 onFail: () => {
                     console.log(`Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`)
@@ -298,10 +306,12 @@ export const Inventory = () => {
             <DragOverlay dropAnimation={null}>
                 {activeDragItem?.item ? (
                     <div className="pointer-events-none select-none">
-                        <img
+                        <Image
                             src={`./assets/images/items/${activeDragItem.item.name}.png`}
                             alt={activeDragItem.item.label ?? activeDragItem.item.name}
                             className="w-16 h-16 object-contain drop-shadow-2xl"
+                            draggable={false}
+                            fallbackSrc={FALLBACK_DEFAULT_IMAGE_PATH}
                         />
                     </div>
                 ) : null}

@@ -9,6 +9,7 @@ local vi = {
         pickUp = "Nhặt",
         open = "Mở",
         canAddItem = "Vật phẩm có thể được thêm vào túi.",
+        openDrop = "Mở",
     },
     player = {
         created = "Tạo nhân vật thành công.",
