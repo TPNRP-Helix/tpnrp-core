@@ -183,13 +183,6 @@ function SInventoryManager.new(core)
     ---@param targetGroupId string|nil target group id
     ---@return {status: boolean; message: string; slot:number} result of moving item
     local function moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot, sourceGroupId, targetGroupId)
-        print('[TPN][SERVER] moveItemDifferentGroup - sourceItem: ', JSON.stringify(sourceItem))
-        print('[TPN][SERVER] moveItemDifferentGroup - targetItem: ', JSON.stringify(targetItem))
-        print('[TPN][SERVER] moveItemDifferentGroup - sourceGroup: ', sourceGroup)
-        print('[TPN][SERVER] moveItemDifferentGroup - targetGroup: ', targetGroup)
-        print('[TPN][SERVER] moveItemDifferentGroup - sourceSlot: ', sourceSlot)
-        print('[TPN][SERVER] moveItemDifferentGroup - targetSlot: ', targetSlot)
-        print('[TPN][SERVER] moveItemDifferentGroup - sourceGroupId: ', sourceGroupId)
         -- Moving from inventory to equipment
         if sourceGroup == 'inventory' and targetGroup == 'equipment' then
             local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
@@ -200,7 +193,6 @@ function SInventoryManager.new(core)
                 }
             end
             local equipResult = player.equipment:equipItem(sourceItem.name, targetSlot)
-            print('[TPN][SERVER] moveItemDifferentGroup - equipResult: ', JSON.stringify(equipResult))
             return {
                 status = equipResult.status,
                 message = equipResult.message,
@@ -230,7 +222,6 @@ function SInventoryManager.new(core)
 
                 -- Have target item => un-equip clothes
                 local unequipResult = player.equipment:unequipItem(clothType, targetSlot)
-                print('[TPN][SERVER] moveItemDifferentGroup - unequipResult: ', JSON.stringify(unequipResult))
                 return {
                     status = unequipResult.status,
                     message = unequipResult.message,
@@ -239,7 +230,6 @@ function SInventoryManager.new(core)
             else
                 -- No target item => Move item to target slot
                 local moveResult = player.inventory:moveItem(sourceItem, targetSlot)
-                print('[TPN][SERVER] moveItemDifferentGroup - moveResult: ', JSON.stringify(moveResult))
                 return {
                     status = moveResult.status,
                     message = moveResult.message,
@@ -289,43 +279,30 @@ function SInventoryManager.new(core)
         end
         -- Moving from container to inventory
         if sourceGroup == 'container' and targetGroup == 'inventory' then
-            print('[TPN][SERVER] moveItemDifferentGroup - container: ', sourceGroupId)
-            for k, v in pairs(self.containers) do
-                print('[TPN][SERVER] moveItemDifferentGroup - container: ', k, ' | ', v.containerId)
-            end
             ---@type SContainer|nil container
             local container = self.containers[sourceGroupId]
             if not container then
-                print('[TPN][SERVER] moveItemDifferentGroup - container not found!')
                 return {
                     status = false,
                     message = 'Container not found!',
                 }
             end
             local removeResult = container:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
-            print('[TPN][SERVER] moveItemDifferentGroup - removeResult: ', JSON.stringify(removeResult))
             if not removeResult.status then
-                print('[TPN][SERVER] moveItemDifferentGroup - removeResult not status!')
                 return {
                     status = false,
                     message = removeResult.message,
                 }
             end
-            print('[TPN][SERVER] moveItemDifferentGroup - sourceItem: ', JSON.stringify(sourceItem))
             local addResult = player.inventory:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info)
-            print('[TPN][SERVER] moveItemDifferentGroup - addResult: ', JSON.stringify(addResult))
             if not addResult.status then
-                print('[TPN][SERVER] moveItemDifferentGroup - addResult not status!')
                 -- Rollback item to container
                 container:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
-                print('[TPN][SERVER] moveItemDifferentGroup - rollback item to container!')
                 return {
                     status = false,
                     message = addResult.message,
                 }
             end
-
-            print('[TPN][SERVER] moveItemDifferentGroup - success!')
             return {
                 status = true,
                 message = 'Item moved from container to inventory!',
@@ -404,13 +381,11 @@ function SInventoryManager.new(core)
     function self:onMoveInventoryItem(source, data)
         local player = self.core:getPlayerBySource(source)
         if not player then
-            print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get player by source!')
             return {
                 status = false,
                 message = SHARED.t('error.failedToGetPlayer'),
             }
         end
-        print('[SERVER][INFO] SInventoryManager.onMoveInventoryItem - data: ', JSON.stringify(data))
         
         -- Validate inputs
         local sourceSlot = data.sourceSlot
@@ -457,7 +432,6 @@ function SInventoryManager.new(core)
             -- Same group => Move item to target slot
             result = moveItemSameGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, targetSlot)
         else
-            print('[TPN][SERVER] onMoveInventoryItem - sourceItem: ', JSON.stringify(sourceItem))
             -- Different group => Move item to target slot
             result = moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot, sourceGroupId, targetGroupId)
         end
@@ -476,7 +450,6 @@ function SInventoryManager.new(core)
     function self:createDropItem(source, data)
         local player = self.core:getPlayerBySource(source)
         if not player then
-            print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get player by source!')
             return {
                 status = false,
                 message = SHARED.t('error.failedToGetPlayer'),
@@ -492,7 +465,6 @@ function SInventoryManager.new(core)
         -- Get item from player's inventory
         local item = player.inventory:findItemBySlot(data.fromSlot)
         if not item then
-            print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to get item by slot!')
             self.core.cheatDetector:logCheater({
                 action = 'createDropItem',
                 player = player or nil,
@@ -578,7 +550,6 @@ function SInventoryManager.new(core)
                 Text = SHARED.t('inventory.openDrop'),
                 Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
                 Action = function(Drop, Instigator)
-                    print('[TPN][SERVER] createDropItem - Open bag!')
                     local controller = Instigator and Instigator:GetController()
                     if controller then
                         TriggerClientEvent(controller, 'openContainerInventory', { containerId = spawnResult.entityId })
