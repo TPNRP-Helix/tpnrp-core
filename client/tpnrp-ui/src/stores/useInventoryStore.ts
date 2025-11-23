@@ -278,6 +278,36 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
       const targetIndex = targetList.findIndex((item) => item.slot === targetSlot)
 
       if (sourceGroup === targetGroup) {
+        const sourceItem = sourceList[sourceIndex]
+        
+        // Check if we should stack items (same item, not unique, target slot has item)
+        if (targetIndex !== -1) {
+          const targetItem = sourceList[targetIndex]
+          const isSameItem = sourceItem.name.toLowerCase() === targetItem.name.toLowerCase()
+          
+          if (isSameItem) {
+            // Check if item is not unique (can stack)
+            const isUnique = sourceItem.unique ?? false
+            if (!isUnique) {
+              // Same item and not unique => stack together
+              sourceList[targetIndex] = {
+                ...targetItem,
+                amount: targetItem.amount + sourceItem.amount,
+              }
+              // Remove source item
+              sourceList.splice(sourceIndex, 1)
+              
+              isSuccess = true
+              return {
+                inventoryItems,
+                equipmentItems,
+                otherItems,
+              }
+            }
+          }
+        }
+        
+        // Different item or same item but unique => swap items
         sourceList[sourceIndex] = { ...sourceList[sourceIndex], slot: targetSlot }
 
         if (targetIndex !== -1) {

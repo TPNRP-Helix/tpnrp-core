@@ -65,6 +65,7 @@ function SGameManager.new(core)
             id = entityId,
             entity = entity,
             isInteractable = false,
+            interactableEntity = nil,
         }
         return {
             status = true,
@@ -94,7 +95,9 @@ function SGameManager.new(core)
         if self.entities[entityId] then
             -- Update entity interactable
             self.entities[entityId].isInteractable = true
+            self.entities[entityId].interactableEntity = entityInteractable
         end
+        
         return {
             status = true,
             message = 'Interactable added successfully!',
@@ -105,18 +108,16 @@ function SGameManager.new(core)
     ---@param id string Entity id
     ---@return {status:boolean; message:string } returnValue 
     function self:destroyEntity(id)
-        local entity = self.entities[id]
-        if not entity then
+        local object = self.entities[id]
+        if not object then
             return {
                 status = false,
-                message = 'Entity not found!',
+                message = 'Object not found!',
             }
         end
-
-        -- Destroy entity
-        -- TODO: Need to destroy entity and Interactable
-        -- self.entities[id].entity:Destroy()
-
+        -- Destroy entity and interactable
+        if object.entity then DeleteEntity(object.entity) end
+        if object.interactableEntity then DeleteEntity(object.interactableEntity) end
         -- Remove entity from list
         self.entities[id] = nil
 

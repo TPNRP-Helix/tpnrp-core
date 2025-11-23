@@ -74,4 +74,5 @@
 ---@class TEntity Manage by sGame
 ---@field id string Entity id
 ---@field entity unknown Entity (TODO: MORE DOCUMENTATION NEEDED!)
+---@field interactableEntity unknown Entity (TODO: MORE DOCUMENTATION NEEDED!)
 ---@field isInteractable boolean Is this entity interactable

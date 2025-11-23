@@ -19,6 +19,7 @@ function SContainer.new(core, containerId, citizenId)
     self.core = core
     self.citizenId = citizenId -- Citizen ID of the player who owns this container
     self.containerId = containerId
+    self.isDestroyOnEmpty = false
     -- items
     self.items = {}
 
@@ -36,13 +37,14 @@ function SContainer.new(core, containerId, citizenId)
     end
 
     ---Init entity data
-    ---@param data {entityId:string; entity:unknown; items:table<number, SInventoryItemType>; maxSlot:number; maxWeight:number} data
+    ---@param data {entityId:string; entity:unknown; items:table<number, SInventoryItemType>; maxSlot:number; maxWeight:number; isDestroyOnEmpty:boolean} data
     function self:initEntity(data)
         self.entityId = data.entityId
         self.entity = data.entity
         self.items = data.items
         self.maxSlot = data.maxSlot
         self.maxWeight = data.maxWeight
+        self.isDestroyOnEmpty = data.isDestroyOnEmpty or false
     end
 
     ---/********************************/
@@ -468,15 +470,31 @@ function SContainer.new(core, containerId, citizenId)
         local targetItem = self:findItemBySlot(targetSlot)
         if targetItem ~= nil then
             -- Target slot have item
+            -- Check if same item and not unique => stack together
+            local isSameItem = item.name:lower() == targetItem.name:lower()
+            if isSameItem then
+                -- Get item definition to check if it's unique
+                local itemData = SHARED.items[item.name:lower()]
+                if itemData and not itemData.unique then
+                    -- Same item and not unique => stack together
+                    local sourceSlot = item.slot
+                    -- Add source amount to target
+                    targetItem.amount = targetItem.amount + item.amount
+                    -- Remove source item
+                    self.items[sourceSlot] = nil
+                    return { status = true, message = 'Items stacked successfully!', slot = targetSlot }
+                end
+            end
+            -- Different item or same item but unique => swap items
             local sourceSlot = item.slot
-            local targetItem = self.items[targetSlot]
-            targetItem.slot = item.slot
+            local targetItemToSwap = self.items[targetSlot]
+            targetItemToSwap.slot = item.slot
             -- Change slot of item
             item.slot = targetSlot
             self.items[targetSlot] = item
-            -- Assign item to new slo
-            targetItem.slot = sourceSlot
-            self.items[sourceSlot] = targetItem
+            -- Assign item to new slot
+            targetItemToSwap.slot = sourceSlot
+            self.items[sourceSlot] = targetItemToSwap
         else
             -- Target slot is empty
             -- Remove current item at source slot
@@ -488,6 +506,24 @@ function SContainer.new(core, containerId, citizenId)
         end
 
         return { status = true, message = 'Item moved to slot!', slot = targetSlot }
+    end
+
+    ---Destroy container
+    ---@return {status:boolean, message:string} result of destroying container
+    function self:destroy()
+        return self.core.gameManager:destroyEntity(self.containerId)
+    end
+
+    ---Check if container is empty
+    ---@return boolean isEmpty true if container is empty, false otherwise
+    function self:isEmpty()
+        local totalItems = 0
+        for _, item in pairs(self.items) do
+            if item ~= nil then
+                totalItems = totalItems + 1
+            end
+        end
+        return totalItems == 0
     end
 
     _contructor()

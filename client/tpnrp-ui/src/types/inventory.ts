@@ -6,6 +6,7 @@ export type TInventoryItem = {
     slot: number // slot number of this item
     description?: string // Description of this item
     useable?: boolean // Whether this item is useable
+    unique?: boolean // Whether this item is unique (cannot stack)
     info?: {
         rare?: number // From 1 to 5
         durability?: number // From 0 to 100

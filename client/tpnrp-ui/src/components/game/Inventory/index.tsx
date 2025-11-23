@@ -160,7 +160,6 @@ export const Inventory = () => {
             setInventoryItems(inventoryItems)
         }
         ///////////////////////////////////////////////////////////////////////////
-        console.log(`openInventory: ${JSON.stringify(result.equipment)}`)
         // Check if result.equipment is an array or object
         if (Array.isArray(result.equipment)) {
             // It's an array

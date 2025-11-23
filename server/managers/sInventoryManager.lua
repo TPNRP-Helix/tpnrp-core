@@ -435,12 +435,28 @@ function SInventoryManager.new(core)
             -- Different group => Move item to target slot
             result = moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot, sourceGroupId, targetGroupId)
         end
-        
+
+        if not result.status then
+            return {
+                status = false,
+                message = 'Move operation failed!',
+            }
+        end
+        -- destroy container when move done
+
+        if data.sourceGroup == 'container' and self.containers[sourceGroupId] and sourceGroupId ~= nil then
+            -- Check if container is empty
+            if self.containers[sourceGroupId].isDestroyOnEmpty then
+                ---@type SContainer container
+                local containerEntity = self.containers[sourceGroupId]
+                local deleteResult = containerEntity:destroy()
+                if deleteResult.status then
+                    self.containers[sourceGroupId] = nil
+                end
+            end
+        end
         -- Return the result from the move function
-        return result or {
-            status = false,
-            message = 'Move operation failed!',
-        }
+        return result
     end
 
     ---Create drop item
@@ -585,6 +601,7 @@ function SInventoryManager.new(core)
             },
             maxSlot = 1, -- Drop item should only have 1 slot
             maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
+            isDestroyOnEmpty = true
         })
         self.containers[spawnResult.entityId] = container
 

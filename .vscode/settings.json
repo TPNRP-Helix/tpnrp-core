@@ -32,7 +32,8 @@
         "SetEntityCoords",
         "SetEntityRotation",
         "EComponentMobility",
-        "Rotator"
+        "Rotator",
+        "DeleteEntity"
     ],
     "Lua.diagnostics.disable": [
         "undefined-doc-name"
