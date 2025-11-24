@@ -100,7 +100,7 @@ end
 ---Get all containers
 ---@return table<string, {id:string; items: table<number,SInventoryItemType>; maxSlot: number; maxWeight: number}> containers
 DAO.container.getAll = function()
-    local result = DAO.DB.Action('Select', 'SELECT * FROM inventories where type = ?', { 'container' })
+    local result = DAO.Action('Select', 'SELECT * FROM inventories where type = ?', { 'container' })
     if not result or #result == 0 then
         return {}
     end

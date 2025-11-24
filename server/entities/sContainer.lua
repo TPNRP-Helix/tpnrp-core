@@ -1,4 +1,4 @@
-local SStorage = require 'entities.sStorage'
+local SStorage = require('server/entities/sStorage')
 
 ---@class SContainer : SStorage
 ---@field core TPNRPServer

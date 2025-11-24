@@ -75,6 +75,7 @@ function SInventoryManager.new(core)
         local allContainers = DAO.container.getAll()
         for _, container in pairs(allContainers) do
             -- TODO: Create container entity, spawn them in world, add interaction for them
+            print('[SERVER] container ' .. container.id .. ' loaded')
         end
     end
 
