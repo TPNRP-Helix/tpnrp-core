@@ -61,6 +61,12 @@ function CInventory.new(player)
         self.core.webUI:registerEventHandler('createDropItem', function(data)
             self:createDropItem(data)
         end)
+
+        -- On split item
+        ---@param data {slot: number} item data
+        self.core.webUI:registerEventHandler('splitItem', function(data)
+            self:splitItem(data)
+        end)
     end
 
     ---/********************************/
@@ -128,6 +134,12 @@ function CInventory.new(player)
     function self:createDropItem(data)
         TriggerCallback('createDropItem', function(result)
             self.core.webUI:sendEvent('onCreateDropResponse', result)
+        end, data)
+    end
+
+    function self:splitItem(data)
+        TriggerCallback('splitItem', function(result)
+            self.core.webUI:sendEvent('onSplitItemResponse', result)
         end, data)
     end
 

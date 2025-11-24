@@ -15,7 +15,7 @@ import { PackageOpen } from "lucide-react"
 import { OtherInventory } from "./OtherInventory"
 import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
-import type { TInventoryGroup, TInventoryItem, TResponseCreateDropItem } from "@/types/inventory"
+import type { TInventoryGroup, TInventoryItem, TResponseCreateDropItem, TResponseSplitItem } from "@/types/inventory"
 import { toast } from "sonner"
 import { FALLBACK_DEFAULT_IMAGE_PATH } from "@/constants"
 import { Image } from "@/components/ui/image"
@@ -204,6 +204,13 @@ export const Inventory = () => {
             // Rollback temporary item into inventory item
             rollbackTemporaryDroppedItem(result.itemData)
         }
+    })
+
+    useWebUIMessage<[TResponseSplitItem]>('onSplitItemResponse', ([result]) => {
+        if (result.status) {
+            return
+        }
+        toast.error(result.message)
     })
     
     useEffect(() => {

@@ -36,6 +36,9 @@ SHARED.randomInt = function(min, max)
     return math.random(min, max)
 end
 
+---Generate a random ID of the given length
+---@param length number
+---@return string
 SHARED.randomId = function(length)
     local length = length or 6
     if type(length) ~= "number" or length <= 0 then

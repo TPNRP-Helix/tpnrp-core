@@ -47,7 +47,7 @@ function SInventory.new(player, inventoryType)
     end
 
     ---Load inventory
----@param inventoryType 'player' | 'stack' | ''
+    ---@param inventoryType 'player' | 'stack' | ''
     ---@return boolean status success status
     function self:load(inventoryType)
         -- Type is empty then don't load inventory
@@ -61,7 +61,7 @@ function SInventory.new(player, inventoryType)
         if inventories then
             self.items = inventories
         end
-        
+
         return true
     end
 
@@ -103,19 +103,19 @@ function SInventory.new(player, inventoryType)
         if totalWeight > totalInventoryWeight then
             return { status = false, message = SHARED.t('error.inventoryWeightLimitReached') }
         end
-        
+
         -- Determine if item is unique (cannot stack)
         local isUnique = itemData.unique or false
-        
+
         -- Check if item already exists in inventory and can be stacked
         local existingItemSlot = self:findItemSlot(itemName)
         local needsNewSlot = true
-        
+
         if existingItemSlot and not isUnique then
             -- Item exists and can stack, no new slot needed
             needsNewSlot = false
         end
-        
+
         -- Check if item slots is greater than backpack slots limit
         if needsNewSlot then
             -- Count only non-nil items (filter out nil slots)
@@ -127,7 +127,8 @@ function SInventory.new(player, inventoryType)
             end
             local totalNewUsedSlots = totalUsedSlots + 1
             if totalNewUsedSlots > totalInventorySlots then
-                print('[TPN][SERVER] SInventory.canAddItem - totalNewUsedSlots: ', totalNewUsedSlots, ' | ', totalInventorySlots)
+                print('[TPN][SERVER] SInventory.canAddItem - totalNewUsedSlots: ', totalNewUsedSlots, ' | ',
+                    totalInventorySlots)
                 return { status = false, message = SHARED.t('error.inventoryFull') }
             end
         end
@@ -145,20 +146,20 @@ function SInventory.new(player, inventoryType)
         end
         -- Max slots is default slots + inventory capacity slots
         local maxSlots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
-        
+
         -- Create a set of used slots for quick lookup
         local usedSlots = {}
         for _, item in pairs(self.items) do
             usedSlots[item.slot] = true
         end
-        
+
         -- Find first empty slot
         for slot = 1, maxSlots do
             if not usedSlots[slot] then
                 return slot
             end
         end
-        
+
         -- No empty slot found
         return nil
     end
@@ -170,10 +171,10 @@ function SInventory.new(player, inventoryType)
         if not itemName then
             return nil
         end
-        
+
         -- Convert item name to lowercase for case-insensitive comparison
         local searchName = itemName:lower()
-        
+
         -- Iterate through all items in the inventory
         for _, item in pairs(self.items) do
             if item.name and item.name:lower() == searchName then
@@ -181,7 +182,7 @@ function SInventory.new(player, inventoryType)
                 return item.slot
             end
         end
-        
+
         -- No item slot found
         return nil
     end
@@ -195,7 +196,7 @@ function SInventory.new(player, inventoryType)
         end
         return self.items[slotNumber] or nil
     end
-    
+
     ---Add item to inventory
     ---@param itemName string item name
     ---@param amount number item amount
@@ -207,38 +208,38 @@ function SInventory.new(player, inventoryType)
         if not itemName or type(itemName) ~= 'string' then
             return { status = false, message = 'Invalid item name!', slot = -1 }
         end
-        
+
         if not amount or type(amount) ~= 'number' or amount <= 0 then
             return { status = false, message = 'Invalid item amount!', slot = -1 }
         end
-        
+
         -- Get item data
         local itemData = SHARED.items[itemName:lower()]
         if not itemData then
             return { status = false, message = 'Item not found!', slot = -1 }
         end
-        
+
         -- Check if item can be added to inventory
         local canAddResult = self:canAddItem(itemName, amount)
         if not canAddResult.status then
             return { status = false, message = canAddResult.message, slot = -1 }
         end
-        
+
         -- Determine if item is unique
         local isUnique = itemData.unique or false
-        
+
         -- Determine slot to use
         local targetSlot = nil
-        
+
         -- If slotNumber is provided, validate it
         if slotNumber then
             if type(slotNumber) ~= 'number' or slotNumber <= 0 then
                 return { status = false, message = 'Invalid slot number!', slot = -1 }
             end
-            
+
             -- Check if slot is already occupied
             local existingItem = self.items[slotNumber]
-            
+
             if existingItem then
                 -- Slot is occupied
                 if isUnique then
@@ -276,7 +277,7 @@ function SInventory.new(player, inventoryType)
                 -- Non-unique items can stack with existing items
                 -- Try to find existing item slot to stack
                 targetSlot = self:findItemSlot(itemName)
-                
+
                 -- If not found, find empty slot
                 if not targetSlot then
                     targetSlot = self:getEmptySlot()
@@ -286,7 +287,7 @@ function SInventory.new(player, inventoryType)
                 end
             end
         end
-        
+
         -- Add or update item in inventory
         if self.items[targetSlot] and not isUnique then
             -- Stack item (non-unique items can stack)
@@ -345,27 +346,27 @@ function SInventory.new(player, inventoryType)
         if not amount or type(amount) ~= 'number' or amount <= 0 then
             return { status = false, message = 'Invalid item amount!', slot = -1 }
         end
-        
+
         -- Determine which slot to remove from
         local targetSlot = nil
-        
+
         if slotNumber then
             -- Slot number provided, validate it
             if type(slotNumber) ~= 'number' or slotNumber <= 0 then
                 return { status = false, message = 'Invalid slot number!', slot = -1 }
             end
-            
+
             -- Check if item exists at the specified slot
             local item = self.items[slotNumber]
             if not item then
                 return { status = false, message = 'No item found at specified slot!', slot = -1 }
             end
-            
+
             -- Verify the item at that slot matches the itemName (case-insensitive)
             if item.name:lower() ~= itemName:lower() then
                 return { status = false, message = 'Item at specified slot does not match!', slot = -1 }
             end
-            
+
             targetSlot = slotNumber
         else
             -- No slot number provided, find the first item matching the name
@@ -374,23 +375,23 @@ function SInventory.new(player, inventoryType)
                 return { status = false, message = 'Item not found in inventory!', slot = -1 }
             end
         end
-        
+
         -- Get the item at the target slot
         local item = self.items[targetSlot]
         if not item then
             return { status = false, message = 'Item not found at slot!', slot = -1 }
         end
-        
+
         -- Verify the item matches (double-check for safety)
         if item.name:lower() ~= itemName:lower() then
             return { status = false, message = 'Item at slot does not match!', slot = -1 }
         end
-        
+
         -- Check if there's enough amount to remove
         if item.amount < amount then
             return { status = false, message = 'Not enough items to remove!', slot = -1 }
         end
-        
+
         -- Calculate remaining amount
         local remainingAmount = item.amount - amount
         -- Tell player that item is remove from inventory
@@ -420,20 +421,20 @@ function SInventory.new(player, inventoryType)
         if not itemName or type(itemName) ~= 'string' then
             return { status = false, message = 'Invalid item name!', totalAmount = 0 }
         end
-        
+
         -- Default amount to 1 if not provided
         if not amount then
             amount = 1
         elseif type(amount) ~= 'number' or amount <= 0 then
             return { status = false, message = 'Invalid item amount!', totalAmount = 0 }
         end
-        
+
         -- Convert item name to lowercase for case-insensitive comparison
         local searchName = itemName:lower()
-        
+
         -- Calculate total amount of matching items in inventory
         local totalAmount = 0
-        
+
         -- Iterate through all items in the inventory
         for _, item in pairs(self.items) do
             if item.name and item.name:lower() == searchName then
@@ -441,7 +442,7 @@ function SInventory.new(player, inventoryType)
                 totalAmount = totalAmount + (item.amount or 0)
             end
         end
-        
+
         -- Check if total amount meets the required amount
         if totalAmount >= amount then
             return {
@@ -483,7 +484,7 @@ function SInventory.new(player, inventoryType)
             }
         }
     end
-    
+
     ---Move item to slot
     ---@param item SInventoryItemType item data
     ---@param targetSlot number target slot number
@@ -508,7 +509,7 @@ function SInventory.new(player, inventoryType)
                     targetItem.amount = targetItem.amount + item.amount
                     -- Remove source item
                     self.items[sourceSlot] = nil
-                    
+
                     return { status = true, message = 'Items stacked successfully!', slot = targetSlot }
                 end
             end
@@ -522,7 +523,6 @@ function SInventory.new(player, inventoryType)
             -- Assign item to new slot
             targetItemToSwap.slot = sourceSlot
             self.items[sourceSlot] = targetItemToSwap
-            
         else
             -- Target slot is empty
             -- Remove current item at source slot
@@ -534,6 +534,52 @@ function SInventory.new(player, inventoryType)
         end
 
         return { status = true, message = 'Item moved to slot!', slot = targetSlot }
+    end
+
+    ---Split item
+    ---@param slot number slot number
+    function self:splitItem(slot)
+        -- Validate inputs
+        if not slot or type(slot) ~= 'number' then
+            return { status = false, message = 'Invalid slot number!', slot = -1 }
+        end
+        -- Get item at slot
+        local item = self:findItemBySlot(slot)
+        if not item then
+            return { status = false, message = SHARED.t('inventory.itemNotFound'), slot = -1 }
+        end
+
+        -- Find empty slot
+        local emptySlot = self:getEmptySlot()
+        if not emptySlot then
+            return { status = false, message = SHARED.t('error.noEmptySlotAvailable'), slot = -1 }
+        end
+
+        local splittedAmount = math.floor(item.amount / 2)
+        self.items[slot].amount = item.amount - splittedAmount
+        -- Create new item in empty slot
+        -- Deep copy info if it exists
+        local newItemInfo = item.info and JSON.parse(JSON.stringify(item.info)) or {}
+
+        self.items[emptySlot] = {
+            name = item.name,
+            label = item.label,
+            weight = item.weight,
+            type = item.type,
+            image = item.image,
+            unique = item.unique,
+            useable = item.useable,
+            shouldClose = item.shouldClose,
+            description = item.description,
+            amount = splittedAmount,
+            slot = emptySlot,
+            info = newItemInfo
+        }
+
+        -- Sync inventory
+        self:sync()
+
+        return { status = true, message = 'Item split successfully!', slot = emptySlot }
     end
 
     _contructor()

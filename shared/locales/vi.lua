@@ -10,6 +10,7 @@ local vi = {
         open = "Mở",
         canAddItem = "Vật phẩm có thể được thêm vào túi.",
         openDrop = "Mở",
+        itemNotFound = "Không tìm thấy vật phẩm!",
     },
     player = {
         created = "Tạo nhân vật thành công.",

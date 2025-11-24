@@ -22,10 +22,9 @@ function SInventoryManager.new(core)
 
     ---Contructor function
     local function _contructor()
-
-         --- In-game Events
-         --- Open Inventory
-         RegisterCallback('onOpenInventory', function(source, data)
+        --- In-game Events
+        --- Open Inventory
+        RegisterCallback('onOpenInventory', function(source, data)
             return self:onOpenInventory(source, data)
         end)
 
@@ -41,7 +40,7 @@ function SInventoryManager.new(core)
         RegisterCallback('createDropItem', function(source, data)
             return self:createDropItem(source, data)
         end)
-
+        
         RegisterCallback('devAddItem', function(source, data)
             local player = self.core:getPlayerBySource(source)
             if not player then
@@ -62,6 +61,10 @@ function SInventoryManager.new(core)
                 status = result.status,
                 message = result.message,
             }
+        end)
+
+        RegisterCallback('splitItem', function(source, data)
+            return self:splitItem(source, data)
         end)
     end
 
@@ -199,7 +202,7 @@ function SInventoryManager.new(core)
                 slot = targetSlot,
             }
         end
-        
+
         -- Moving from equipment to inventory
         if sourceGroup == 'equipment' and targetGroup == 'inventory' then
             -- Un-equip item
@@ -212,7 +215,8 @@ function SInventoryManager.new(core)
                         citizenId = player.playerData.citizenId or '',
                         license = player.playerData.license or '',
                         name = player.playerData.name or '',
-                        content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Item %s is not a cloth item! Player trying to un-equip item that is not a cloth item!'):format(sourceItem.name)
+                        content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Item %s is not a cloth item! Player trying to un-equip item that is not a cloth item!')
+                            :format(sourceItem.name)
                     })
                     return {
                         status = false,
@@ -236,13 +240,13 @@ function SInventoryManager.new(core)
                     slot = targetSlot,
                 }
             end
-            
+
             return {
                 status = true,
                 message = 'Item moved from equipment to inventory!',
             }
         end
-        
+
         -- Moving from inventory to container
         if sourceGroup == 'inventory' and targetGroup == 'container' then
             ---@type SContainer|nil container
@@ -357,7 +361,7 @@ function SInventoryManager.new(core)
                 message = 'Equipment does not support swapping items!',
             }
         elseif sourceGroup == 'container' then
-            -- TODO: Handle other inventory types (ground, other player, etc.)
+            -- Handle other inventory types (ground, other player, etc.)
             local container = self.containers[sourceGroupId]
             if not container then
                 return {
@@ -386,7 +390,7 @@ function SInventoryManager.new(core)
                 message = SHARED.t('error.failedToGetPlayer'),
             }
         end
-        
+
         -- Validate inputs
         local sourceSlot = data.sourceSlot
         local targetSlot = data.targetSlot
@@ -400,7 +404,7 @@ function SInventoryManager.new(core)
                 message = 'Invalid parameters!',
             }
         end
-        
+
         -- Same slot, same group => Don't do anything
         if sourceSlot == targetSlot and sourceGroup == targetGroup then
             return {
@@ -418,7 +422,8 @@ function SInventoryManager.new(core)
                 citizenId = player.playerData.citizenId or '',
                 license = player.playerData.license or '',
                 name = player.playerData.name or '',
-                content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s! Player trying to move item that they don\'t have in their inventory!'):format(sourceSlot)
+                content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s! Player trying to move item that they don\'t have in their inventory!')
+                    :format(sourceSlot)
             })
             return {
                 status = false,
@@ -433,7 +438,8 @@ function SInventoryManager.new(core)
             result = moveItemSameGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, targetSlot)
         else
             -- Different group => Move item to target slot
-            result = moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot, sourceGroupId, targetGroupId)
+            result = moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot,
+                targetSlot, sourceGroupId, targetGroupId)
         end
 
         if not result.status then
@@ -487,7 +493,8 @@ function SInventoryManager.new(core)
                 citizenId = player.playerData.citizenId or '',
                 license = player.playerData.license or '',
                 name = player.playerData.name or '',
-                content = ('[ERROR] SInventoryManager.createDropItem: Item not found in inventory! Player trying to create drop item that they don\'t have in their inventory!'):format(data.fromSlot)
+                content = ('[ERROR] SInventoryManager.createDropItem: Item not found in inventory! Player trying to create drop item that they don\'t have in their inventory!')
+                    :format(data.fromSlot)
             })
             return {
                 status = false,
@@ -495,7 +502,7 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-        
+
         -- Verify item name matches
         if item.name:lower() ~= data.itemName:lower() then
             return {
@@ -504,7 +511,7 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-        
+
         -- Check if item has enough amount
         if item.amount < data.amount then
             return {
@@ -513,7 +520,7 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-        
+
         -- Create a copy of the item with the requested amount for the drop
         local dropItem = {
             name = item.name,
@@ -526,10 +533,10 @@ function SInventoryManager.new(core)
             shouldClose = item.shouldClose,
             description = item.description,
             amount = data.amount,
-            slot = 1, -- Will be set to 1 for the drop container
+            slot = 1,                                                        -- Will be set to 1 for the drop container
             info = item.info and JSON.parse(JSON.stringify(item.info)) or {} -- Deep copy info if it exists
         }
-        
+
         -- Remove item from player's inventory
         local removeResult = player.inventory:removeItem(data.itemName, data.amount, data.fromSlot)
         if not removeResult.status then
@@ -560,7 +567,7 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-        
+
         local options = {
             {
                 Text = SHARED.t('inventory.openDrop'),
@@ -610,6 +617,20 @@ function SInventoryManager.new(core)
             message = 'Drop item created successfully!',
             itemData = data,
         }
+    end
+
+    --- Split item
+    ---@param source PlayerController player controller
+    ---@param data {slot: number} item data
+    function self:splitItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        return player.inventory:splitItem(data.slot)
     end
 
     _contructor()

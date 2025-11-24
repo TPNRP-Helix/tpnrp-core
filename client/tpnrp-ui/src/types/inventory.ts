@@ -48,3 +48,8 @@ export type TResponseCreateDropItem = {
         fromSlot: number
     }
 }
+
+export type TResponseSplitItem = {
+    status: boolean
+    message: string
+}
