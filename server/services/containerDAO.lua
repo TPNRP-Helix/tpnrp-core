@@ -2,9 +2,9 @@ DAO.container = {}
 ---Save inventory
 ---@param container SContainer
 ---@return boolean success
-DAO.container.save = function(container, citizenId)
+DAO.container.save = function(container)
     -- Don't execute any query if inventory or player or playerData doesn't exist
-    if not container or not citizenId then
+    if not container or not container.citizenId then
         print('[ERROR] DAO.container.save: Invalid container data!')
         return false
     end
@@ -39,7 +39,7 @@ DAO.container.save = function(container, citizenId)
     local params = {
         container.containerId,
         'container',
-        citizenId,
+        container.citizenId,
         container.maxSlot,
         container.maxWeight,
         JSON.stringify(formattedItems),
@@ -50,10 +50,10 @@ DAO.container.save = function(container, citizenId)
     local result = DAO.DB.Execute(sql, params)
     if result then
         DAO.DB.Execute('COMMIT;')
-        print(('[LOG] Saved container for %s (Citizen ID: %s)'):format(container.containerId, citizenId))
+        print(('[LOG] Saved container for %s (Citizen ID: %s)'):format(container.containerId, container.citizenId))
         return true
     end
-    print(('[ERROR] DAO.container.save: Failed to save container for %s (Citizen ID: %s)'):format(container.containerId, citizenId))
+    print(('[ERROR] DAO.container.save: Failed to save container for %s (Citizen ID: %s)'):format(container.containerId, container.citizenId))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end

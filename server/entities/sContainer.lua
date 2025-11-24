@@ -64,7 +64,7 @@ function SContainer.new(core, containerId, citizenId)
     ---Save container
     ---@return boolean status success status
     function self:save()
-        local result = DAO.container.save(self, self.citizenId)
+        local result = DAO.container.save(self)
         if result then
             return true
         end
