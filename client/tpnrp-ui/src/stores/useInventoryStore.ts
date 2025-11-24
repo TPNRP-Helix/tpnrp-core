@@ -72,6 +72,7 @@ type InventoryState = {
   setOtherItemsId: (value: string) => void
   // Items
   splitItem: (itemSlot: number, options?: SplitItemOptions) => void
+  onCloseInventory: () => void
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
@@ -431,6 +432,14 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
       return {
         inventoryItems,
       }
+    })
+  },
+  onCloseInventory: () => {
+    set({
+      otherItems: [],
+      otherItemsType: 'ground',
+      otherItemsSlotCount: 0,
+      otherItemsId: ''
     })
   }
 }))

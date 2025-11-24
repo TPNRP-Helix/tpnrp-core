@@ -109,6 +109,7 @@ function CPlayer.new(core, playerData)
 
         -- On Update basic needs
         RegisterClientEvent('TPN:player:updateBasicNeeds', function(newHunger, newThirst)
+            print('[CPlayer] TPN:player:updateBasicNeeds ' .. newHunger .. ' ' .. newThirst)
             self.core.webUI:sendEvent('setBasicNeeds', {
                 hunger = newHunger,
                 thirst = newThirst,

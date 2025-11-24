@@ -56,7 +56,8 @@ export const Inventory = () => {
         getTotalLimitWeight,
         moveInventoryItem,
         removeTemporaryDroppedItem,
-        rollbackTemporaryDroppedItem
+        rollbackTemporaryDroppedItem,
+        onCloseInventory
     } = useInventoryStore()
     const { t } = useI18n()
     const [activeDragItem, setActiveDragItem] = useState<{
@@ -243,6 +244,8 @@ export const Inventory = () => {
                 setOpenInventory(open)
                 if (!open) {
                     window.hEvent("onCloseInventory")
+                    // Close other inventory on close inventory
+                    onCloseInventory()
                 }
             }}>
                 <DialogContent
