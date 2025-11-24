@@ -26,12 +26,15 @@ DAO.container.save = function(container, citizenId)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
     local sql = [[
-        INSERT INTO inventories (container_id, type, citizen_id, max_slot, max_weight, items)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO inventories (container_id, type, citizen_id, max_slot, max_weight, items, is_destroy_on_empty, position, rotation)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(container_id) DO UPDATE SET
             items = excluded.items,
             max_slot = excluded.max_slot,
             max_weight = excluded.max_weight,
+            is_destroy_on_empty = excluded.is_destroy_on_empty,
+            position = excluded.position,
+            rotation = excluded.rotation,
     ]]
     local params = {
         container.containerId,
@@ -40,6 +43,9 @@ DAO.container.save = function(container, citizenId)
         container.maxSlot,
         container.maxWeight,
         JSON.stringify(formattedItems),
+        container.isDestroyOnEmpty,
+        JSON.stringify({ x = container.position.x, y = container.position.y, z = container.position.z }),
+        JSON.stringify({ Yaw = container.rotation.Yaw }),
     }
     local result = DAO.DB.Execute(sql, params)
     if result then
@@ -54,7 +60,7 @@ end
 
 ---Get container by containerId
 ---@param containerId string
----@return {id:string; items: table<number,SInventoryItemType>; maxSlot: number; maxWeight: number}|nil
+---@return ResponseGetContainer|nil
 DAO.container.get = function(containerId)
     local type = 'container'
 
@@ -84,6 +90,10 @@ DAO.container.get = function(containerId)
         items = formattedItems,
         maxSlot = inventory.max_slot,
         maxWeight = inventory.max_weight,
+        isDestroyOnEmpty = inventory.is_destroy_on_empty,
+        position = JSON.parse(inventory.position),
+        rotation = JSON.parse(inventory.rotation),
+        displayModel = inventory.display_model,
     }
 end
 

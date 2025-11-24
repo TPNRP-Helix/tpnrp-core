@@ -22,6 +22,8 @@ function SGameManager.new(core)
 
     ---Contructor function
     local function _contructor()
+        -- TODO: Load container from DB and create entity
+
     end
 
     ---/********************************/

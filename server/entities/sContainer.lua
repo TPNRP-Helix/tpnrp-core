@@ -23,6 +23,9 @@ function SContainer.new(core, containerId, citizenId)
     -- items
     self.items = {}
 
+    self.position = nil
+    self.rotation = nil
+
     -- Max slot count of this container
     self.maxSlot = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
     -- Max weight in grams
@@ -37,7 +40,7 @@ function SContainer.new(core, containerId, citizenId)
     end
 
     ---Init entity data
-    ---@param data {entityId:string; entity:unknown; items:table<number, SInventoryItemType>; maxSlot:number; maxWeight:number; isDestroyOnEmpty:boolean} data
+    ---@param data InitContainer data
     function self:initEntity(data)
         self.entityId = data.entityId
         self.entity = data.entity
@@ -45,6 +48,8 @@ function SContainer.new(core, containerId, citizenId)
         self.maxSlot = data.maxSlot
         self.maxWeight = data.maxWeight
         self.isDestroyOnEmpty = data.isDestroyOnEmpty or false
+        self.position = data.position
+        self.rotation = data.rotation
     end
 
     ---/********************************/
@@ -69,6 +74,9 @@ function SContainer.new(core, containerId, citizenId)
             self.items = container.items
             self.maxSlot = container.maxSlot
             self.maxWeight = container.maxWeight
+            self.isDestroyOnEmpty = container.isDestroyOnEmpty
+            self.position = container.position
+            self.rotation = container.rotation
             return true
         end
         return false

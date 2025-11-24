@@ -487,7 +487,7 @@ function SInventoryManager.new(core)
         local PawnRotation = GetEntityRotation(playerPawn)
         local ForwardVec = playerPawn:GetActorForwardVector()
         local SpawnPosition = playerCoords + (ForwardVec * 200)
-        PawnRotation.Yaw = PawnRotation.Yaw
+        PawnRotation.Yaw = PawnRotation.Yaw + 90
         -- Get item from player's inventory
         local item = player.inventory:findItemBySlot(data.fromSlot)
         if not item then
@@ -607,6 +607,8 @@ function SInventoryManager.new(core)
         container:initEntity({
             entityId = spawnResult.entityId,
             entity = spawnResult.entity,
+            position = SpawnPosition,
+            rotation = PawnRotation,
             items = {
                 [1] = dropItem,
             },

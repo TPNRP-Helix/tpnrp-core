@@ -49,6 +49,10 @@ DAO.DB.Execute([[
         max_slot INTEGER,
         max_weight INTEGER,
         items TEXT,
+        is_destroy_on_empty BOOLEAN,
+        position TEXT,
+        rotation TEXT,
+        display_model TEXT,
         UNIQUE(citizen_id, "type")
     );
 ]])
