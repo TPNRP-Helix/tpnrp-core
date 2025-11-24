@@ -20,6 +20,7 @@ function SContainer.new(core, containerId, citizenId)
     self.citizenId = citizenId -- Citizen ID of the player who owns this container
     self.containerId = containerId
     self.isDestroyOnEmpty = false
+    self.interactableEntity = nil
     -- items
     self.items = {}
 
@@ -44,6 +45,7 @@ function SContainer.new(core, containerId, citizenId)
     function self:initEntity(data)
         self.entityId = data.entityId
         self.entity = data.entity
+        self.interactableEntity = data.interactableEntity
         self.items = data.items
         self.maxSlot = data.maxSlot
         self.maxWeight = data.maxWeight
@@ -519,7 +521,13 @@ function SContainer.new(core, containerId, citizenId)
     ---Destroy container
     ---@return {status:boolean, message:string} result of destroying container
     function self:destroy()
-        return self.core.gameManager:destroyEntity(self.containerId)
+        if self.interactableEntity then
+            DeleteEntity(self.interactableEntity)
+        end
+        if self.entity then
+            DeleteEntity(self.entity)
+        end
+        return { status = true, message = 'Container destroyed successfully!' }
     end
 
     ---Check if container is empty

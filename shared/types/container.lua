@@ -1,6 +1,7 @@
 ---@class InitContainer
 ---@field entityId string
 ---@field entity unknown
+---@field interactableEntity unknown
 ---@field items table<number, SInventoryItemType>
 ---@field maxSlot number
 ---@field maxWeight number

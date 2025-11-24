@@ -22,8 +22,8 @@ function SInventoryManager.new(core)
 
     ---Contructor function
     local function _contructor()
-        --- In-game Events
-        --- Open Inventory
+
+        --- Callback events
         RegisterCallback('onOpenInventory', function(source, data)
             return self:onOpenInventory(source, data)
         end)
@@ -70,6 +70,12 @@ function SInventoryManager.new(core)
         RegisterCallback('useItem', function(source, data)
             return self:useItem(source, data)
         end)
+        
+        -- TODO: Load container from DB and create entity
+        local allContainers = DAO.container.getAll()
+        for _, container in pairs(allContainers) do
+            -- TODO: Create container entity, spawn them in world, add interaction for them
+        end
     end
 
     ---On shutdown
@@ -593,8 +599,8 @@ function SInventoryManager.new(core)
         if not addInteractableResult.status then
             -- Add item back to player's inventory
             player.inventory:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
-            -- Destroy bag
-            self.core.gameManager:destroyEntity(spawnResult.entityId)
+            -- On failed to create interactable => Destroy bag
+            DeleteEntity(spawnResult.entity)
             return {
                 status = false,
                 message = addInteractableResult.message,
@@ -607,6 +613,7 @@ function SInventoryManager.new(core)
         container:initEntity({
             entityId = spawnResult.entityId,
             entity = spawnResult.entity,
+            interactableEntity = addInteractableResult.interactableEntity,
             position = SpawnPosition,
             rotation = PawnRotation,
             items = {
