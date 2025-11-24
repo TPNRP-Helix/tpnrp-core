@@ -12,9 +12,6 @@ function SGameManager.new(core)
     -- Core
     self.core = core
 
-    -- ---@type table<string, TEntity>
-    -- self.entities = {}
-
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/

@@ -22,7 +22,6 @@ function SInventoryManager.new(core)
 
     ---Contructor function
     local function _contructor()
-
         --- Callback events
         RegisterCallback('onOpenInventory', function(source, data)
             return self:onOpenInventory(source, data)
@@ -56,7 +55,14 @@ function SInventoryManager.new(core)
                     message = SHARED.t('error.notAllowed'),
                 }
             end
-            local result = player.inventory:addItem(data.itemName, data.amount)
+            local itemInfo = nil
+            if data.itemName == 'cloth_bag_item_1' then
+                itemInfo = {
+                    slotCount = 30,
+                    weightLimit = 80000
+                }
+            end
+            local result = player.inventory:addItem(data.itemName, data.amount, nil, itemInfo)
             return {
                 status = result.status,
                 message = result.message,
@@ -70,7 +76,7 @@ function SInventoryManager.new(core)
         RegisterCallback('useItem', function(source, data)
             return self:useItem(source, data)
         end)
-        
+
         -- TODO: Load container from DB and create entity
         local allContainers = DAO.container.getAll()
         for _, container in pairs(allContainers) do
@@ -83,6 +89,7 @@ function SInventoryManager.new(core)
     function self:onShutdown()
         for _, container in pairs(self.containers) do
             container:save()
+            container:destroy()
         end
     end
 

@@ -59,7 +59,7 @@ function SEquipment.new(player)
         return {
             status = true,
             slots = bagItem.info.slotCount or 0,
-            weightLimit = bagItem.info.WeightLimit or 0
+            weightLimit = bagItem.info.weightLimit or 0
         }
     end
 
