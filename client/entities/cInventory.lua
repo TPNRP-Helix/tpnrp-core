@@ -67,6 +67,10 @@ function CInventory.new(player)
         self.core.webUI:registerEventHandler('splitItem', function(data)
             self:splitItem(data)
         end)
+
+        self.core.webUI:registerEventHandler('useItem', function(data)
+            self:useItem(data)
+        end)
     end
 
     ---/********************************/
@@ -140,6 +144,12 @@ function CInventory.new(player)
     function self:splitItem(data)
         TriggerCallback('splitItem', function(result)
             self.core.webUI:sendEvent('onSplitItemResponse', result)
+        end, data)
+    end
+
+    function self:useItem(data)
+        TriggerCallback('useItem', function(result)
+            self.core.webUI:sendEvent('onUseItemResponse', result)
         end, data)
     end
 

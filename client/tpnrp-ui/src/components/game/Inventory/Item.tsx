@@ -58,7 +58,11 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     }, [item])
 
     const onClickUse = useCallback(() => {
-        console.log('onClickUse')
+        if (item === null || slot === null) return
+        window.hEvent('useItem', {
+            itemName: item.name,
+            slot: item.slot
+        })
     }, [])
 
     const onClickSplit = useCallback(() => {

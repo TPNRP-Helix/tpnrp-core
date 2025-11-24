@@ -271,6 +271,28 @@ function TPNRPServer.new()
         end)
     end
 
+    --- Use item
+    ---@param player SPlayer player entity
+    ---@param data {itemName: string; slot: number} item data
+    function self:useItem(player, data)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        local itemName = data.itemName:lower()
+        local slot = data.slot
+        if not self:canUseItem(itemName) then
+            return {
+                status = false,
+                message = SHARED.t('error.itemCannotBeUsed'),
+            }
+        end
+        -- Use item
+        return self.useableItems[itemName](player, slot)
+    end
+
     _contructor()
     return self
 end

@@ -40,7 +40,7 @@ function SInventoryManager.new(core)
         RegisterCallback('createDropItem', function(source, data)
             return self:createDropItem(source, data)
         end)
-        
+
         RegisterCallback('devAddItem', function(source, data)
             local player = self.core:getPlayerBySource(source)
             if not player then
@@ -65,6 +65,10 @@ function SInventoryManager.new(core)
 
         RegisterCallback('splitItem', function(source, data)
             return self:splitItem(source, data)
+        end)
+
+        RegisterCallback('useItem', function(source, data)
+            return self:useItem(source, data)
         end)
     end
 
@@ -631,6 +635,64 @@ function SInventoryManager.new(core)
             }
         end
         return player.inventory:splitItem(data.slot)
+    end
+
+    --- Use item
+    ---@param source PlayerController player controller
+    ---@param data {itemName: string; slot: number} item data
+    function self:useItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        local item = player.inventory:findItemBySlot(data.slot)
+        -- Verify item at slot
+        if not item then
+            self.core.cheatDetector:logCheater({
+                action = 'useItem',
+                player = player or nil,
+                citizenId = player.playerData.citizenId or '',
+                license = player.playerData.license or '',
+                name = player.playerData.name or '',
+                content = ('[ERROR] sInventoryManager.useItem: Item %s not found in inventory!'):format(data.itemName)
+            })
+            return {
+                status = false,
+                message = SHARED.t('error.itemNotFound'),
+            }
+        end
+        -- Verify that slot item matches with data.itemName
+        if item.name ~= data.itemName then
+            self.core.cheatDetector:logCheater({
+                action = 'useItem',
+                player = player or nil,
+                citizenId = player.playerData.citizenId or '',
+                license = player.playerData.license or '',
+                name = player.playerData.name or '',
+                content = ('[ERROR] sInventoryManager.useItem: Item %s does not match!'):format(data.itemName)
+            })
+            return {
+                status = false,
+                message = SHARED.t('error.itemNotFound'),
+            }
+        end
+        -- Player are allowed to use item
+        local result = self.core:useItem(player, data)
+        if result.status then
+            -- Each use should only remove 1 item
+            player.inventory:removeItem(data.itemName, 1, data.slot)
+
+            player.missionManager:triggerAction('use', {
+                item = data.itemName,
+                slot = data.slot,
+                amount = 1,
+                info = item.info,
+            })
+        end
+        return result
     end
 
     _contructor()
