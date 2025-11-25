@@ -63,7 +63,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
             itemName: item.name,
             slot: item.slot
         })
-    }, [])
+    }, [item])
 
     const onClickSplit = useCallback(() => {
         if (item === null || slot === null) return

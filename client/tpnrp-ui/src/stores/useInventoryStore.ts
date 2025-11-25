@@ -395,7 +395,6 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
       let freeSlot = -1
 
       // Assuming slots start from 1. 
-      // Hotbar: 1-5 (or 1-6 based on UI code? UI code says hotbar is 1-6, backpack starts at 7)
       // Let's check all slots up to slotCount
       for (let i = 1; i <= state.slotCount; i++) {
         if (!takenSlots.has(i)) {
@@ -406,7 +405,6 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       if (freeSlot === -1) {
         // No free slot
-        // TODO: Show error message?
         options?.onFail?.('inventory.noFreeSlot')
         return {}
       }
