@@ -26,6 +26,7 @@ function SEquipment.new(player)
         local equipment = DAO.equipment.get(self.player.playerData.citizenId)
         if equipment then
             self.items = equipment
+            print('[SERVER] equipment '.. JSON.stringify(equipment))
         end
     end
 
@@ -65,10 +66,9 @@ function SEquipment.new(player)
 
     ---Equip item to slot
     ---@param itemName string item name
-    ---@param containerType 'inventory' | 'backpack' | '' container type
     ---@param slotNumber number slot number
     ---@return {status:boolean, message:string} success Status when equip item
-    function self:equipItem(itemName, containerType, slotNumber)
+    function self:equipItem(itemName, slotNumber)
         -- Get item data
         local itemData = SHARED.items[itemName:lower()]
         if not itemData then
@@ -106,13 +106,13 @@ function SEquipment.new(player)
         
         -- Remove item from inventory
         local removeResult = { status = false, message = 'Container not found!' }
-        if containerType == 'backpack' then
+        if slotNumber <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            removeResult = self.player.inventory:removeItem(itemName, 1, item.slot)
+        else
             local backpack = self.player.inventory:getBackpackContainer()
             if backpack then
                 removeResult = backpack:removeItem(itemName, 1, item.slot)
             end
-        else
-            removeResult = self.player.inventory:removeItem(itemName, 1, item.slot)
         end
 
         if not removeResult.status then
@@ -152,8 +152,9 @@ function SEquipment.new(player)
     function self:unequipItem(clothItemType, containerType, toSlotNumber)
         -- Get item data
         local item = self.items[clothItemType]
+        print('[SERVER] unequipItem ' .. clothItemType)
         if not item then
-            print(('[ERROR] sEquipment.unequipItem: Failed to unequip item %s from slot %s!'):format(clothItemType, item.name))
+            print(('[ERROR] sEquipment.unequipItem: Failed to unequip item from slot!'))
             -- [CHEAT] possible event cheat
             return { status = false, message = 'Item not found in equipment!' }
         end
@@ -277,7 +278,7 @@ function SEquipment.new(player)
         -- 1. Empty equipment slot
         self.items[sourceItemClothType] = nil
         -- 2. Equip targetItem
-        self:equipItem(sourceItemClothType, containerType, targetSlot)
+        self:equipItem(sourceItemClothType, targetSlot)
 
         
         return { status = true, message = 'Item swapped successfully!' }

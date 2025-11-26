@@ -200,14 +200,8 @@ SHARED.getClothItemTypeByName = function(itemName)
         return nil
     end
     
-    if SHARED.startsWith(itemName, "cloth_head_") then
-        return EEquipmentClothType.Head
-    end
     if SHARED.startsWith(itemName, "cloth_mask_") then
         return EEquipmentClothType.Mask
-    end
-    if SHARED.startsWith(itemName, "cloth_hairstyle_") then
-        return EEquipmentClothType.HairStyle
     end
     if SHARED.startsWith(itemName, "cloth_torso_") then
         return EEquipmentClothType.Torso
@@ -230,9 +224,6 @@ SHARED.getClothItemTypeByName = function(itemName)
     if SHARED.startsWith(itemName, "cloth_armor_") then
         return EEquipmentClothType.Armor
     end
-    if SHARED.startsWith(itemName, "cloth_decal_") then
-        return EEquipmentClothType.Decal
-    end
     if SHARED.startsWith(itemName, "cloth_top_") then
         return EEquipmentClothType.Top
     end
@@ -244,15 +235,6 @@ SHARED.getClothItemTypeByName = function(itemName)
     end
     if SHARED.startsWith(itemName, "cloth_ears_") then
         return EEquipmentClothType.Ears
-    end
-    if SHARED.startsWith(itemName, "cloth_null1_") then
-        return EEquipmentClothType.Null1
-    end
-    if SHARED.startsWith(itemName, "cloth_null2_") then
-        return EEquipmentClothType.Null2
-    end
-    if SHARED.startsWith(itemName, "cloth_null3_") then
-        return EEquipmentClothType.Null3
     end
     if SHARED.startsWith(itemName, "cloth_watch_") then
         return EEquipmentClothType.Watch

@@ -230,7 +230,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   setOtherItems: (items: TInventoryItem[]) => set({ otherItems: items }),
   setOtherItemsType: (value: 'ground' | 'player' | 'stack' | 'container') => set({ otherItemsType: value }),
   setOtherItemsSlotCount: (value: number) => set({ otherItemsSlotCount: value }),
-  getEquipmentItem: (equipSlot: EEquipmentSlot) => get().equipmentItems.find((item: TInventoryItem) => item.slot === equipSlot),
+  getEquipmentItem: (equipSlot: EEquipmentSlot) => get().equipmentItems.find((item: TInventoryItem) => item?.slot === equipSlot),
   isHaveOtherItems: () => {
     return get().otherItems.length > 0 && get().otherItemsType !== '' && get().otherItemsSlotCount > 0
   },

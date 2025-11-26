@@ -335,7 +335,7 @@ function SInventoryManager.new(core)
                         message = SHARED.t('error.itemNotCloth'),
                     }
                 end
-                local equipResult = player.equipment:equipItem(sourceItem.name, 'inventory', targetSlot)
+                local equipResult = player.equipment:equipItem(sourceItem.name, targetSlot)
                 return {
                     status = equipResult.status,
                     message = equipResult.message,
@@ -531,7 +531,7 @@ function SInventoryManager.new(core)
                                 }
                             end
                             -- Then equip targetItem
-                            local equipResult = player.equipment:equipItem(targetItem.name, 'backpack', targetSlot)
+                            local equipResult = player.equipment:equipItem(targetItem.name, targetSlot)
                             
                             return {
                                 status = true,
@@ -1092,7 +1092,7 @@ function SInventoryManager.new(core)
                 message = SHARED.t('error.itemNotCloth'),
             }
         end
-        return player.equipment:equipItem(itemInfo.name, containerType, data.slot)
+        return player.equipment:equipItem(itemInfo.name, data.slot)
     end
 
     _contructor()
