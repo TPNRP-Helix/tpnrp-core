@@ -97,6 +97,48 @@ function SInventoryManager.new(core)
     ---/*          Functions           */
     ---/********************************/
 
+    ---Open container by id
+    ---@param containerId string container id
+    ---@return {status: boolean; message: string; container: SContainer|nil} result of opening container
+    function self:openContainerId(containerId)
+        local container = self.containers[containerId]
+        if not container then
+            return {
+                status = false,
+                message = 'Container not found!',
+                container = nil
+            }
+        end
+        return {
+            status = true,
+            message = 'Container opened!',
+            container = container,
+        }
+    end
+
+    ---Init container
+    ---@param containerId string container id
+    ---@param citizenId string citizen id
+    ---@return {status: boolean; message: string; container: SContainer|nil} result of initializing container
+    function self:initContainer(containerId, citizenId)
+        local container = SContainer.new(self.core, containerId, citizenId)
+        if container:load() then
+            -- Assign container to list
+            self.containers[containerId] = container
+            return {
+                status = true,
+                message = 'Container initialized!',
+                container = container,
+            }
+        end
+
+        return {
+            status = false,
+            message = 'Failed to init container!',
+            container = nil
+        }
+    end
+
     ---On open inventory
     ---@param source PlayerController player controller
     ---@param data {type:'player' | 'container'; containerId:string|nil} data
@@ -204,148 +246,398 @@ function SInventoryManager.new(core)
     ---@param targetGroupId string|nil target group id
     ---@return {status: boolean; message: string; slot:number} result of moving item
     local function moveItemDifferentGroup(player, sourceItem, targetItem, sourceGroup, targetGroup, sourceSlot, targetSlot, sourceGroupId, targetGroupId)
-        -- Moving from inventory to equipment
-        if sourceGroup == 'inventory' and targetGroup == 'equipment' then
-            local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
-            if not clothType then
-                return {
-                    status = false,
-                    message = SHARED.t('error.itemNotCloth'),
-                }
-            end
-            local equipResult = player.equipment:equipItem(sourceItem.name, targetSlot)
-            return {
-                status = equipResult.status,
-                message = equipResult.message,
-                slot = targetSlot,
-            }
-        end
-
-        -- Moving from equipment to inventory
-        if sourceGroup == 'equipment' and targetGroup == 'inventory' then
-            -- Un-equip item
-            if targetItem then
-                local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
-                if not clothType then
-                    self.core.cheatDetector:logCheater({
-                        action = 'moveInventoryItem',
-                        player = player or nil,
-                        citizenId = player.playerData.citizenId or '',
-                        license = player.playerData.license or '',
-                        name = player.playerData.name or '',
-                        content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Item %s is not a cloth item! Player trying to un-equip item that is not a cloth item!')
-                            :format(sourceItem.name)
-                    })
+        if sourceGroup == 'inventory' then
+            -- Move item from inventory to backpack
+            if targetGroup == 'backpack' then
+                -- if targetItem exist then swapping sourceItem and targetItem
+                local backpack = player.inventory:getBackpackContainer()
+                if not backpack then
                     return {
                         status = false,
-                        message = 'Item is not a cloth item!',
+                        message = 'Backpack not found!',
+                    }
+                end
+                if targetItem then
+                    -- Remove item from source
+                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+                    if not removeResult.status then
+                        return {
+                            status = false,
+                            message = removeResult.message,
+                        }
+                    end
+                    targetItem.slot = sourceSlot
+                    -- Add targetItem back to source
+                    local addResult = player.inventory:addItem(targetItem.name, targetItem.amount, sourceSlot)
+                    if not addResult.status then
+                        return {
+                            status = false,
+                            message = addResult.message,
+                        }
+                    end
+                    
+                    -- Remove targetItem from backpack
+                    local removeBackpackResult = backpack:removeItem(targetItem.name, targetItem.amount, targetSlot)
+                    if not removeBackpackResult.status then
+                        return {
+                            status = false,
+                            message = removeBackpackResult.message,
+                        }
+                    end
+                    sourceItem.slot = targetSlot
+                    -- Add sourceItem to backpack
+                    local addBackpackResult = backpack:addItem(sourceItem.name, sourceItem.amount, targetSlot)
+                    if not addBackpackResult.status then
+                        return {
+                            status = false,
+                            message = addBackpackResult.message,
+                        }
+                    end
+                else
+                    -- Target don't have any item then just move sourceItem to targetSlot
+                    -- Remove item from source
+                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+                    if not removeResult.status then
+                        return {
+                            status = false,
+                            message = removeResult.message,
+                        }
+                    end
+                    sourceItem.slot = targetSlot
+                    -- Add targetItem back to source
+                    local addResult = backpack:addItem(sourceItem.name, sourceItem.amount, targetSlot)
+                    if not addResult.status then
+                        return {
+                            status = false,
+                            message = addResult.message,
+                        }
+                    end
+                end
+
+                return {
+                    status = true,
+                    message = 'Item moved successfully!',
+                    slot = targetSlot,
+                }
+            end
+            -- Moving from inventory to equipment
+            if targetGroup == 'equipment' then
+                local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
+                if not clothType then
+                    return {
+                        status = false,
+                        message = SHARED.t('error.itemNotCloth'),
+                    }
+                end
+                local equipResult = player.equipment:equipItem(sourceItem.name, 'inventory', targetSlot)
+                return {
+                    status = equipResult.status,
+                    message = equipResult.message,
+                    slot = targetSlot,
+                }
+            end
+            -- Moving from inventory to container
+            if targetGroup == 'container' then
+                ---@type SContainer|nil container
+                local container = self.containers[targetGroupId]
+                if not container then
+                    return {
+                        status = false,
+                        message = 'Container not found!',
+                    }
+                end
+                if targetItem then
+                    -- Remove source item from inventory
+                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+                    if not removeResult.status then
+                        return {
+                            status = false,
+                            message = removeResult.message,
+                        }
+                    end
+                    -- Add target item to inventory
+                    targetItem.slot = sourceSlot
+                    local addResult = player.inventory:addItem(targetItem.name, targetItem.amount, sourceSlot)
+                    if not addResult.status then
+                        return {
+                            status = false,
+                            message = addResult.message,
+                        }
+                    end
+                    -- Remove target item from container
+                    local removeTargetResult = container:removeItem(targetItem.name, targetItem.amount, targetSlot)
+                    if not removeTargetResult.status then
+                        return {
+                            status = false,
+                            message = removeTargetResult.message,
+                        }
+                    end
+                    -- Add source item to container
+                    sourceItem.slot = targetSlot
+                    local addTargetResult = container:addItem(sourceItem.name, sourceItem.amount, targetSlot)
+                    if not addTargetResult.status then
+                        return {
+                            status = false,
+                            message = addTargetResult.message,
+                        }
+                    end
+                else
+                    -- Remove item from inventory
+                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+                    if not removeResult.status then
+                        return {
+                            status = false,
+                            message = removeResult.message,
+                        }
+                    end
+                    -- Add item to container
+                    sourceItem.slot = targetSlot
+                    local addResult = container:addItem(sourceItem.name, sourceItem.amount, targetSlot)
+                    if not addResult.status then
+                        return {
+                            status = false,
+                            message = addResult.message,
+                        }
+                    end
+                end
+
+                return {
+                    status = true,
+                    message = 'Item moved from inventory to container!',
+                    slot = targetSlot,
+                }
+            end
+        end
+
+        if sourceGroup == 'equipment' then
+            -- Moving from equipment to inventory
+            if targetGroup == 'inventory' then
+                -- Un-equip item
+                if targetItem then
+                    local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
+                    if not clothType then
+                        self.core.cheatDetector:logCheater({
+                            action = 'moveInventoryItem',
+                            player = player or nil,
+                            citizenId = player.playerData.citizenId or '',
+                            license = player.playerData.license or '',
+                            name = player.playerData.name or '',
+                            content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Item %s is not a cloth item! Player trying to un-equip item that is not a cloth item!')
+                                :format(sourceItem.name)
+                        })
+                        return {
+                            status = false,
+                            message = 'Item is not a cloth item!',
+                        }
+                    end
+
+                    -- Have target item => un-equip clothes
+                    local unequipResult = player.equipment:unequipItem(clothType, 'inventory', targetSlot)
+                    return {
+                        status = unequipResult.status,
+                        message = unequipResult.message,
+                        slot = targetSlot,
+                    }
+                else
+                    -- No target item => Move item to target slot
+                    local moveResult = player.inventory:moveItem(sourceItem, targetSlot)
+                    return {
+                        status = moveResult.status,
+                        message = moveResult.message,
+                        slot = targetSlot,
                     }
                 end
 
-                -- Have target item => un-equip clothes
-                local unequipResult = player.equipment:unequipItem(clothType, targetSlot)
                 return {
-                    status = unequipResult.status,
-                    message = unequipResult.message,
+                    status = true,
+                    message = 'Item moved from equipment to inventory!',
+                }
+            end
+
+            if targetGroup == 'backpack' then
+                -- TODO: Move item from equipment to backpack
+                local sourceItemClothType = SHARED.getClothItemTypeByName(sourceItem.name)
+                if not sourceItemClothType then
+                    -- This should not invoke. Because sourceItem of equipment must be a cloth item
+                    print('[SERVER] [ERROR] SInventoryManager.onMoveEquipmentItem: Source item is not a cloth item! Revalidate source item')
+                    return {
+                        status = false,
+                        message = 'Source item is not a cloth item!',
+                    }
+                end
+                if targetItem then
+                    local backpack = player.inventory:getBackpackContainer()
+                    local targetItemClothType = SHARED.getClothItemTypeByName(targetItem.name)
+                    if not backpack then
+                        return {
+                            status = false,
+                            message = 'Backpack not found!',
+                        }
+                    end
+                    if not targetItemClothType then
+                        -- targetItem is not a cloth type then just find empty slot
+                        local emptySlot = backpack:getEmptySlot()
+                        if not emptySlot then
+                            return {
+                                status = false,
+                                message = SHARED.t('backpack.full'),
+                            }
+                        end
+                        local unequipResult = player.equipment:unequipItem(sourceItemClothType, 'backpack', emptySlot)
+                        if not unequipResult.status then
+                            return {
+                                status = false,
+                                message = unequipResult.message,
+                            }
+                        end
+                        return {
+                            status = true,
+                            message = 'Item moved from equipment to backpack!',
+                            slot = emptySlot,
+                        }
+                    else
+                        -- targetItem is a clothType
+                        -- TODO: Check is same clothType?
+                        -- If same clothType then swap
+                        -- If not then find empty slot for sourceItem
+                        if targetItemClothType == sourceItemClothType then
+                            -- Same clothType then swap them
+                            local removeTargetItemResult = backpack:removeItem(targetItem.name, targetItem.amount, targetSlot)
+                            if not removeTargetItemResult.status then
+                                return {
+                                    status = false,
+                                    message = removeTargetItemResult.message,
+                                }
+                            end
+                            local unequipResult = player.equipment:unequipItem(sourceItemClothType, 'backpack', targetSlot)
+                            if not unequipResult.status then
+                                return {
+                                    status = false,
+                                    message = unequipResult.message,
+                                }
+                            end
+                            -- Then equip targetItem
+                            local equipResult = player.equipment:equipItem(targetItem.name, 'backpack', targetSlot)
+                            
+                            return {
+                                status = true,
+                                message = 'Item moved from equipment to backpack!',
+                                slot = targetSlot,
+                            }
+                        else
+                            -- Not same cloth type then find empty slot for sourceItem
+                            local emptySlot = backpack:getEmptySlot()
+                            if not emptySlot then
+                                return {
+                                    status = false,
+                                    message = SHARED.t('backpack.full'),
+                                }
+                            end
+                            local unequipResult = player.equipment:unequipItem(sourceItemClothType, 'backpack', emptySlot)
+                            if not unequipResult.status then
+                                return {
+                                    status = false,
+                                    message = unequipResult.message,
+                                }
+                            end
+                            return {
+                                status = true,
+                                message = 'Item moved from equipment to backpack!',
+                                slot = emptySlot,
+                            }
+                        end
+                    end
+                else
+                    local clothType = SHARED.getClothItemTypeByName(sourceItem.name)
+                    if not clothType then
+                        print('[SERVER] [ERROR] SInventoryManager.onMoveEquipmentItem: Item %s is not a cloth item! Player trying to move item that is not a cloth item!')
+                        return {
+                            status = false,
+                            message = 'Item is not a cloth item!',
+                        }
+                    end
+                    local unequipResult = player.equipment:unequipItem(clothType, 'backpack', targetSlot)
+                    if not unequipResult.status then
+                        return {
+                            status = false,
+                            message = unequipResult.message,
+                        }
+                    end
+                end
+
+                return {
+                    status = true,
+                    message = 'Item moved from equipment to backpack!',
+                }
+            end
+
+            -- TODO: Move item from equipment to container
+            if targetGroup == 'container' then
+                return {
+                    status = false,
+                    message = 'Moving items to/from other groups is not implemented yet!',
+                }
+            end
+        end
+
+        if sourceGroup == 'container' then
+            -- Moving from container to inventory
+            if targetGroup == 'inventory' then
+                ---@type SContainer|nil container
+                local container = self.containers[sourceGroupId]
+                if not container then
+                    return {
+                        status = false,
+                        message = 'Container not found!',
+                    }
+                end
+                local removeResult = container:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+                if not removeResult.status then
+                    return {
+                        status = false,
+                        message = removeResult.message,
+                    }
+                end
+                local addResult = player.inventory:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info)
+                if not addResult.status then
+                    -- Rollback item to container
+                    container:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
+                    return {
+                        status = false,
+                        message = addResult.message,
+                    }
+                end
+                return {
+                    status = true,
+                    message = 'Item moved from container to inventory!',
                     slot = targetSlot,
                 }
-            else
-                -- No target item => Move item to target slot
-                local moveResult = player.inventory:moveItem(sourceItem, targetSlot)
+            end
+
+            if targetGroup == 'equipment' then
                 return {
-                    status = moveResult.status,
-                    message = moveResult.message,
-                    slot = targetSlot,
+                    status = false,
+                    message = 'Moving items to/from other groups is not implemented yet!',
                 }
             end
 
-            return {
-                status = true,
-                message = 'Item moved from equipment to inventory!',
-            }
+            if targetGroup == 'backpack' then
+                -- TODO:
+            end
         end
 
-        -- Moving from inventory to container
-        if sourceGroup == 'inventory' and targetGroup == 'container' then
-            ---@type SContainer|nil container
-            local container = self.containers[targetGroupId]
-            if not container then
-                return {
-                    status = false,
-                    message = 'Container not found!',
-                }
+        if sourceGroup == 'backpack' then
+            if targetGroup == 'inventory' then
+                -- TODO:
             end
 
-            local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
-            if not removeResult.status then
-                return {
-                    status = false,
-                    message = removeResult.message,
-                }
-            end
-            local addResult = container:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info)
-            if not addResult.status then
-                -- Rollback item to inventory
-                player.inventory:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
-                return {
-                    status = false,
-                    message = addResult.message,
-                }
+            if targetGroup == 'equipment' then
+                -- TODO:
             end
 
-            return {
-                status = true,
-                message = 'Item moved from inventory to container!',
-                slot = targetSlot,
-            }
-        end
-        -- Moving from container to inventory
-        if sourceGroup == 'container' and targetGroup == 'inventory' then
-            ---@type SContainer|nil container
-            local container = self.containers[sourceGroupId]
-            if not container then
-                return {
-                    status = false,
-                    message = 'Container not found!',
-                }
+            if targetGroup == 'container' then
+                -- TODO:
             end
-            local removeResult = container:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
-            if not removeResult.status then
-                return {
-                    status = false,
-                    message = removeResult.message,
-                }
-            end
-            local addResult = player.inventory:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info)
-            if not addResult.status then
-                -- Rollback item to container
-                container:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
-                return {
-                    status = false,
-                    message = addResult.message,
-                }
-            end
-            return {
-                status = true,
-                message = 'Item moved from container to inventory!',
-                slot = targetSlot,
-            }
-        end
-
-        -- [TODO] Moving from/to other groups (not implemented yet)
-        if sourceGroup == 'container' and targetGroup == 'equipment' then
-            return {
-                status = false,
-                message = 'Moving items to/from other groups is not implemented yet!',
-            }
-        end
-
-        -- [TODO] Moving from/to other groups (not implemented yet)
-        if sourceGroup == 'equipment' and targetGroup == 'container' then
-            return {
-                status = false,
-                message = 'Moving items to/from other groups is not implemented yet!',
-            }
         end
 
         -- Unknown combination

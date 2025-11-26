@@ -1,6 +1,7 @@
 ---@class SEquipmentItemInfoType
 ---@field slotCount number
 ---@field weightLimit number
+---@field containerId string
 
 ---@class SEquipmentItemType: SInventoryItemType
 ---@field slot number

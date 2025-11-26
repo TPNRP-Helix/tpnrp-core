@@ -12,6 +12,9 @@ local en = {
         openDrop = "Open Drop",
         itemNotFound = "Item not found!",
     },
+    backpack = {
+        full = 'Backpack is full!'
+    },
     player = {
         created = "Player created successfully.",
         loaded = "Player loaded.",
