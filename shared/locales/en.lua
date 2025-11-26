@@ -10,6 +10,7 @@ local en = {
         open = "Open",
         canAddItem = "Item can be add to inventory.",
         openDrop = "Open Drop",
+        itemNotFound = "Item not found!",
     },
     player = {
         created = "Player created successfully.",
@@ -40,6 +41,7 @@ local en = {
         inventoryWeightLimitReached = "Inventory weight limit reached!",
         inventoryFull = "Inventory is full!",
         playerNotFound = "Player not found!",
+        itemCannotBeUsed = "Item cannot be used",
     },
     success = {
         joinGame = "Joined game successfully",

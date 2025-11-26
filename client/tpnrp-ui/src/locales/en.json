@@ -6,10 +6,8 @@
   "settings.showHunger": "Show Hunger Badge When Smaller Than",
   "settings.showThirst": "Show Thirst Badge When Smaller Than",
   "settings.showStamina": "Show Stamina Badge When Smaller Than",
-
   "settings.audio.title": "Audio",
   "settings.audio.description": "Audio settings for the game",
-
   "settings.basicNeedsHUD.title": "Basic Needs HUD",
   "settings.basicNeedsHUD.description": "Basic needs HUD settings for the game",
   "settings.basicNeedsHUD.showHealth": "Show Health Badge When Smaller Than",
@@ -17,9 +15,7 @@
   "settings.basicNeedsHUD.showHunger": "Show Hunger Badge When Smaller Than",
   "settings.basicNeedsHUD.showThirst": "Show Thirst Badge When Smaller Than",
   "settings.basicNeedsHUD.showStamina": "Show Stamina Badge When Smaller Than",
-
   "library.title": "Library",
-
   "selectCharacter.title": "Select Character",
   "selectCharacter.delete": "Delete",
   "selectCharacter.emptySlot": "Empty slot {n}",
@@ -34,7 +30,6 @@
   "selectCharacter.deleteConfirmTitle": "Delete Character",
   "selectCharacter.deleteConfirmDesc": "Are you sure you want to delete character with citizen id {citizenId}?",
   "selectCharacter.cancel": "Cancel",
-  
   "createCharacter.title": "Create Character",
   "createCharacter.description": "Create a new character to start your journey.",
   "createCharacter.firstName": "First Name",
@@ -47,24 +42,17 @@
   "createCharacter.reset": "Reset",
   "createCharacter.submit": "Create",
   "createCharacter.submitting": "Creating...",
-  
-
   "toast.create.success.title": "Character created successfully",
   "toast.create.success.desc": "Welcome {name} to the Underground City!",
-
   "error.firstNameRequired": "First name is required",
   "error.lastNameRequired": "Last name is required",
   "error.dobRequired": "Date of birth is required",
-
   "error.createCharacter.failedToCreateCharacter": "Failed to create character!",
-
   "error.failedToGetLicense": "Failed to get license. Contact admin for support.",
   "error.joinGameFailed": "Failed to join game",
   "error.joinGame.playerNotFound": "Player not found!",
-
   "success.joinGame": "Joined game successfully",
   "success.createCharacter": "Character created successfully!",
-
   "helper.toggleGuideHelper": "Toggle Guide",
   "helper.toggleFocus": "Toggle focus",
   "helper.toggleToastExpand": "Toggle toast expand",
@@ -72,13 +60,11 @@
   "helper.toggleConsole": "Toggle console",
   "helper.toggleInventory": "Toggle inventory",
   "helper.toggleSettings": "Toggle settings",
-
   "inventory.title": "Inventory",
   "inventory.backpack.title": "Backpack",
   "inventory.backpack.slotCount": "Slot Count",
   "inventory.backpack.empty": "You don't have backpack",
   "inventory.backpack.emptyDescription": "Buy a backpack from store to increase your inventory capacity.",
-
   "inventory.other.ground": "Ground",
   "inventory.other.player": "Player",
   "inventory.other.stack": "Stack",
@@ -92,12 +78,9 @@
   "inventory.weightPerUnit": "Weight per unit",
   "inventory.canCarry": "Can carry",
   "inventory.noDescription": "No description",
-
   "inventory.equipment.notCloth": "Item is not a cloth item!",
-
   "inventory.other.crafting.title": "Crafting",
   "inventory.other.missions.title": "Missions",
-
   "inventory.amountDialog.title": "You want to {type} how many {item}?",
   "inventory.amountDialog.description": "You can choose the quantity from 1 to {amount}",
   "inventory.amountDialog.quantity": "Quantity",
@@ -107,7 +90,6 @@
   "inventory.amountDialog.drop": "Drop",
   "inventory.amountDialog.invalidQuantity": "Invalid quantity",
   "inventory.amountDialog.other": "Other",
-
   "inventory.use": "Use",
   "inventory.split": "Split",
   "inventory.give": "Give",
@@ -117,7 +99,10 @@
   "inventory.all": "All",
   "inventory.other": "Other",
   "inventory.add": "Add",
-
+  "inventory.splitSuccess": "Split successfully",
+  "inventory.itemNotFound": "Item not found",
+  "inventory.itemAmountLessThanOne": "Item amount less than one",
+  "inventory.noFreeSlot": "No free slot",
   "inventory.item.label.id_card": "ID Card",
   "inventory.item.label.driver_license": "Drivers License",
   "inventory.item.label.beer": "Beer",
@@ -125,17 +110,14 @@
   "inventory.item.label.wood_log": "Wood Log",
   "inventory.item.label.sandwich": "Sandwich",
   "inventory.item.label.painkillers": "Painkiller",
-
   "inventory.rare.common": "Common",
   "inventory.rare.uncommon": "Uncommon",
   "inventory.rare.rare": "Rare",
   "inventory.rare.epic": "Epic",
   "inventory.rare.legendary": "Legendary",
-
   "inventory.equipment.title": "Equipment",
   "inventory.skills.title": "Skills",
   "inventory.stats.title": "Stats",
-
   "inventory.crafting.searchPlaceholder": "Search crafting recipe",
   "inventory.crafting.search": "Search",
   "crafting.category.all": "All",
@@ -150,5 +132,3 @@
   "crafting.empty": "No crafting recipe found",
   "crafting.emptyDescription": "Buy a recipe book from store or level up to unlock recipes."
 }
-
-

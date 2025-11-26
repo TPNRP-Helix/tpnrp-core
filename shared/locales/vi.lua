@@ -10,6 +10,7 @@ local vi = {
         open = "Mở",
         canAddItem = "Vật phẩm có thể được thêm vào túi.",
         openDrop = "Mở",
+        itemNotFound = "Không tìm thấy vật phẩm!",
     },
     player = {
         created = "Tạo nhân vật thành công.",
@@ -40,6 +41,7 @@ local vi = {
         inventoryWeightLimitReached = "Túi đồ đã đầy trọng lượng!",
         inventoryFull = "Túi đồ đã đầy!",
         playerNotFound = "Không tìm thấy nhân vật!",
+        itemCannotBeUsed = "Vật phẩm không thể sử dụng!",
     },
     success = {
         joinGame = "Đã vào game thành công",

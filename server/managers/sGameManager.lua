@@ -1,6 +1,5 @@
 ---@class SGameManager
 ---@field core TPNRPServer Core
----@field entities table<string, TEntity> Dictionary of entities managed by SGameManager, keyed by entityId
 SGameManager = {}
 SGameManager.__index = SGameManager
 
@@ -12,9 +11,6 @@ function SGameManager.new(core)
 
     -- Core
     self.core = core
-
-    ---@type table<string, TEntity>
-    self.entities = {}
 
     ---/********************************/
     ---/*         Initializes          */
@@ -60,13 +56,7 @@ function SGameManager.new(core)
         entity:SetActorScale3D(Vector(spawnScale.x, spawnScale.y, spawnScale.z))
         entity:SetMobility(mobilityType)
         local entityId = SHARED.randomId(3) .. '-' .. SHARED.randomInt(11111,99999)
-        -- Push entity to list for manage later
-        self.entities[entityId] = {
-            id = entityId,
-            entity = entity,
-            isInteractable = false,
-            interactableEntity = nil,
-        }
+
         return {
             status = true,
             entityId = entityId,
@@ -77,7 +67,7 @@ function SGameManager.new(core)
     
     ---Add interactable to entity
     ---@param params TAddInteractableParams
-    ---@return {status:boolean; message: string} returnValue 
+    ---@return {status:boolean; message: string; interactableEntity: unknown|nil} returnValue 
     function self:addInteractable(params)
         local entityId = params.entityId
         local entity = params.entity
@@ -92,38 +82,11 @@ function SGameManager.new(core)
         -- Attach the interactable to our existing cube
         entityInteractable:SetInteractableProp(entity)
         entityInteractable.BoxCollision:SetCollisionResponseToChannel(UE.ECollisionChannel.ECC_Pawn, UE.ECollisionResponse.ECR_Overlap)
-        if self.entities[entityId] then
-            -- Update entity interactable
-            self.entities[entityId].isInteractable = true
-            self.entities[entityId].interactableEntity = entityInteractable
-        end
         
         return {
             status = true,
             message = 'Interactable added successfully!',
-        }
-    end
-
-    ---Destroy entity
-    ---@param id string Entity id
-    ---@return {status:boolean; message:string } returnValue 
-    function self:destroyEntity(id)
-        local object = self.entities[id]
-        if not object then
-            return {
-                status = false,
-                message = 'Object not found!',
-            }
-        end
-        -- Destroy entity and interactable
-        if object.entity then DeleteEntity(object.entity) end
-        if object.interactableEntity then DeleteEntity(object.interactableEntity) end
-        -- Remove entity from list
-        self.entities[id] = nil
-
-        return {
-            status = true,
-            message = 'Entity destroyed successfully!',
+            interactableEntity = entityInteractable,
         }
     end
 

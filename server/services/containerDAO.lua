@@ -2,9 +2,9 @@ DAO.container = {}
 ---Save inventory
 ---@param container SContainer
 ---@return boolean success
-DAO.container.save = function(container, citizenId)
+DAO.container.save = function(container)
     -- Don't execute any query if inventory or player or playerData doesn't exist
-    if not container or not citizenId then
+    if not container or not container.citizenId then
         print('[ERROR] DAO.container.save: Invalid container data!')
         return false
     end
@@ -26,35 +26,41 @@ DAO.container.save = function(container, citizenId)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
     local sql = [[
-        INSERT INTO inventories (container_id, type, citizen_id, max_slot, max_weight, items)
-        VALUES (?, ?, ?, ?, ?, ?)
+        INSERT INTO inventories (container_id, type, citizen_id, max_slot, max_weight, items, is_destroy_on_empty, position, rotation)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(container_id) DO UPDATE SET
             items = excluded.items,
             max_slot = excluded.max_slot,
             max_weight = excluded.max_weight,
+            is_destroy_on_empty = excluded.is_destroy_on_empty,
+            position = excluded.position,
+            rotation = excluded.rotation,
     ]]
     local params = {
         container.containerId,
         'container',
-        citizenId,
+        container.citizenId,
         container.maxSlot,
         container.maxWeight,
         JSON.stringify(formattedItems),
+        container.isDestroyOnEmpty,
+        JSON.stringify({ x = container.position.x, y = container.position.y, z = container.position.z }),
+        JSON.stringify({ Yaw = container.rotation.Yaw }),
     }
     local result = DAO.DB.Execute(sql, params)
     if result then
         DAO.DB.Execute('COMMIT;')
-        print(('[LOG] Saved container for %s (Citizen ID: %s)'):format(container.containerId, citizenId))
+        print(('[LOG] Saved container for %s (Citizen ID: %s)'):format(container.containerId, container.citizenId))
         return true
     end
-    print(('[ERROR] DAO.container.save: Failed to save container for %s (Citizen ID: %s)'):format(container.containerId, citizenId))
+    print(('[ERROR] DAO.container.save: Failed to save container for %s (Citizen ID: %s)'):format(container.containerId, container.citizenId))
     DAO.DB.Execute('ROLLBACK;')
     return false
 end
 
 ---Get container by containerId
 ---@param containerId string
----@return {id:string; items: table<number,SInventoryItemType>; maxSlot: number; maxWeight: number}|nil
+---@return ResponseGetContainer|nil
 DAO.container.get = function(containerId)
     local type = 'container'
 
@@ -84,13 +90,17 @@ DAO.container.get = function(containerId)
         items = formattedItems,
         maxSlot = inventory.max_slot,
         maxWeight = inventory.max_weight,
+        isDestroyOnEmpty = inventory.is_destroy_on_empty,
+        position = JSON.parse(inventory.position),
+        rotation = JSON.parse(inventory.rotation),
+        displayModel = inventory.display_model,
     }
 end
 
 ---Get all containers
 ---@return table<string, {id:string; items: table<number,SInventoryItemType>; maxSlot: number; maxWeight: number}> containers
 DAO.container.getAll = function()
-    local result = DAO.DB.Action('Select', 'SELECT * FROM inventories where type = ?', { 'container' })
+    local result = DAO.Action('Select', 'SELECT * FROM inventories where type = ?', { 'container' })
     if not result or #result == 0 then
         return {}
     end

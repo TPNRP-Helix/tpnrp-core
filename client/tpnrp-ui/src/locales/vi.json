@@ -6,10 +6,8 @@
   "settings.showHunger": "Hiện Đói khi nhỏ hơn",
   "settings.showThirst": "Hiện Khát khi nhỏ hơn",
   "settings.showStamina": "Hiện Thể lực khi nhỏ hơn",
-
   "settings.audio.title": "Âm thanh",
   "settings.audio.description": "Cài đặt âm thanh cho trò chơi",
-
   "settings.basicNeedsHUD.title": "HUD góc phải",
   "settings.basicNeedsHUD.description": "Cài đặt HUD cần thiết cho trò chơi",
   "settings.basicNeedsHUD.showHealth": "Hiện Máu khi nhỏ hơn",
@@ -17,9 +15,7 @@
   "settings.basicNeedsHUD.showHunger": "Hiện Đói khi nhỏ hơn",
   "settings.basicNeedsHUD.showThirst": "Hiện Khát khi nhỏ hơn",
   "settings.basicNeedsHUD.showStamina": "Hiện Thể lực khi nhỏ hơn",
-
   "library.title": "Thư viện",
-  
   "selectCharacter.title": "Chọn nhân vật",
   "selectCharacter.delete": "Xóa",
   "selectCharacter.emptySlot": "Ô trống {n}",
@@ -34,7 +30,6 @@
   "selectCharacter.deleteConfirmTitle": "Xóa nhân vật",
   "selectCharacter.deleteConfirmDesc": "Bạn có chắc chắn muốn xóa nhân vật với CCCD {citizenId}?",
   "selectCharacter.cancel": "Hủy",
-  
   "createCharacter.title": "Tạo nhân vật",
   "createCharacter.description": "Tạo nhân vật mới để bắt đầu hành trình của bạn.",
   "createCharacter.firstName": "Tên",
@@ -47,23 +42,17 @@
   "createCharacter.reset": "Làm lại",
   "createCharacter.submit": "Tạo",
   "createCharacter.submitting": "Đang tạo...",
-
   "toast.create.success.title": "Tạo nhân vật thành công",
   "toast.create.success.desc": "Chào mừng {name} đến với Thành Phố Ngầm!",
-
   "error.firstNameRequired": "Tên là bắt buộc",
   "error.lastNameRequired": "Họ là bắt buộc",
   "error.dobRequired": "Ngày sinh là bắt buộc",
-  
   "error.joinGameFailed": "Không thể vào game",
   "error.failedToGetLicense": "Không tìm thấy license. Liên hệ admin để được hỗ trợ.",
   "error.joinGame.playerNotFound": "Không tìm thấy nhân vật!",
-
   "error.createCharacter.failedToCreateCharacter": "Không thể tạo nhân vật!",
-
   "success.joinGame": "Đã vào game thành công",
   "success.createCharacter": "Tạo nhân vật thành công!",
-
   "helper.toggleGuideHelper": "Bật/tắt trợ giúp",
   "helper.toggleFocus": "Bật/tắt con trỏ",
   "helper.toggleToastExpand": "Bật/tắt thông báo",
@@ -71,17 +60,14 @@
   "helper.toggleConsole": "Bật/Tắt Console",
   "helper.toggleInventory": "Bật/tắt túi đồ",
   "helper.toggleSettings": "Bật/tắt cài đặt",
-
   "inventory.title": "Túi đồ",
   "inventory.backpack.title": "Ba lô",
   "inventory.backpack.slotCount": "Số ô",
   "inventory.backpack.empty": "Bạn không có ba lô",
   "inventory.backpack.emptyDescription": "Mua ba lô từ cửa hàng để tăng số lượng ô trong túi đồ.",
-
   "inventory.other.ground": "Đất",
   "inventory.other.player": "Ba lô",
   "inventory.other.stack": "Túi",
-
   "inventory.weight": "Trọng lượng",
   "inventory.slot": "Số ô",
   "inventory.durability": "Độ bền",
@@ -92,16 +78,16 @@
   "inventory.weightPerUnit": "Trọng lượng mỗi đơn vị",
   "inventory.canCarry": "Có thể mang",
   "inventory.noDescription": "Không có mô tả",
-
+  "inventory.splitSuccess": "Tách thành công",
+  "inventory.itemNotFound": "Không tìm thấy vật phẩm",
+  "inventory.itemAmountLessThanOne": "Số lượng vật phẩm nhỏ hơn 1",
+  "inventory.noFreeSlot": "Không có ô trống",
   "inventory.equipment.notCloth": "Vật phẩm không phải là quần áo!",
-
   "inventory.other.crafting.title": "Chế tạo",
   "inventory.other.missions.title": "Nhiệm vụ",
-
   "inventory.equipment.title": "Trang bị",
   "inventory.skills.title": "Kỹ năng",
   "inventory.stats.title": "Thống kê",
-
   "inventory.amountDialog.title": "Bạn muốn {type} bao nhiêu {item}?",
   "inventory.amountDialog.description": "Bạn có thể chọn số lượng từ 1 đến {amount}",
   "inventory.amountDialog.quantity": "Số lượng",
@@ -111,7 +97,6 @@
   "inventory.amountDialog.drop": "Vứt",
   "inventory.amountDialog.invalidQuantity": "Số lượng không hợp lệ",
   "inventory.amountDialog.other": "Khác",
-
   "inventory.use": "Dùng",
   "inventory.split": "Tách",
   "inventory.give": "Cho",
@@ -121,7 +106,6 @@
   "inventory.all": "Tất cả",
   "inventory.other": "Khác",
   "inventory.add": "Thêm",
-
   "inventory.item.label.id_card": "CCCD",
   "inventory.item.label.driver_license": "Giấy phép lái xe",
   "inventory.item.label.beer": "Bia",
@@ -129,13 +113,11 @@
   "inventory.item.label.wood_log": "Gỗ",
   "inventory.item.label.sandwich": "Sandwich",
   "inventory.item.label.painkillers": "Thuốc giảm đau",
-
   "inventory.rare.common": "Thường",
   "inventory.rare.uncommon": "Ít phổ biến",
   "inventory.rare.rare": "Hiếm",
   "inventory.rare.epic": "Cực hiếm",
   "inventory.rare.legendary": "Huyền thoại",
-
   "inventory.crafting.searchPlaceholder": "Tìm kiếm công thức chế tạo",
   "inventory.crafting.search": "Tìm kiếm",
   "crafting.category.all": "Tất cả",
@@ -150,5 +132,3 @@
   "crafting.empty": "Không tìm thấy công thức chế tạo",
   "crafting.emptyDescription": "Mua sách công thức từ cửa hàng hoặc nâng cấp để mở khóa công thức."
 }
-
-

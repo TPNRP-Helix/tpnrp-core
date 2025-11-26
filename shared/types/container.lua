@@ -1,0 +1,20 @@
+---@class InitContainer
+---@field entityId string
+---@field entity unknown
+---@field interactableEntity unknown
+---@field items table<number, SInventoryItemType>
+---@field maxSlot number
+---@field maxWeight number
+---@field isDestroyOnEmpty boolean
+---@field position Vector3
+---@field rotation Rotator
+
+---@class ResponseGetContainer
+---@field id string
+---@field items table<number,SInventoryItemType>
+---@field maxSlot number
+---@field maxWeight number
+---@field isDestroyOnEmpty boolean
+---@field position Vector3
+---@field rotation Rotator
+---@field displayModel string

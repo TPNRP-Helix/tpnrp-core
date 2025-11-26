@@ -14,6 +14,7 @@ import { Progress } from "@/components/ui/progress"
 import { useDraggable, useDroppable } from "@dnd-kit/core"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { Image } from "@/components/ui/image"
+import { toast } from "sonner"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
     const {
@@ -29,7 +30,8 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setIsOpenAmountDialog,
         setAmountDialogType,
         setDialogItem,
-        setTemporaryDroppedItem
+        setTemporaryDroppedItem,
+        splitItem
     } = useInventoryStore()
 
     const { permission } = useDevModeStore()
@@ -56,13 +58,28 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     }, [item])
 
     const onClickUse = useCallback(() => {
-        console.log('onClickUse')
-    }, [])
+        if (item === null || slot === null) return
+        window.hEvent('useItem', {
+            itemName: item.name,
+            slot: item.slot
+        })
+    }, [item])
 
     const onClickSplit = useCallback(() => {
-        console.log('onClickSplit')
-    }, [])
-    
+        if (item === null || slot === null) return
+        splitItem(item.slot, {
+            onSuccess: () => {
+                // Split success
+                window.hEvent('splitItem', {
+                    slot: item.slot
+                })
+            },
+            onFail: (reason: string) => {
+                toast.error(t(reason))
+            }
+        })
+    }, [item, slot, splitItem])
+
     const onClickGive = useCallback((giveType: 'half' | 'one' | 'all') => {
         console.log('onClickGive', giveType)
     }, [])
@@ -77,14 +94,14 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         } else if (dropType === 'all') {
             amount = item.amount
         }
-        setTemporaryDroppedItem({...item, amount})
+        setTemporaryDroppedItem({ ...item, amount })
         window.hEvent('createDropItem', {
             itemName: item.name,
             amount,
             fromSlot: item.slot
         })
     }, [])
-    
+
     const onOpenAmountDialog = useCallback((dialogType: 'give' | 'drop') => {
         if (item === null) {
             return
@@ -214,7 +231,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                     </HoverCardTrigger>
                 </ContextMenuTrigger>
                 {!!item && (
-                    <HoverCardContent className="w-80 pointer-events-none select-none rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
+                    <HoverCardContent className="w-80 pointer-events-none select-none rounded">
                         {/* Hover card more details */}
                         <div className="flex flex-col justify-between space-x-4">
                             <div className="flex flex-row justify-between space-x-4">
@@ -287,7 +304,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                     )}
                     {(item.useable || item.amount > 1) ? (
                         <ContextMenuSeparator />
-                    ): null}
+                    ) : null}
                     {item.amount > 1 ? (
                         <>
                             <ContextMenuSub>
@@ -301,31 +318,31 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                 </ContextMenuSubContent>
                             </ContextMenuSub>
                             <ContextMenuSub>
-                            <ContextMenuSubTrigger><ArrowDownCircle className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.drop')}</ContextMenuSubTrigger>
-                            <ContextMenuSubContent className="w-48">
-                                {item.amount > 1 && (
-                                    <>
-                                        <ContextMenuItem onClick={() => onClickDrop('half')}><StarHalf className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.half')}</ContextMenuItem>
-                                    </>
-                                )}
-                                <ContextMenuItem onClick={() => onClickDrop('one')}><Star className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.one')}</ContextMenuItem>
-                                <ContextMenuItem onClick={() => onClickDrop('all')}><Sparkles className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.all')}</ContextMenuItem>
-                                {item.amount > 1 && (
-                                    <>
-                                        <ContextMenuSeparator />
-                                        <ContextMenuItem onClick={() => onOpenAmountDialog('drop')}><CircleEllipsis className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.other')}</ContextMenuItem>
-                                    </>
-                                )}
-                            </ContextMenuSubContent>
-                        </ContextMenuSub>
-                    </>
+                                <ContextMenuSubTrigger><ArrowDownCircle className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.drop')}</ContextMenuSubTrigger>
+                                <ContextMenuSubContent className="w-48">
+                                    {item.amount > 1 && (
+                                        <>
+                                            <ContextMenuItem onClick={() => onClickDrop('half')}><StarHalf className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.half')}</ContextMenuItem>
+                                        </>
+                                    )}
+                                    <ContextMenuItem onClick={() => onClickDrop('one')}><Star className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.one')}</ContextMenuItem>
+                                    <ContextMenuItem onClick={() => onClickDrop('all')}><Sparkles className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.all')}</ContextMenuItem>
+                                    {item.amount > 1 && (
+                                        <>
+                                            <ContextMenuSeparator />
+                                            <ContextMenuItem onClick={() => onOpenAmountDialog('drop')}><CircleEllipsis className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.other')}</ContextMenuItem>
+                                        </>
+                                    )}
+                                </ContextMenuSubContent>
+                            </ContextMenuSub>
+                        </>
                     ) : (
                         <>
                             <ContextMenuItem onClick={() => onClickGive('one')}><HandHeart className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.give')}</ContextMenuItem>
                             <ContextMenuItem onClick={() => onClickDrop('one')}><ArrowDownCircle className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.drop')}</ContextMenuItem>
                         </>
                     )}
-                    
+
                     {/* {item.name.includes('weapon_') && (
                         <>
                             <ContextMenuSeparator />
@@ -341,6 +358,6 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                 </ContextMenuContent>
             )}
         </ContextMenu>
-        
+
     )
 }

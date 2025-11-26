@@ -2,6 +2,7 @@
 SHARED.dropItems = {
     -- Cards
     id_card = { path = "/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard", scale = Vector(0.8, 0.8, 0.8) },
+    driver_license = { path = "/Game/QBCore/Meshes/SM_Clipboard.SM_Clipboard", scale = Vector(0.8, 0.8, 0.8) },
 }
 
 ---Get item path by item name

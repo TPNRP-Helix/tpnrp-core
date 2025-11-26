@@ -24,6 +24,11 @@ type MoveInventoryItemOptions = {
   onFail?: () => void
 }
 
+type SplitItemOptions = {
+  onSuccess?: () => void
+  onFail?: (reason: string) => void
+}
+
 type InventoryState = {
   isOpenInventory: boolean
   otherItems: TInventoryItem[]
@@ -65,6 +70,9 @@ type InventoryState = {
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => void
   moveInventoryItem: (params: MoveInventoryItemParams, options?: MoveInventoryItemOptions) => boolean
   setOtherItemsId: (value: string) => void
+  // Items
+  splitItem: (itemSlot: number, options?: SplitItemOptions) => void
+  onCloseInventory: () => void
 }
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
@@ -279,12 +287,12 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       if (sourceGroup === targetGroup) {
         const sourceItem = sourceList[sourceIndex]
-        
+
         // Check if we should stack items (same item, not unique, target slot has item)
         if (targetIndex !== -1) {
           const targetItem = sourceList[targetIndex]
           const isSameItem = sourceItem.name.toLowerCase() === targetItem.name.toLowerCase()
-          
+
           if (isSameItem) {
             // Check if item is not unique (can stack)
             const isUnique = sourceItem.unique ?? false
@@ -296,7 +304,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
               }
               // Remove source item
               sourceList.splice(sourceIndex, 1)
-              
+
               isSuccess = true
               return {
                 inventoryItems,
@@ -306,7 +314,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
             }
           }
         }
-        
+
         // Different item or same item but unique => swap items
         sourceList[sourceIndex] = { ...sourceList[sourceIndex], slot: targetSlot }
 
@@ -362,5 +370,74 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     return isSuccess
   },
   setOtherItemsId: (value: string) => set({ otherItemsId: value }),
-}))
+  splitItem: (itemSlot: number, options?: SplitItemOptions) => {
+    // TODO: Implement split item by slot
+    set((state) => {
+      const inventoryItems = [...state.inventoryItems]
+      const itemIndex = inventoryItems.findIndex((item) => item.slot === itemSlot)
 
+      if (itemIndex === -1) {
+        options?.onFail?.('inventory.itemNotFound')
+        return {}
+      }
+
+      const item = inventoryItems[itemIndex]
+
+      if (item.amount <= 1) {
+        options?.onFail?.('inventory.itemAmountLessThanOne')
+        return {}
+      }
+
+      // Find first available slot
+      // We need to check slots from 1 to slotCount
+      // Exclude slots that are already taken
+      const takenSlots = new Set(inventoryItems.map((i) => i.slot))
+      let freeSlot = -1
+
+      // Assuming slots start from 1. 
+      // Let's check all slots up to slotCount
+      for (let i = 1; i <= state.slotCount; i++) {
+        if (!takenSlots.has(i)) {
+          freeSlot = i
+          break
+        }
+      }
+
+      if (freeSlot === -1) {
+        // No free slot
+        options?.onFail?.('inventory.noFreeSlot')
+        return {}
+      }
+
+      const splitAmount = Math.floor(item.amount / 2)
+      const remainingAmount = item.amount - splitAmount
+
+      // Update original item
+      inventoryItems[itemIndex] = {
+        ...item,
+        amount: remainingAmount,
+      }
+
+      // Create new item
+      inventoryItems.push({
+        ...item,
+        amount: splitAmount,
+        slot: freeSlot,
+      })
+
+      options?.onSuccess?.()
+
+      return {
+        inventoryItems,
+      }
+    })
+  },
+  onCloseInventory: () => {
+    set({
+      otherItems: [],
+      otherItemsType: 'ground',
+      otherItemsSlotCount: 0,
+      otherItemsId: ''
+    })
+  }
+}))

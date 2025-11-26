@@ -211,6 +211,7 @@ function SPlayer.new(core, playerController, playerData)
     function self:basicNeedTick()
         local newHunger = self.playerData.metadata['hunger'] - SHARED.CONFIG.BASIC_NEEDS.HUNGER_RATE
         local newThirst = self.playerData.metadata['thirst'] - SHARED.CONFIG.BASIC_NEEDS.THIRST_RATE
+        print('[SERVER] basicNeedTick ' .. newHunger .. ' ' .. newThirst)
         if newHunger <= 0 then newHunger = 0 end
         if newThirst <= 0 then newThirst = 0 end
         -- Assign new hunger and thirst
