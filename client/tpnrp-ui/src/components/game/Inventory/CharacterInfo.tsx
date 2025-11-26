@@ -83,7 +83,7 @@ export const CharacterInfo = () => {
                                 group="equipment"
                                 slot={item.slot}
                                 item={getEquipmentItem(item.slot)}
-                                isShowHotbarNumber={false}
+                                isShowHotbarNumber
                             />
                         ))}
                     </div>
@@ -94,7 +94,7 @@ export const CharacterInfo = () => {
                                 group="equipment"
                                 slot={item.slot}
                                 item={getEquipmentItem(item.slot)}
-                                isShowHotbarNumber={false}
+                                isShowHotbarNumber
                             />
                         ))}
                     </div>

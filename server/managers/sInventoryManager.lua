@@ -77,6 +77,10 @@ function SInventoryManager.new(core)
             return self:useItem(source, data)
         end)
 
+        RegisterCallback('wearItem', function(source, data)
+            return self:wearItem(source, data)
+        end)
+
         -- TODO: Load container from DB and create entity
         local allContainers = DAO.container.getAll()
         for _, container in pairs(allContainers) do
@@ -218,12 +222,14 @@ function SInventoryManager.new(core)
     ---@param targetGroupId string|nil target group id
     ---@return table | nil item data or nil
     local function getItemFromGroup(player, group, slot, sourceGroupId, targetGroupId)
+        print('[SERVER] getItemFromGroup - group: ' .. group .. ', slot: ' .. slot .. ', sourceGroupId: ' .. sourceGroupId .. ', targetGroupId: ' .. targetGroupId)
         if group == 'inventory' then
             ---@cast slot number
             return player.inventory:findItemBySlot(slot)
         elseif group == 'equipment' then
             ---@cast slot number
             local clothType = getEquipmentClothTypeFromSlot(slot)
+            print('clothType: ' .. clothType)
             if not clothType then
                 return nil
             end
@@ -422,7 +428,7 @@ function SInventoryManager.new(core)
                             citizenId = player.playerData.citizenId or '',
                             license = player.playerData.license or '',
                             name = player.playerData.name or '',
-                            content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Item %s is not a cloth item! Player trying to un-equip item that is not a cloth item!')
+                            content = ('[ERROR] [1] SInventoryManager.onMoveInventoryItem: Item %s is not a cloth item! Player trying to un-equip item that is not a cloth item!')
                                 :format(sourceItem.name)
                         })
                         return {
@@ -439,11 +445,19 @@ function SInventoryManager.new(core)
                         slot = targetSlot,
                     }
                 else
-                    -- No target item => Move item to target slot
-                    local moveResult = player.inventory:moveItem(sourceItem, targetSlot)
+                    local clothItemType = SHARED.getClothItemTypeByName(sourceItem.name)
+                    if not clothItemType then
+                        -- This should not invoke. Because sourceItem of equipment must be a cloth item
+                        print('[SERVER] [ERROR] SInventoryManager.onMoveEquipmentItem: Source item is not a cloth item! Revalidate source item')
+                        return {
+                            status = false,
+                            message = 'Source item is not a cloth item!',
+                        }
+                    end
+                    local unequipResult = player.equipment:unequipItem(clothItemType, 'inventory', targetSlot)
                     return {
-                        status = moveResult.status,
-                        message = moveResult.message,
+                        status = unequipResult.status,
+                        message = unequipResult.message,
                         slot = targetSlot,
                     }
                 end
@@ -732,7 +746,7 @@ function SInventoryManager.new(core)
                 citizenId = player.playerData.citizenId or '',
                 license = player.playerData.license or '',
                 name = player.playerData.name or '',
-                content = ('[ERROR] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s! Player trying to move item that they don\'t have in their inventory!')
+                content = ('[ERROR] [0] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s! Player trying to move item that they don\'t have in their inventory!')
                     :format(sourceSlot)
             })
             return {
@@ -788,14 +802,28 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
+        local container = nil
+        if data.fromSlot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            container = player.inventory
+        else
+            container = player.inventory:getBackpackContainer()
+        end
+        if not container then
+            return {
+                status = false,
+                message = 'Container not found!',
+                itemData = data,
+            }
+        end
         local playerPawn = GetPlayerPawn(source)
         local playerCoords = GetEntityCoords(playerPawn)
         local PawnRotation = GetEntityRotation(playerPawn)
         local ForwardVec = playerPawn:GetActorForwardVector()
         local SpawnPosition = playerCoords + (ForwardVec * 200)
-        PawnRotation.Yaw = PawnRotation.Yaw + 90
+        local item = nil
         -- Get item from player's inventory
-        local item = player.inventory:findItemBySlot(data.fromSlot)
+        item = container:findItemBySlot(data.fromSlot)
+        
         if not item then
             self.core.cheatDetector:logCheater({
                 action = 'createDropItem',
@@ -848,7 +876,7 @@ function SInventoryManager.new(core)
         }
 
         -- Remove item from player's inventory
-        local removeResult = player.inventory:removeItem(data.itemName, data.amount, data.fromSlot)
+        local removeResult = container:removeItem(data.itemName, data.amount, data.fromSlot)
         if not removeResult.status then
             return {
                 status = false,
@@ -859,6 +887,7 @@ function SInventoryManager.new(core)
         local worldItem = SHARED.getWorldItemPath(data.itemName)
         -- TODO: Need a native function to get ground Z
         SpawnPosition.Z = SpawnPosition.Z - 90
+        PawnRotation.Yaw = PawnRotation.Yaw + worldItem.rotation
         -- Spawn bag
         local spawnResult = self.core.gameManager:spawnStaticMesh({
             entityPath = worldItem.path,
@@ -870,7 +899,7 @@ function SInventoryManager.new(core)
         })
         if not spawnResult.status then
             -- Spawn failed => Add item back to player's inventory
-            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
+            container:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
             return {
                 status = false,
                 message = spawnResult.message,
@@ -898,7 +927,7 @@ function SInventoryManager.new(core)
         })
         if not addInteractableResult.status then
             -- Add item back to player's inventory
-            player.inventory:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
+            container:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
             -- On failed to create interactable => Destroy bag
             DeleteEntity(spawnResult.entity)
             return {
@@ -909,8 +938,8 @@ function SInventoryManager.new(core)
         end
 
         -- Add container to dictionary (dropItem already has slot = 1)
-        local container = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
-        container:initEntity({
+        local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
+        dropContainer:initEntity({
             entityId = spawnResult.entityId,
             entity = spawnResult.entity,
             interactableEntity = addInteractableResult.interactableEntity,
@@ -923,7 +952,7 @@ function SInventoryManager.new(core)
             maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
             isDestroyOnEmpty = true
         })
-        self.containers[spawnResult.entityId] = container
+        self.containers[spawnResult.entityId] = dropContainer
 
         return {
             status = true,
@@ -957,9 +986,18 @@ function SInventoryManager.new(core)
                 message = SHARED.t('error.failedToGetPlayer'),
             }
         end
-        local item = player.inventory:findItemBySlot(data.slot)
+        local itemInfo = nil
+        if data.slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            -- Inventory
+            itemInfo = player.inventory:findItemBySlot(data.slot)
+        else
+            local backpack = player.inventory:getBackpackContainer()
+            if backpack then
+                itemInfo = backpack:findItemBySlot(data.slot)
+            end
+        end
         -- Verify item at slot
-        if not item then
+        if not itemInfo then
             self.core.cheatDetector:logCheater({
                 action = 'useItem',
                 player = player or nil,
@@ -974,7 +1012,7 @@ function SInventoryManager.new(core)
             }
         end
         -- Verify that slot item matches with data.itemName
-        if item.name ~= data.itemName then
+        if itemInfo.name ~= data.itemName then
             self.core.cheatDetector:logCheater({
                 action = 'useItem',
                 player = player or nil,
@@ -992,16 +1030,69 @@ function SInventoryManager.new(core)
         local result = self.core:useItem(player, data)
         if result.status then
             -- Each use should only remove 1 item
-            player.inventory:removeItem(data.itemName, 1, data.slot)
+            if data.slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+                player.inventory:removeItem(data.itemName, 1, data.slot)
+            else
+                local backpack = player.inventory:getBackpackContainer()
+                if backpack then
+                    backpack:removeItem(data.itemName, 1, data.slot)
+                end
+            end
 
             player.missionManager:triggerAction('use', {
                 item = data.itemName,
                 slot = data.slot,
                 amount = 1,
-                info = item.info,
+                info = itemInfo.info,
             })
         end
         return result
+    end
+
+    ---Wear item
+    ---@param source PlayerController player controller
+    ---@param data {itemName: string; slot: number} item data
+    function self:wearItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        local container = nil
+        local containerType = ''
+        if data.slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            container = player.inventory
+            containerType = 'inventory'
+        else
+            containerType = 'backpack'
+            local backpack = player.inventory:getBackpackContainer()
+            if backpack then
+                container = backpack
+            end
+        end
+        if not container then
+            return {
+                status = false,
+                message = SHARED.t('error.itemNotFound'),
+            }
+        end
+        local itemInfo = container:findItemBySlot(data.slot)
+        if not itemInfo then
+            return {
+                status = false,
+                message = SHARED.t('error.itemNotFound'),
+            }
+        end
+        local itemClothType = SHARED.getClothItemTypeByName(itemInfo.name)
+        if not itemClothType then
+            return {
+                status = false,
+                message = SHARED.t('error.itemNotCloth'),
+            }
+        end
+        return player.equipment:equipItem(itemInfo.name, containerType, data.slot)
     end
 
     _contructor()

@@ -213,6 +213,11 @@ export const Inventory = () => {
         }
         toast.error(result.message)
     })
+
+    useWebUIMessage<[unknown]>('onWearItemResponse', ([result]) => {
+        console.log('[UI] onWearItemResponse - result: ', JSON.stringify(result))
+        
+    })
     
     useEffect(() => {
         // Only disable when menu is open
@@ -285,7 +290,7 @@ export const Inventory = () => {
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
                                                     const slot = i + 7
                                                     const item = backpackItems.find(item => item.slot === slot)
-                                                    return <InventoryItem key={slot} item={item} slot={slot} />
+                                                    return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} />
                                                 })}
                                             </div>
                                         ) : (

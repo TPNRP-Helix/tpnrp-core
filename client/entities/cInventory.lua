@@ -71,6 +71,10 @@ function CInventory.new(player)
         self.core.webUI:registerEventHandler('useItem', function(data)
             self:useItem(data)
         end)
+
+        self.core.webUI:registerEventHandler('wearItem', function(data)
+            self:wearItem(data)
+        end)
     end
 
     ---/********************************/
@@ -141,15 +145,27 @@ function CInventory.new(player)
         end, data)
     end
 
+    ---Split item
+    ---@param data {slot: number} item data
     function self:splitItem(data)
         TriggerCallback('splitItem', function(result)
             self.core.webUI:sendEvent('onSplitItemResponse', result)
         end, data)
     end
 
+    ---Use item
+    ---@param data {itemName: string; slot: number} item data
     function self:useItem(data)
         TriggerCallback('useItem', function(result)
             self.core.webUI:sendEvent('onUseItemResponse', result)
+        end, data)
+    end
+
+    ---Wear item
+    ---@param data {itemName: string; slot: number} item data
+    function self:wearItem(data)
+        TriggerCallback('wearItem', function(result)
+            self.core.webUI:sendEvent('onWearItemResponse', result)
         end, data)
     end
 

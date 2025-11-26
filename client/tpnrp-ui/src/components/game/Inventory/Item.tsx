@@ -15,6 +15,7 @@ import { useDraggable, useDroppable } from "@dnd-kit/core"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { Image } from "@/components/ui/image"
 import { toast } from "sonner"
+import { getEquipmentSlotName } from "@/lib/utils"
 
 export const InventoryItem = (props: TInventoryItemProps) => {
     const {
@@ -60,6 +61,14 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     const onClickUse = useCallback(() => {
         if (item === null || slot === null) return
         window.hEvent('useItem', {
+            itemName: item.name,
+            slot: item.slot
+        })
+    }, [item])
+
+    const onClickWear = useCallback(() => {
+        if (item === null || slot === null) return
+        window.hEvent('wearItem', {
             itemName: item.name,
             slot: item.slot
         })
@@ -165,6 +174,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         }
         return base.join(" ")
     }, [isDragging, isOver])
+
     const cursorClass = isDragDropDisabled
         ? "cursor-default"
         : hasItem
@@ -198,9 +208,9 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                     <HoverCardTrigger asChild>
                         <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...(draggableAttributes ?? {})} {...(draggableListeners ?? {})}>
                             <Item className="relative gap-1 p-0 w-full h-full border-none">
-                                {slot !== null && slot <= 5 && isShowHotbarNumber ? (
-                                    <Badge className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
-                                        {slot}
+                                {slot !== null && isShowHotbarNumber ? (
+                                    <Badge variant={group === 'equipment' ? 'secondary' : 'default'} className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
+                                        {group === 'equipment' ? t(`equipment.category.${getEquipmentSlotName(slot)}`) : slot}
                                     </Badge>
                                 ) : null}
                                 {item !== null && (
@@ -298,6 +308,9 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                 <ContextMenuContent>
                     {item.useable && (
                         <ContextMenuItem onClick={onClickUse}><Hand className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.use')}</ContextMenuItem>
+                    )}
+                    {item.name.indexOf('cloth_') >= 0 && (
+                        <ContextMenuItem onClick={onClickWear}><Hand className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.wear')}</ContextMenuItem>
                     )}
                     {item.amount > 1 && (
                         <ContextMenuItem onClick={onClickSplit}><Split className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.split')}</ContextMenuItem>

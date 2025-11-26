@@ -51,3 +51,4 @@
 ---@class TWorldItem
 ---@field path string   - Path to origin resource
 ---@field scale Vector3 - Scale of this entity in world
+---@field rotation number - Rotation of this entity in world

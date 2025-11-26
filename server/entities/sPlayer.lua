@@ -290,7 +290,7 @@ function SPlayer.new(core, playerController, playerData)
     ---@param info table|nil item info (optional)
     ---@param slot number|nil slot to add (optional) (1-5: inventory | 6 -> n: backpack)
     function self:addItem(itemName, amount, info, slot)
-        if slot <= 5 then
+        if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
             return self.inventory:addItem(itemName, amount, slot, info)
         else
@@ -324,7 +324,7 @@ function SPlayer.new(core, playerController, playerData)
             return backpack:removeItem(itemName, amount, slot)
         end
         -- Has slot
-        if slot <= 5 then
+        if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
             return self.inventory:removeItem(itemName, amount, slot)
         else
