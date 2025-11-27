@@ -438,7 +438,7 @@ function SInventoryManager.new(core)
                     end
 
                     -- Have target item => un-equip clothes
-                    local unequipResult = player.equipment:unequipItem(clothType, 'inventory', targetSlot)
+                    local unequipResult = player.equipment:unequipItem(clothType, targetSlot)
                     return {
                         status = unequipResult.status,
                         message = unequipResult.message,
@@ -454,7 +454,7 @@ function SInventoryManager.new(core)
                             message = 'Source item is not a cloth item!',
                         }
                     end
-                    local unequipResult = player.equipment:unequipItem(clothItemType, 'inventory', targetSlot)
+                    local unequipResult = player.equipment:unequipItem(clothItemType, targetSlot)
                     return {
                         status = unequipResult.status,
                         message = unequipResult.message,
@@ -497,7 +497,7 @@ function SInventoryManager.new(core)
                                 message = SHARED.t('backpack.full'),
                             }
                         end
-                        local unequipResult = player.equipment:unequipItem(sourceItemClothType, 'backpack', emptySlot)
+                        local unequipResult = player.equipment:unequipItem(sourceItemClothType, emptySlot)
                         if not unequipResult.status then
                             return {
                                 status = false,
@@ -523,7 +523,7 @@ function SInventoryManager.new(core)
                                     message = removeTargetItemResult.message,
                                 }
                             end
-                            local unequipResult = player.equipment:unequipItem(sourceItemClothType, 'backpack', targetSlot)
+                            local unequipResult = player.equipment:unequipItem(sourceItemClothType, targetSlot)
                             if not unequipResult.status then
                                 return {
                                     status = false,
@@ -547,7 +547,7 @@ function SInventoryManager.new(core)
                                     message = SHARED.t('backpack.full'),
                                 }
                             end
-                            local unequipResult = player.equipment:unequipItem(sourceItemClothType, 'backpack', emptySlot)
+                            local unequipResult = player.equipment:unequipItem(sourceItemClothType, emptySlot)
                             if not unequipResult.status then
                                 return {
                                     status = false,
@@ -570,7 +570,7 @@ function SInventoryManager.new(core)
                             message = 'Item is not a cloth item!',
                         }
                     end
-                    local unequipResult = player.equipment:unequipItem(clothType, 'backpack', targetSlot)
+                    local unequipResult = player.equipment:unequipItem(clothType, targetSlot)
                     if not unequipResult.status then
                         return {
                             status = false,

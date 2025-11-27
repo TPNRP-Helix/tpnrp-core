@@ -66,7 +66,7 @@ function SEquipment.new(player)
 
     ---Equip item to slot
     ---@param itemName string item name
-    ---@param slotNumber number slot number
+    ---@param slotNumber number slot number of current itemName that player want to equip
     ---@return {status:boolean, message:string} success Status when equip item
     function self:equipItem(itemName, slotNumber)
         -- Get item data
@@ -74,7 +74,26 @@ function SEquipment.new(player)
         if not itemData then
             return { status = false, message = 'Item not found!' }
         end
-        local item = self.player.inventory:findItemBySlot(slotNumber)
+        local item = nil
+        local container = nil
+        if slotNumber <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            -- Inventory
+            container = self.player.inventory
+            
+        else 
+            -- Backpack
+            local backpackContainer = self.player.inventory:getBackpackContainer()
+            if backpackContainer then
+                container = backpackContainer
+            end
+        end
+        if not container then
+            print('[SERVER] [ERROR] sEquipment.equipItem: Container not found!')
+            return { status = false, message = 'Container not found!' }
+        end
+
+        item = container:findItemBySlot(slotNumber)
+
         if not item then
             -- [CHEAT] possible event cheat
             self.core.cheatDetector:logCheater({
@@ -97,23 +116,15 @@ function SEquipment.new(player)
         local existingItem = self.items[clothItemType]
         if existingItem then
             -- Unequip the existing item first
-            local unequipResult = self:unequipItem(clothItemType, '', nil)
+            local unequipResult = self:unequipItem(clothItemType)
             if not unequipResult.status then
                 print(('[ERROR] sEquipment.equipItem: Failed to unequip existing item %s from slot %s!'):format(existingItem.name, clothItemType))
                 return { status = false, message = 'Failed to unequip existing item: ' .. unequipResult.message }
             end
         end
         
-        -- Remove item from inventory
-        local removeResult = { status = false, message = 'Container not found!' }
-        if slotNumber <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
-            removeResult = self.player.inventory:removeItem(itemName, 1, item.slot)
-        else
-            local backpack = self.player.inventory:getBackpackContainer()
-            if backpack then
-                removeResult = backpack:removeItem(itemName, 1, item.slot)
-            end
-        end
+        -- Remove item from container (inventory for slot <= 5, backpack for slot > 5)
+        local removeResult = container:removeItem(itemName, 1, item.slot)
 
         if not removeResult.status then
             print(('[ERROR] sEquipment.equipItem: Failed to remove item %s from inventory!'):format(itemName))
@@ -146,13 +157,11 @@ function SEquipment.new(player)
 
     ---Unequip item from slot
     ---@param clothItemType EEquipmentClothType cloth item type
-    ---@param containerType 'inventory' | 'backpack' | '' container type
     ---@param toSlotNumber number | nil slot number to add item to (optional)
     ---@return {status:boolean, message:string} success Status when unequip item
-    function self:unequipItem(clothItemType, containerType, toSlotNumber)
+    function self:unequipItem(clothItemType, toSlotNumber)
         -- Get item data
         local item = self.items[clothItemType]
-        print('[SERVER] unequipItem ' .. clothItemType)
         if not item then
             print(('[ERROR] sEquipment.unequipItem: Failed to unequip item from slot!'))
             -- [CHEAT] possible event cheat
@@ -160,62 +169,19 @@ function SEquipment.new(player)
         end
         -- Unequip item from slot
         self.items[clothItemType] = nil
-        
-        -- Helper function to try adding item to a container
-        local function tryAddToContainer(container, slot)
-            if not container then return { status = false } end
-            
-            local targetSlot = slot
-            if not targetSlot then
-                targetSlot = container:getEmptySlot()
-            end
-            
-            if not targetSlot then
-                return { status = false, message = SHARED.t('inventory.full') }
-            end
-            
-            -- Check if specific slot is occupied if provided
-            if slot then
-                local slotItem = container:findItemBySlot(slot)
-                if slotItem then
-                    local newEmptySlot = container:getEmptySlot()
-                    if not newEmptySlot then
-                        return { status = false, message = SHARED.t('inventory.full') }
-                    end
-                    targetSlot = newEmptySlot
-                end
-            end
-            
-            local addResult = container:addItem(item.name, 1, targetSlot)
-            return addResult
+        local container = nil
+        if not toSlotNumber then
+            -- Don't have toSlotNumber find emptySlot from inventory then backpack
+            container = self.player.inventory:getContainerWithEmptySlot()
+        else
+            -- Have toSlotNumber then find container by toSlotNumber
+            container = self.player.inventory:getContainerBySlotNumber(toSlotNumber)
+        end
+        if not container then
+            return { status = false, message = SHARED.t('inventory.full') }
         end
 
-        local addResult = { status = false, message = SHARED.t('inventory.full') }
-        
-        -- Fallback logic
-        if containerType == 'backpack' then
-            -- Priority: Backpack -> Inventory
-            local backpack = self.player.inventory:getBackpackContainer()
-            if backpack then
-                addResult = tryAddToContainer(backpack, toSlotNumber)
-            end
-            
-            if not addResult.status then
-                -- Fallback to inventory
-                addResult = tryAddToContainer(self.player.inventory, nil) -- Don't use toSlotNumber for fallback
-            end
-        else
-            -- Priority: Inventory -> Backpack
-            addResult = tryAddToContainer(self.player.inventory, toSlotNumber)
-            
-            if not addResult.status then
-                -- Fallback to backpack
-                local backpack = self.player.inventory:getBackpackContainer()
-                if backpack then
-                    addResult = tryAddToContainer(backpack, nil) -- Don't use toSlotNumber for fallback
-                end
-            end
-        end
+        local addResult = container:addItem(item.name, 1, item.slot, item.info)
 
         if not addResult.status then
             print(('[ERROR] sEquipment.unequipItem: Failed to add item %s to inventory!'):format(item.name))
@@ -241,47 +207,6 @@ function SEquipment.new(player)
     ---@return table<EEquipmentClothType, SEquipmentItemType> equipment
     function self:getEquipment()
         return self.items
-    end
-
-    function self:swapEquipItem(sourceItemClothType, containerType, targetSlot)
-        local sourceItem = self.items[sourceItemClothType]
-        if not sourceItem then
-            print(('[ERROR] sEquipment.swapEquipItem: Failed to find source item %s!'):format(sourceItemClothType))
-            return { status = false, message = 'Source item not found!' }
-        end
-        local container = nil
-        if containerType == 'backpack' then
-            container = self.player.inventory:getBackpackContainer()
-        else
-            container = self.player.inventory
-        end
-        if not container then
-            print(('[ERROR] sEquipment.swapEquipItem: Failed to find container %s!'):format(containerType))
-            return { status = false, message = 'Container not found!' }
-        end
-
-        local targetItem = container:findItemBySlot(targetSlot)
-        if not targetItem then
-            print(('[ERROR] sEquipment.swapEquipItem: Failed to find target item %s!'):format(targetSlot))
-            return { status = false, message = 'Target item not found!' }
-        end
-        local targetItemClothType = SHARED.getItemClothType(targetItem.name)
-        if not targetItemClothType then
-            print(('[ERROR] sEquipment.swapEquipItem: Failed to find target item cloth type %s!'):format(targetItem.name))
-            return { status = false, message = 'Target item is not cloth type!' }
-        end
-        if sourceItemClothType ~= targetItemClothType then
-            print(('[ERROR] sEquipment.swapEquipItem: Source item and target item are not the same cloth type %s!'):format(sourceItemClothType))
-            return { status = false, message = 'Source item and target item are not the same cloth type!' }
-        end
-        local sourceItem = self.items[sourceItemClothType]
-        -- 1. Empty equipment slot
-        self.items[sourceItemClothType] = nil
-        -- 2. Equip targetItem
-        self:equipItem(sourceItemClothType, targetSlot)
-
-        
-        return { status = true, message = 'Item swapped successfully!' }
     end
 
     _contructor()

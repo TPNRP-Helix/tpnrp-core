@@ -176,6 +176,39 @@ function SInventory.new(player, inventoryType)
         }
     end
 
+    ---Get container by slot number
+    ---@param slotNumber number slot number
+    ---@return SContainer|SInventory|nil container
+    function self:getContainerBySlotNumber(slotNumber)
+        if slotNumber <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            return self
+        else
+            return self:getBackpackContainer()
+        end
+    end
+
+    ---Get container with empty slot
+    ---@return SContainer|SInventory|nil container
+    function self:getContainerWithEmptySlot()
+        -- Looking empty slot from inventory first
+        local emptySlot = self:getEmptySlot()
+        if emptySlot then
+            return self
+        end
+        -- Looking empty slot from 
+        local backpack = self:getBackpackContainer()
+        if not backpack then
+            -- Don't have backpack and inventory is full
+            return nil
+        end
+        emptySlot = backpack:getEmptySlot()
+        if emptySlot then
+            return backpack
+        end
+        -- Backpack and inventory is full
+        return nil
+    end
+
     _contructor()
     ---- END ----
     return self
