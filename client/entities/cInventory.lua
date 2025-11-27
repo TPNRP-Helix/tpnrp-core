@@ -23,8 +23,9 @@ function CInventory.new(player)
     local function _contructor()
         -- On Update inventory
         ---@param items table<number, SInventoryItemType> item data
-        RegisterClientEvent('TPN:inventory:sync', function(items)
-            self:onSyncInventory(items)
+        ---@param backpack SContainer|nil backpack data
+        RegisterClientEvent('clientSyncInventory', function(items, backpack)
+            self:onSyncInventory(items, backpack)
         end)
 
         --- Open drop inventory
@@ -100,12 +101,14 @@ function CInventory.new(player)
     
     -- On Update inventory
     ---@param items table<number, SInventoryItemType> item data
-    function self:onSyncInventory(items)
+    ---@param backpack SContainer|nil backpack data
+    function self:onSyncInventory(items, backpack)
         self.items = items
         -- Update UI for items changes
         self.core.webUI:sendEvent('doSyncInventory', {
             type = 'sync',
-            items = items
+            items = items,
+            backpack = backpack,
         })
     end
 

@@ -42,7 +42,8 @@ function SInventory.new(player, inventoryType)
 
     ---Sync inventory
     function self:sync()
-        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', self.items)
+        local backpack = self:getBackpackContainer()
+        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, backpack)
     end
 
     ---Save inventory
@@ -163,12 +164,14 @@ function SInventory.new(player, inventoryType)
         end
         local backpackCapacity = self.player.equipment:getBackpackCapacity()
         local equipment = self.player.equipment:getEquipment()
+        local backpack = self:getBackpackContainer()
 
         return {
             status = true,
             message = 'Inventory opened!',
             inventory = inventory,
             equipment = equipment,
+            backpack = backpack,
             capacity = {
                 weight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpackCapacity.weightLimit,
                 slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,

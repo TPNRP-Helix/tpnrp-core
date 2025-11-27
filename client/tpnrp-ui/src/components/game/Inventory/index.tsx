@@ -1,5 +1,5 @@
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { useInventoryStore } from "@/stores/useInventoryStore"
+import { useInventoryStore, type TContainer } from "@/stores/useInventoryStore"
 import { useI18n } from "@/i18n"
 import { InventoryItem } from "./Item"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -27,14 +27,8 @@ type TOpenInventoryResult = {
     message: string
     inventory: TInventoryItem[]
     equipment: TInventoryItem[]
-    container?: {
-        items: TInventoryItem[]
-        id: string
-        capacity: {
-            weight: number
-            slots: number
-        }
-    } | null
+    backpack: TContainer | null
+    container?: TContainer | null
     capacity: {
         weight: number
         slots: number
@@ -49,6 +43,7 @@ export const Inventory = () => {
         setEquipmentItems,
         slotCount, setSlotCount,
         getTotalWeight, setTotalWeight,
+        backpack, setBackpack,
         setOtherItems,
         setOtherItemsId,
         setOtherItemsType,
@@ -147,7 +142,6 @@ export const Inventory = () => {
     
     // Filter items with slot indices from 1 to 6
     const hotbarItems = inventoryItems.filter(item => item.slot >= 1 && item.slot <= 6).sort((a, b) => a.slot - b.slot)
-    const backpackItems = inventoryItems.filter(item => item.slot >= 7).sort((a, b) => a.slot - b.slot)
 
     useWebUIMessage<[TOpenInventoryResult]>('openInventory', ([result]) => {
         ///////////////////////////////////////////////////////////////////////////
@@ -176,7 +170,7 @@ export const Inventory = () => {
             if (Array.isArray(result.container.items)) {
                 // It's an array
                 setOtherItems(result.container.items)
-            } else if (result.container && typeof result.container === 'object') {
+            } else if (result.container?.items && typeof result.container.items === 'object') {
                 // It's an object (not an array)
                 const containerItems: TInventoryItem[] = Object.values(result.container.items).filter(item => item !== null) as TInventoryItem[]
                 setOtherItems(containerItems)
@@ -186,14 +180,32 @@ export const Inventory = () => {
             setOtherItemsType('container')
             setOtherItemsSlotCount(result.container.capacity.slots)
         }
+        ///////////////////////////////////////////////////////////////////////////
+        if (result.backpack) {
+            if (Array.isArray(result.backpack.items)) {
+                // It's an array
+                setBackpack(result.backpack)
+            } else if (result.backpack.items && typeof result.backpack.items === 'object') {
+                // It's an object (not an array)
+                const formattedItems = Object.values(result.backpack.items).filter(item => item !== null) as TInventoryItem[]
+                setBackpack({
+                    ...result.backpack,
+                    items: formattedItems // Override items
+                })
+            }
+            console.log('[UI] openInventory - backpack result: ', JSON.stringify(result.backpack))
+        }
         setSlotCount(result.capacity.slots)
         setTotalWeight(result.capacity.weight)
         setOpenInventory(true)
     })
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
-    useWebUIMessage<[type: string, items: TInventoryItem[]]>('doSyncInventory', ([type, items]) => {
+    useWebUIMessage<[type: string, items: TInventoryItem[], backpack: TContainer | null]>('doSyncInventory', ([type, items, backpack]) => {
         if (type === 'sync') {
             setInventoryItems(items)
+            if (backpack) {
+                setBackpack(backpack)
+            }
         }
     })
 
@@ -289,7 +301,7 @@ export const Inventory = () => {
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
                                                     const slot = i + (DEFAULT_SLOT_COUNT + 1) // Next slot index
-                                                    const item = backpackItems.find(item => item.slot === (i + 1)) // Actual item slot
+                                                    const item = backpack?.items.find((item) => item.slot === (i + 1))
                                                     return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} />
                                                 })}
                                             </div>

@@ -2,6 +2,15 @@ import { EEquipmentSlot } from "@/constants/enum"
 import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
 import { create } from "zustand"
 
+export type TContainer = {
+  items: TInventoryItem[]
+  id: string
+  capacity: {
+    weight: number
+    slots: number
+  }
+}
+
 type TItemData = {
   itemName: string
   amount: number
@@ -39,6 +48,7 @@ type InventoryState = {
   amountDialogType: 'give' | 'drop'
   dialogItem: TInventoryItem | null
   inventoryItems: TInventoryItem[]
+  backpack: TContainer | null
   slotCount: number
   totalWeight: number // Total weight of inventory in grams
   equipmentItems: TInventoryItem[]
@@ -46,6 +56,7 @@ type InventoryState = {
   learnedCraftingRecipes: string[]
   selectCharacterTab: 'equipment' | 'skills' | 'stats'
   temporaryDroppedItems: TInventoryItem[]
+  setBackpack: (backpack: TContainer | null) => void
   setTemporaryDroppedItem: (items: TInventoryItem) => void
   removeTemporaryDroppedItem: (item: TItemData) => void
   rollbackTemporaryDroppedItem: (item: TItemData) => void
@@ -81,6 +92,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   amountDialogType: 'drop',
   dialogItem: null,
   inventoryItems: [],
+  backpack: null,
   slotCount: 0,
   totalWeight: 15000, // 15kg
   otherItems: [],
@@ -92,6 +104,11 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   learnedCraftingRecipes: [],
   selectCharacterTab: 'equipment',
   temporaryDroppedItems: [],
+  setBackpack: (backpack: TContainer | null) => {
+    set(() => {
+      return { backpack: backpack }
+    })
+  },
   setTemporaryDroppedItem: (item: TInventoryItem) => {
     set((state) => {
       const matchedItem = state.inventoryItems.find(
