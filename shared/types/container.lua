@@ -8,6 +8,7 @@
 ---@field isDestroyOnEmpty boolean
 ---@field position Vector3
 ---@field rotation Rotator
+---@field containerId string|nil
 
 ---@class ResponseGetContainer
 ---@field id string

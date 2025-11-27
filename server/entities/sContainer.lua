@@ -42,24 +42,33 @@ function SContainer.new(core, containerId, citizenId)
     ---Contructor function
     local function _contructor()
     end
-
-    ---Init entity data
-    ---@param data InitContainer data
-    function self:initEntity(data)
-        self.entityId = data.entityId
-        self.entity = data.entity
-        self.interactableEntity = data.interactableEntity
-        self.items = data.items
-        self.maxSlot = data.maxSlot
-        self.maxWeight = data.maxWeight
-        self.isDestroyOnEmpty = data.isDestroyOnEmpty or false
-        self.position = data.position
-        self.rotation = data.rotation
-    end
-
+    
     ---/********************************/
     ---/*           Functions          */
     ---/********************************/
+    
+    ---Init entity data
+    ---@param data InitContainer data
+    function self:initEntity(data)
+        self.entityId = data.entityId or nil
+        self.entity = data.entity or nil
+        self.interactableEntity = data.interactableEntity or nil
+        self.items = data.items or {}
+        self.maxSlot = data.maxSlot or SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+        self.maxWeight = data.maxWeight or SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT
+        self.isDestroyOnEmpty = data.isDestroyOnEmpty or false
+        self.position = data.position or nil
+        self.rotation = data.rotation or nil
+    end
+
+    ---Create new container
+    ---@param data InitContainer data
+    function self:createNewContainer(data)
+        self.containerId = data.containerId
+        self:initEntity(data)
+        -- Save container to db
+        self:save()
+    end
 
     ---Save container
     ---@return boolean status success status

@@ -36,6 +36,7 @@
         "DeleteEntity"
     ],
     "Lua.diagnostics.disable": [
-        "undefined-doc-name"
+        "undefined-doc-name",
+        "missing-fields"
     ]
 }

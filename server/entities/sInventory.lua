@@ -188,25 +188,39 @@ function SInventory.new(player, inventoryType)
     end
 
     ---Get container with empty slot
-    ---@return SContainer|SInventory|nil container
+    ---@return {status: boolean; container: SContainer|SInventory|nil; slotNumber: number} response
     function self:getContainerWithEmptySlot()
         -- Looking empty slot from inventory first
         local emptySlot = self:getEmptySlot()
         if emptySlot then
-            return self
+            return {
+                status = true,
+                container = self,
+                slotNumber = emptySlot,
+            }
         end
         -- Looking empty slot from 
         local backpack = self:getBackpackContainer()
         if not backpack then
             -- Don't have backpack and inventory is full
-            return nil
+            return {
+                status = false,
+                message = 'Don\'t have backpack and inventory is full',
+            }
         end
         emptySlot = backpack:getEmptySlot()
         if emptySlot then
-            return backpack
+            return {
+                status = true,
+                container = backpack,
+                slotNumber = emptySlot,
+            }
         end
         -- Backpack and inventory is full
-        return nil
+        return {
+            status = false,
+            message = 'Backpack and inventory is full',
+        }
     end
 
     _contructor()

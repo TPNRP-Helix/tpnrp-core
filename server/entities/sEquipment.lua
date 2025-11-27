@@ -139,7 +139,8 @@ function SEquipment.new(player)
             })
             return { status = false, message = removeResult.message }
         end
-
+        -- Assign slot to item
+        item.slot = clothItemType
         -- Equip item to slot
         ---@cast item SEquipmentItemType
         self.items[clothItemType] = item
@@ -179,17 +180,24 @@ function SEquipment.new(player)
         -- Unequip item from slot
         self.items[clothItemType] = nil
         local container = nil
+        local emptySlotNumber = nil
         if not toSlotNumber then
             -- Don't have toSlotNumber find emptySlot from inventory then backpack
-            container = self.player.inventory:getContainerWithEmptySlot()
+            local getContainerResult = self.player.inventory:getContainerWithEmptySlot()
+            if getContainerResult.status then
+                container = getContainerResult.container
+                emptySlotNumber = getContainerResult.slotNumber
+            end
         else
             -- Have toSlotNumber then find container by toSlotNumber
             container = self.player.inventory:getContainerBySlotNumber(toSlotNumber)
+            emptySlotNumber = toSlotNumber
         end
-        if not container then
+        if not container or not emptySlotNumber then
             return { status = false, message = SHARED.t('inventory.full') }
         end
 
+        item.slot = emptySlotNumber
         local addResult = container:addItem(item.name, 1, item.slot, item.info)
 
         if not addResult.status then

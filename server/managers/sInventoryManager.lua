@@ -57,9 +57,16 @@ function SInventoryManager.new(core)
             end
             local itemInfo = nil
             if data.itemName == 'cloth_bag_item_1' then
-                itemInfo = {
+                local containerId = self:createContainer({
+                    citizenId = player.playerData.citizenId,
                     slotCount = 30,
                     weightLimit = 80000
+                })
+
+                itemInfo = {
+                    slotCount = 30,
+                    weightLimit = 80000,
+                    containerId = containerId
                 }
             end
             local result = player.inventory:addItem(data.itemName, data.amount, nil, itemInfo)
@@ -87,10 +94,12 @@ function SInventoryManager.new(core)
 
         -- TODO: Load container from DB and create entity
         local allContainers = DAO.container.getAll()
+        print('---------------------------------------')
         for _, container in pairs(allContainers) do
             -- TODO: Create container entity, spawn them in world, add interaction for them
             print('[SERVER] container ' .. container.id .. ' loaded')
         end
+        print('---------------------------------------')
     end
 
     ---On shutdown
@@ -144,6 +153,29 @@ function SInventoryManager.new(core)
             status = false,
             message = 'Failed to init container!',
             container = nil
+        }
+    end
+
+    ---Create new container
+    ---@param data {citizenId:string; slotCount:number; weightLimit:number}
+    ---@return {status: boolean; message: string; containerId: string|nil} result of creating container
+    function self:createContainer(data)
+        local containerId = self.core.gameManager:createId('bag_item')
+        
+        local container = SContainer.new(self.core, containerId, data.citizenId)
+        container:createNewContainer({
+            slotCount = data.slotCount,
+            weightLimit = data.weightLimit,
+        })
+        -- Save container into database
+        container:save()
+        -- Push container into self.containers for manage later
+        self.containers[containerId] = container
+
+        return {
+            status = true,
+            message = 'Container created!',
+            containerId = containerId,
         }
     end
 
