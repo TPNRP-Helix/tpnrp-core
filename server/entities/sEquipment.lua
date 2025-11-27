@@ -165,6 +165,15 @@ function SEquipment.new(player)
         if not item then
             print(('[ERROR] sEquipment.unequipItem: Failed to unequip item from slot!'))
             -- [CHEAT] possible event cheat
+            -- Player trying to un-equip an clothType that not equipped
+            self.core.cheatDetector:logCheater({
+                action = 'unequipItem',
+                player = self.player or nil,
+                citizenId = self.player.playerData.citizenId or '',
+                license = self.player.playerData.license or '',
+                name = self.player.playerData.name or '',
+                content = ('[ERROR] sEquipment.unequipItem: Item %s not found in equipment!'):format(clothItemType)
+            })
             return { status = false, message = 'Item not found in equipment!' }
         end
         -- Unequip item from slot

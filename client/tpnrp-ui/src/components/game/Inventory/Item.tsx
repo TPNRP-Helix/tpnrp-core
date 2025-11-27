@@ -123,8 +123,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
     const onClickUnequip = useCallback(() => {
         if (item === null || slot === null) return
         window.hEvent('unequipItem', {
-            itemName: item.name,
-            slot: item.slot
+            itemName: item.name
         })
     }, [item])
 
@@ -217,7 +216,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                         <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...(draggableAttributes ?? {})} {...(draggableListeners ?? {})}>
                             <Item className="relative gap-1 p-0 w-full h-full border-none">
                                 {slot !== null && isShowHotbarNumber ? (
-                                    <Badge variant={group === 'equipment' ? 'secondary' : 'default'} className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
+                                    <Badge variant={group === 'equipment' ? 'info' : 'default'} className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
                                         {group === 'equipment' ? t(`equipment.category.${getEquipmentSlotName(slot)}`) : slot}
                                     </Badge>
                                 ) : null}

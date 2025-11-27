@@ -81,6 +81,10 @@ function SInventoryManager.new(core)
             return self:wearItem(source, data)
         end)
 
+        RegisterCallback('unequipItem', function(source, data)
+            return self:unequipItem(source, data)
+        end)
+
         -- TODO: Load container from DB and create entity
         local allContainers = DAO.container.getAll()
         for _, container in pairs(allContainers) do
@@ -1093,6 +1097,29 @@ function SInventoryManager.new(core)
             }
         end
         return player.equipment:equipItem(itemInfo.name, data.slot)
+    end
+
+    ---Unequip item
+    ---@param source PlayerController player controller
+    ---@param data {itemName: string; toSlotNumber: number} item data
+    function self:unequipItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        local clothType = SHARED.getClothItemTypeByName(data.itemName)
+        if not clothType then
+            -- This should no happen. Because item that being equipped must be a cloth item
+            return {
+                status = false,
+                message = SHARED.t('error.itemNotCloth'),
+            }
+        end
+
+        return player.equipment:unequipItem(clothType, data.toSlotNumber or nil)
     end
 
     _contructor()

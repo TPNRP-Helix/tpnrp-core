@@ -288,8 +288,8 @@ export const Inventory = () => {
                                         {(slotCount - DEFAULT_SLOT_COUNT) > 0 ? (
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
-                                                    const slot = i + 7
-                                                    const item = backpackItems.find(item => item.slot === slot)
+                                                    const slot = i + (DEFAULT_SLOT_COUNT + 1) // Next slot index
+                                                    const item = backpackItems.find(item => item.slot === (i + 1)) // Actual item slot
                                                     return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} />
                                                 })}
                                             </div>
