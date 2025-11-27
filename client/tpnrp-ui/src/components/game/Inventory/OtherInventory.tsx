@@ -26,16 +26,16 @@ export const OtherInventory = () => {
     
     return (
         <Tabs value={selectOtherTab} onValueChange={(value) => setSelectOtherTab(value as 'ground' | 'crafting' | 'missions')} className="relative w-full h-full flex flex-col">
-            <TabsListHelix className="gap-px shrink-0">
+            <TabsListHelix className="gap-px shrink-0 px-2">
                 {isHaveOtherItems() && (
                     <TabsTriggerHelix value={otherItemsType}>{otherItemsId}</TabsTriggerHelix>
                 )}
                 <TabsTriggerHelix value="crafting">{t('inventory.other.crafting.title')}</TabsTriggerHelix>
                 <TabsTriggerHelix value="missions">{t('inventory.other.missions.title')}</TabsTriggerHelix>
             </TabsListHelix>
-            <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)]" />
+            <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)] mx-2" />
             <TabsContent value="ground" className="h-full overflow-hidden">
-                <ScrollArea className="h-full overflow-hidden mt-2">
+                <ScrollArea className="h-full overflow-hidden mt-2 p-2">
                     <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap">
                         {Array.from({ length: otherItemsSlotCount }, (_, i) => {
                             const slot = i + 1

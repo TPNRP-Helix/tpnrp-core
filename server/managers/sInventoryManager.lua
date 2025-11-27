@@ -57,7 +57,7 @@ function SInventoryManager.new(core)
             end
             local itemInfo = nil
             if data.itemName == 'cloth_bag_item_1' then
-                local containerId = self:createContainer({
+                local createContainerResult = self:createContainer({
                     citizenId = player.playerData.citizenId,
                     slotCount = 30,
                     weightLimit = 80000
@@ -66,7 +66,7 @@ function SInventoryManager.new(core)
                 itemInfo = {
                     slotCount = 30,
                     weightLimit = 80000,
-                    containerId = containerId
+                    containerId = createContainerResult.containerId
                 }
             end
             local result = player.inventory:addItem(data.itemName, data.amount, nil, itemInfo)
@@ -166,7 +166,8 @@ function SInventoryManager.new(core)
         container:createNewContainer({
             maxSlot = data.slotCount,
             maxWeight = data.weightLimit,
-            items = {}
+            items = {},
+            containerId = containerId,
         })
         -- Save container into database
         container:save()

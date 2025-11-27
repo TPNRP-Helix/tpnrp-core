@@ -77,7 +77,7 @@ export const CharacterInfo = () => {
             <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)]" />
             <TabsContent value="equipment" className="h-full">
                 <div className="grid grid-cols-[96px_1fr_96px] h-full">
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                         {leftColumnItems.map((item) => (
                             <InventoryItem
                                 group="equipment"
@@ -88,7 +88,7 @@ export const CharacterInfo = () => {
                         ))}
                     </div>
                     <div></div>
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-col gap-3">
                         {rightColumnItems.map((item) => (
                             <InventoryItem
                                 group="equipment"

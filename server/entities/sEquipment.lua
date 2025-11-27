@@ -93,7 +93,7 @@ function SEquipment.new(player)
         end
 
         item = container:findItemBySlot(slotNumber)
-
+        print('[SERVER] sEquipment.equipItem: Item ' .. JSON.stringify(item))
         if not item then
             -- [CHEAT] possible event cheat
             self.core.cheatDetector:logCheater({
@@ -149,6 +149,7 @@ function SEquipment.new(player)
             local containerId = item.info.containerId
             -- Init container
             self.core.inventoryManager:initContainer(containerId, self.player.playerData.citizenId)
+            print('[SERVER] sEquipment.equipItem: Backpack equipped! ' .. containerId)
         end
         -- call client for sync (This mean equip cloth success)
         self:sync() -- Sync equipment
