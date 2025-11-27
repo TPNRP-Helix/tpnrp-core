@@ -93,6 +93,7 @@
   "inventory.use": "Use",
   "inventory.wear": "Wear",
   "inventory.split": "Split",
+  "inventory.unequip": "Unequip",
   "inventory.give": "Give",
   "inventory.drop": "Drop",
   "inventory.half": "Half",

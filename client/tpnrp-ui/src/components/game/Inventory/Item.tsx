@@ -120,6 +120,14 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setIsOpenAmountDialog(true)
     }, [])
 
+    const onClickUnequip = useCallback(() => {
+        if (item === null || slot === null) return
+        window.hEvent('unequipItem', {
+            itemName: item.name,
+            slot: item.slot
+        })
+    }, [item])
+
     const slotId = typeof slot === "number" ? slot : null
     const uniqueId = useId()
     const dndId = useMemo(() => {
@@ -363,6 +371,11 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                             <ContextMenuItem onClick={onClickAttach}><Paperclip className="w-4 h-4 text-muted-foreground mr-2" /> Phụ kiện</ContextMenuItem>
                         </>
                     )} */}
+                </ContextMenuContent>
+            )}
+            {!!item && group === 'equipment' && (
+                <ContextMenuContent>
+                    <ContextMenuItem onClick={onClickUnequip}><Hand className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.unequip')}</ContextMenuItem>
                 </ContextMenuContent>
             )}
             {!!item && group === 'devLibrary' && (
