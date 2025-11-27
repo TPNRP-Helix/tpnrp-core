@@ -26,6 +26,7 @@ function SEquipment.new(player)
         local equipment = DAO.equipment.get(self.player.playerData.citizenId)
         if equipment then
             self.items = equipment
+            print('[SERVER] equipment '.. JSON.stringify(equipment))
         end
     end
 
@@ -65,7 +66,7 @@ function SEquipment.new(player)
 
     ---Equip item to slot
     ---@param itemName string item name
-    ---@param slotNumber number slot number
+    ---@param slotNumber number slot number of current itemName that player want to equip
     ---@return {status:boolean, message:string} success Status when equip item
     function self:equipItem(itemName, slotNumber)
         -- Get item data
@@ -73,7 +74,26 @@ function SEquipment.new(player)
         if not itemData then
             return { status = false, message = 'Item not found!' }
         end
-        local item = self.player.inventory:findItemBySlot(slotNumber)
+        local item = nil
+        local container = nil
+        if slotNumber <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            -- Inventory
+            container = self.player.inventory
+            
+        else 
+            -- Backpack
+            local backpackContainer = self.player.inventory:getBackpackContainer()
+            if backpackContainer then
+                container = backpackContainer
+            end
+        end
+        if not container then
+            print('[SERVER] [ERROR] sEquipment.equipItem: Container not found!')
+            return { status = false, message = 'Container not found!' }
+        end
+
+        item = container:findItemBySlot(slotNumber)
+
         if not item then
             -- [CHEAT] possible event cheat
             self.core.cheatDetector:logCheater({
@@ -91,8 +111,21 @@ function SEquipment.new(player)
         if not clothItemType then
             return { status = false, message = SHARED.t('error.itemNotCloth') }
         end
-        -- Remove item from inventory
-        local removeResult = self.player.inventory:removeItem(itemName, 1, item.slot)
+        
+        -- Check if there's already an item equipped in this clothType slot
+        local existingItem = self.items[clothItemType]
+        if existingItem then
+            -- Unequip the existing item first
+            local unequipResult = self:unequipItem(clothItemType)
+            if not unequipResult.status then
+                print(('[ERROR] sEquipment.equipItem: Failed to unequip existing item %s from slot %s!'):format(existingItem.name, clothItemType))
+                return { status = false, message = 'Failed to unequip existing item: ' .. unequipResult.message }
+            end
+        end
+        
+        -- Remove item from container (inventory for slot <= 5, backpack for slot > 5)
+        local removeResult = container:removeItem(itemName, 1, item.slot)
+
         if not removeResult.status then
             print(('[ERROR] sEquipment.equipItem: Failed to remove item %s from inventory!'):format(itemName))
             -- [CHEAT] possible event cheat
@@ -110,6 +143,12 @@ function SEquipment.new(player)
         -- Equip item to slot
         ---@cast item SEquipmentItemType
         self.items[clothItemType] = item
+        -- On equip backpack it should init container for use
+        if clothItemType == EEquipmentClothType.Bag then
+            local containerId = item.info.containerId
+            -- Init container
+            self.core.inventoryManager:initContainer(containerId, self.player.playerData.citizenId)
+        end
         -- call client for sync (This mean equip cloth success)
         self:sync() -- Sync equipment
         self.player.inventory:sync() -- Sync inventory
@@ -124,38 +163,42 @@ function SEquipment.new(player)
         -- Get item data
         local item = self.items[clothItemType]
         if not item then
-            print(('[ERROR] sEquipment.unequipItem: Failed to unequip item %s from slot %s!'):format(clothItemType, item.name))
+            print(('[ERROR] sEquipment.unequipItem: Failed to unequip item from slot!'))
             -- [CHEAT] possible event cheat
+            -- Player trying to un-equip an clothType that not equipped
+            self.core.cheatDetector:logCheater({
+                action = 'unequipItem',
+                player = self.player or nil,
+                citizenId = self.player.playerData.citizenId or '',
+                license = self.player.playerData.license or '',
+                name = self.player.playerData.name or '',
+                content = ('[ERROR] sEquipment.unequipItem: Item %s not found in equipment!'):format(clothItemType)
+            })
             return { status = false, message = 'Item not found in equipment!' }
         end
         -- Unequip item from slot
         self.items[clothItemType] = nil
-        -- Find empty slot
+        local container = nil
         if not toSlotNumber then
-            toSlotNumber = self.player.inventory:getEmptySlot()
-            if not toSlotNumber then
-                return { status = false, message = SHARED.t('inventory.full') }
-            end
+            -- Don't have toSlotNumber find emptySlot from inventory then backpack
+            container = self.player.inventory:getContainerWithEmptySlot()
         else
-            -- Have toSlotNumber
-            -- Check if slot have item or not
-            local slotItem = self.player.inventory:findItemBySlot(toSlotNumber)
-            if slotItem then
-                -- Slot have item
-                local newEmptySlot = self.player.inventory:getEmptySlot()
-                if not newEmptySlot then
-                    return { status = false, message = SHARED.t('inventory.full') }
-                end
-                -- Assign new slot into toSlotNumber
-                toSlotNumber = newEmptySlot
-            end
+            -- Have toSlotNumber then find container by toSlotNumber
+            container = self.player.inventory:getContainerBySlotNumber(toSlotNumber)
         end
-        -- Add item to inventory
-        local addResult = self.player.inventory:addItem(item.name, 1, toSlotNumber)
+        if not container then
+            return { status = false, message = SHARED.t('inventory.full') }
+        end
+
+        local addResult = container:addItem(item.name, 1, item.slot, item.info)
+
         if not addResult.status then
             print(('[ERROR] sEquipment.unequipItem: Failed to add item %s to inventory!'):format(item.name))
-            return { status = false, message = addResult.message }
+            -- Restore item to equipment since we failed to add it anywhere
+            self.items[clothItemType] = item
+            return { status = false, message = addResult.message or SHARED.t('inventory.full') }
         end
+        
         -- call client for sync (This mean unequip cloth success)
         self:sync() -- Sync equipment
         self.player.inventory:sync() -- Sync inventory

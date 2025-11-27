@@ -59,17 +59,38 @@ function CInventory.new(player)
         -- On create drop item
         ---@param data {itemName: string, amount: number, fromSlot: number} item data
         self.core.webUI:registerEventHandler('createDropItem', function(data)
-            self:createDropItem(data)
+            TriggerCallback('createDropItem', function(result)
+                self.core.webUI:sendEvent('onCreateDropResponse', result)
+            end, data)
         end)
 
         -- On split item
         ---@param data {slot: number} item data
         self.core.webUI:registerEventHandler('splitItem', function(data)
-            self:splitItem(data)
+            TriggerCallback('splitItem', function(result)
+                self.core.webUI:sendEvent('onSplitItemResponse', result)
+            end, data)
         end)
 
+        ---@param data {itemName: string; slot: number} item data
         self.core.webUI:registerEventHandler('useItem', function(data)
-            self:useItem(data)
+            TriggerCallback('useItem', function(result)
+                self.core.webUI:sendEvent('onUseItemResponse', result)
+            end, data)
+        end)
+
+        ---@param data {itemName: string; slot: number} equip item data
+        self.core.webUI:registerEventHandler('wearItem', function(data)
+            TriggerCallback('wearItem', function(result)
+                self.core.webUI:sendEvent('onWearItemResponse', result)
+            end, data)
+        end)
+
+        ---@param data {itemName: string; slot: number} un-equip item data
+        self.core.webUI:registerEventHandler('unequipItem', function(data)
+            TriggerCallback('unequipItem', function(result)
+                self.core.webUI:sendEvent('onUnequipItemResponse', result)
+            end, data)
         end)
     end
 
@@ -131,26 +152,6 @@ function CInventory.new(player)
         end
 
         return matchedItems
-    end
-
-    ---Create drop item
-    ---@param data {itemName: string, amount: number, fromSlot: number} item data
-    function self:createDropItem(data)
-        TriggerCallback('createDropItem', function(result)
-            self.core.webUI:sendEvent('onCreateDropResponse', result)
-        end, data)
-    end
-
-    function self:splitItem(data)
-        TriggerCallback('splitItem', function(result)
-            self.core.webUI:sendEvent('onSplitItemResponse', result)
-        end, data)
-    end
-
-    function self:useItem(data)
-        TriggerCallback('useItem', function(result)
-            self.core.webUI:sendEvent('onUseItemResponse', result)
-        end, data)
     end
 
     _contructor()

@@ -1,4 +1,5 @@
 local SStorage = require('server/entities/sStorage')
+local SContainer = require('server/entities/sContainer')
 
 ---@class SInventory : SStorage
 ---@field core TPNRPServer
@@ -89,6 +90,20 @@ function SInventory.new(player, inventoryType)
         return SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
     end
 
+    ---Get backpack container
+    ---@return SContainer | nil
+    function self:getBackpackContainer()
+        local backpack = self.player.equipment:findItemByClothType(EEquipmentClothType.Bag)
+        if backpack and backpack.info and backpack.info.containerId then
+            local containerId = backpack.info.containerId
+            local containerResult = self.core.inventoryManager:openContainerId(containerId)
+            if not containerResult.status then
+                print('[SERVER] Failed to open container ' .. containerId)
+            end
+            return containerResult.container
+        end
+    end
+
     ---Add item to inventory
     ---@param itemName string item name
     ---@param amount number item amount
@@ -97,7 +112,6 @@ function SInventory.new(player, inventoryType)
     ---@return SInventoryAddItemResultType {status=boolean, message=string, slot=number} result of adding item
     function self:addItem(itemName, amount, slotNumber, info)
         local result = SStorage.addItem(self, itemName, amount, slotNumber, info)
-        
         if result.status then
              -- Tell player that item is added to inventory
             TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'add', amount, itemName)
@@ -121,7 +135,6 @@ function SInventory.new(player, inventoryType)
     ---@return {status:boolean, message:string, slot:number} result of removing item
     function self:removeItem(itemName, amount, slotNumber)
         local result = SStorage.removeItem(self, itemName, amount, slotNumber)
-        
         if result.status then
             -- Tell player that item is remove from inventory
             TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', 'remove', amount, itemName)
@@ -161,6 +174,39 @@ function SInventory.new(player, inventoryType)
                 slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,
             }
         }
+    end
+
+    ---Get container by slot number
+    ---@param slotNumber number slot number
+    ---@return SContainer|SInventory|nil container
+    function self:getContainerBySlotNumber(slotNumber)
+        if slotNumber <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            return self
+        else
+            return self:getBackpackContainer()
+        end
+    end
+
+    ---Get container with empty slot
+    ---@return SContainer|SInventory|nil container
+    function self:getContainerWithEmptySlot()
+        -- Looking empty slot from inventory first
+        local emptySlot = self:getEmptySlot()
+        if emptySlot then
+            return self
+        end
+        -- Looking empty slot from 
+        local backpack = self:getBackpackContainer()
+        if not backpack then
+            -- Don't have backpack and inventory is full
+            return nil
+        end
+        emptySlot = backpack:getEmptySlot()
+        if emptySlot then
+            return backpack
+        end
+        -- Backpack and inventory is full
+        return nil
     end
 
     _contructor()

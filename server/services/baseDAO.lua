@@ -42,7 +42,7 @@ DAO.DB.Execute([[
 --- Init table 'inventories'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS inventories (
-        inventory_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        inventory_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
         citizen_id VARCHAR(11),
         "type" TEXT,
         container_id VARCHAR(255),
@@ -52,14 +52,8 @@ DAO.DB.Execute([[
         is_destroy_on_empty BOOLEAN,
         position TEXT,
         rotation TEXT,
-        display_model TEXT,
-        UNIQUE(citizen_id, "type")
+        display_model TEXT
     );
-]])
--- Create unique index for existing databases (if table already exists without constraint)
-DAO.DB.Execute([[
-    CREATE UNIQUE INDEX IF NOT EXISTS idx_inventories_citizen_type 
-    ON inventories(citizen_id, "type");
 ]])
 
 --- Init table 'levels'

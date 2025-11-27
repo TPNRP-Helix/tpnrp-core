@@ -1,25 +1,19 @@
 ---@enum EEquipmentClothType
 EEquipmentClothType = {
-    Head = "head",
-    Mask = "mask",
-    HairStyle = "hairstyle",
-    Torso = "torso",
-    Leg = "leg",
-    Bag = "bag",
-    Shoes = "shoes",
-    Accessories = "accessories",
-    Undershirts = "undershirts",
-    Armor = "armor",
-    Decal = "decal",
-    Top = "top",
-    Hat = "hat",
-    Glasses = "glasses",
-    Ears = "ears",
-    Null1 = "null1",
-    Null2 = "null2",
-    Null3 = "null3",
-    Watch = "watch",
-    Bracelets = "bracelets"
+    Hat = 1,
+    Glasses = 2,
+    Ears = 3,
+    Top = 4,
+    Undershirts = 5,
+    Leg = 6,
+    Shoes = 7,
+    Bag = 8,
+    Bracelets = 9,
+    Watch = 10,
+    Mask = 11,
+    Accessories = 12,
+    Torso = 13, -- Torso is Gloves
+    Armor = 14,
 }
 
 ---@enum EWebUIInputMode

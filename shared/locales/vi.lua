@@ -12,6 +12,9 @@ local vi = {
         openDrop = "Mở",
         itemNotFound = "Không tìm thấy vật phẩm!",
     },
+    backpack = {
+        full = 'Túi đồ đã đầy!',
+    },
     player = {
         created = "Tạo nhân vật thành công.",
         loaded = "Đã tải nhân vật.",

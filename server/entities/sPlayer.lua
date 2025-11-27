@@ -280,6 +280,63 @@ function SPlayer.new(core, playerController, playerData)
         return true
     end
 
+    ---/********************************/
+    ---/*      Inventory & Backpack    */
+    ---/********************************/
+    
+    ---Add item to inventory
+    ---@param itemName string item name
+    ---@param amount number amount to add
+    ---@param info table|nil item info (optional)
+    ---@param slot number|nil slot to add (optional) (1-5: inventory | 6 -> n: backpack)
+    function self:addItem(itemName, amount, info, slot)
+        if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            -- Inventory
+            return self.inventory:addItem(itemName, amount, slot, info)
+        else
+            -- Backpack
+            local backpack = self.inventory:getBackpackContainer()
+            if not backpack then
+                return {status = false, message = 'Backpack not found!'}
+            end
+            return backpack:addItem(itemName, amount, slot, info)
+        end
+    end
+
+    ---Remove item from inventory
+    ---@param itemName string item name
+    ---@param amount number amount to remove
+    ---@param slot number|nil slot to remove (optional) (1-5: inventory | 6 -> n: backpack)
+    function self:removeItem(itemName, amount, slot)
+        if not slot then
+            -- Remove slot from inventory first
+            -- Remove slot from backpack if not exist in inventory
+            local removeItemResult = self.inventory:removeItem(itemName, amount, slot)
+            if removeItemResult.status then
+                return removeItemResult
+            end
+            -- Failed to remove from inventory
+            -- Remove from backpack
+            local backpack = self.inventory:getBackpackContainer()
+            if not backpack then
+                return {status = false, message = 'Backpack not found!'}
+            end
+            return backpack:removeItem(itemName, amount, slot)
+        end
+        -- Has slot
+        if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            -- Inventory
+            return self.inventory:removeItem(itemName, amount, slot)
+        else
+            -- Backpack
+            local backpack = self.inventory:getBackpackContainer()
+            if not backpack then
+                return {status = false, message = 'Backpack not found!'}
+            end
+            return backpack:removeItem(itemName, amount, slot)
+        end
+    end
+
     _contructor()
     ---- END ----
     return self
