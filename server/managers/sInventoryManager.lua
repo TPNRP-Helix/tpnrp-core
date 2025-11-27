@@ -164,8 +164,9 @@ function SInventoryManager.new(core)
         
         local container = SContainer.new(self.core, containerId, data.citizenId)
         container:createNewContainer({
-            slotCount = data.slotCount,
-            weightLimit = data.weightLimit,
+            maxSlot = data.slotCount,
+            maxWeight = data.weightLimit,
+            items = {}
         })
         -- Save container into database
         container:save()

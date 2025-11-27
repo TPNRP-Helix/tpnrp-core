@@ -31,6 +31,8 @@
 ---@field SetInputMode fun(self: WebUI, mode: EWebUIInputMode): nil
 ---@field BringToFront fun(self: WebUI): nil
 
+---@alias HPawn unknown
+
 ---/********************************/
 ---/*          TPN's Class         */
 ---/********************************/

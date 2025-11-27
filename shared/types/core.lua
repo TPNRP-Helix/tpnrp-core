@@ -1,0 +1,19 @@
+---@class TSHARED
+---@field CONFIG any
+---@field items table<string, SInventoryItemType>
+---@field randomStr fun(length: number): string
+---@field randomInt fun(min: number, max: number): number|nil
+---@field randomId fun(length: number): string
+---@field splitString fun(str: string, delimiter: string): table
+---@field joinString fun(tbl: table, delimiter: string): string
+---@field trimString fun(str: string): string
+---@field replaceString fun(str: string, old: string, new: string): string
+---@field toUpper fun(str: string): string
+---@field toLower fun(str: string): string
+---@field startsWith fun(str: string, prefix: string): boolean
+---@field endsWith fun(str: string, suffix: string): boolean
+---@field contains fun(tbl: table, val: any): boolean
+---@field getClothItemTypeByName fun(itemName: string): any
+---@field createCitizenId fun(): string
+---@field L any
+---@field t fun(self: TSHARED, key: string, ...: any): string
