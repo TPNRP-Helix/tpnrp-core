@@ -196,6 +196,7 @@ export const Inventory = () => {
             // Backpack
             if (backpack) {
                 const parsedBackpackItems = parseArrayItems(backpack.items)
+                console.log('[UI] doSyncInventory - parsedBackpackItems: ', JSON.stringify(parsedBackpackItems))
                 setBackpackItems(parsedBackpackItems)
                 setSlotCount(backpack.slotCount === 0 ? DEFAULT_SLOT_COUNT : backpack.slotCount)
                 setTotalWeight(backpack.maxWeight === 0 ? DEFAULT_MAX_WEIGHT : backpack.maxWeight)

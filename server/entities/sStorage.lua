@@ -431,16 +431,20 @@ function SStorage:moveItem(item, targetSlot)
         end
         -- Different item or same item but unique => swap items
         local sourceSlot = item.slot
-        local targetItemToSwap = self:getItemBySlot(targetSlot)
-        targetItemToSwap.slot = item.slot
-        -- Change slot of item
-        item.slot = targetSlot
-        self:updateItem(item, targetSlot)
-        if targetItemToSwap then
-            -- Assign item to new slot
-            targetItemToSwap.slot = sourceSlot
-            self:updateItem(targetItemToSwap, sourceSlot)
+        local targetItemToSwap, targetIndex = self:getItemBySlot(targetSlot)
+        local sourceItem, sourceIndex = self:getItemBySlot(sourceSlot)
+        
+        if not targetItemToSwap or not sourceItem then
+            return { status = false, message = 'Failed to find items for swap!', slot = -1 }
         end
+        
+        -- Swap items directly in the items table using indices
+        self.items[targetIndex] = sourceItem
+        self.items[sourceIndex] = targetItemToSwap
+        
+        -- Update slot properties after swapping in table
+        sourceItem.slot = targetSlot
+        targetItemToSwap.slot = sourceSlot
     else
         -- Target slot is empty; keep existing reference and just update slot
         item.slot = targetSlot

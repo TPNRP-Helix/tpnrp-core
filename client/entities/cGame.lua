@@ -31,6 +31,7 @@ function CGame.new(core)
     function self:playAnimation(pawn, animationName, options)
         local loopCount = options.loopCount or 1
         local bIgnoreMovementInput = options.bIgnoreMovementInput or true
+        local animSlotName = options.AnimSlotName or 'DefaultSlot'
         -- Get pawn
         local char = pawn or self.core.player:getPawn()
         if not char then
@@ -40,6 +41,7 @@ function CGame.new(core)
         local AnimParams = UE.FHelixPlayAnimParams()
         AnimParams.LoopCount = loopCount
         AnimParams.bIgnoreMovementInput = bIgnoreMovementInput
+        AnimParams.AnimSlotName = animSlotName
         -- Play animation
         Animation.Play(char, animationName, AnimParams, function()
             if not options.onEnd then
@@ -51,6 +53,12 @@ function CGame.new(core)
 
         return true
     end
+
+    -- Note: Sleep animation
+    -- Game/Characters/Heroes/Unified/Animations/SleepAnimPack/Sleep_Tent/A_Sleep_Tent_Enter.A_Sleep_Tent_Enter
+    -- Game/Characters/Heroes/Unified/Animations/SleepAnimPack/Sleep_Tent/A_Sleep_Tent_Exit.A_Sleep_Tent_Exit
+    -- Game/Characters/Heroes/Unified/Animations/SleepAnimPack/Sleep_Tent/A_Sleep_Tent_QuickExit.A_Sleep_Tent_QuickExit
+    -- Game/Characters/Heroes/Unified/Animations/SleepAnimPack/Sleep_Tent/A_Sleep_Tent_SleepLoop.A_Sleep_Tent_SleepLoop
 
     _contructor()
     return self

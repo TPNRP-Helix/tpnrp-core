@@ -862,11 +862,24 @@ function SInventoryManager.new(core)
                 }
             end
             return container:moveItem(sourceItem, targetSlot)
+        elseif sourceGroup == 'backpack' then
+            local backpack = player.inventory:getBackpackContainer()
+            if not backpack then
+                return {
+                    status = false,
+                    message = 'Backpack not found!',
+                }
+            end
+            local backpackSlot = targetSlot - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+            local result = backpack:moveItem(sourceItem, backpackSlot)
+            player.inventory:sync()
+
+            return result
         end
 
         return {
-            status = true,
-            message = 'Item moved successfully!',
+            status = false,
+            message = 'Group not supported!',
         }
     end
 
