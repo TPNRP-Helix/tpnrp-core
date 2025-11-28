@@ -792,7 +792,7 @@ function SInventoryManager.new(core)
                     local addResult = player.inventory:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info, false)
                     if not addResult.status then
                         -- Rollback on failed: Add sourceItem back to backpack
-                        backpack:addItem(sourceItem.name, sourceItem.amount, backpackSlot, sourceItem.info, false)
+                        backpack:addItem(sourceItem.name, sourceItem.amount, backpackSlot, sourceItem.info)
                         return {
                             status = false,
                             message = addResult.message,
