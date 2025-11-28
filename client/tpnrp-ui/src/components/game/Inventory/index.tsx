@@ -261,7 +261,7 @@ export const Inventory = () => {
                                     <SheetTitle>{t("inventory.backpack.title")}</SheetTitle>
                                     <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount - DEFAULT_SLOT_COUNT}</div>
                                     <Separator className="relative mb-4 -top-px" />
-                                    <ScrollArea className="h-[calc(100%-45px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed">
+                                    <ScrollArea className="h-[calc(100%-45px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed pt-2">
                                         {(slotCount - DEFAULT_SLOT_COUNT) > 0 ? (
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
