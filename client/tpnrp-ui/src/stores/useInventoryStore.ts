@@ -45,6 +45,7 @@ type InventoryState = {
   backpackItems: TInventoryItem[]
   slotCount: number
   totalWeight: number // Total weight of inventory in grams
+  inventoryWeight: number
   equipmentItems: TInventoryItem[]
   selectOtherTab: 'ground' | 'crafting' | 'missions' | ''
   learnedCraftingRecipes: string[]
@@ -83,6 +84,9 @@ type InventoryState = {
   onCloseInventory: () => void
 }
 
+const calculateInventoryWeight = (items: TInventoryItem[]) =>
+  items.reduce((acc, item) => acc + item.weight * item.amount, 0)
+
 export const useInventoryStore = create<InventoryState>((set, get) => ({
   isOpenInventory: false,
   isOpenAmountDialog: false,
@@ -92,6 +96,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   backpackItems: [],
   slotCount: 0,
   totalWeight: 15000, // 15kg
+  inventoryWeight: 0,
   otherItems: [],
   otherItemsType: 'ground',
   otherItemsSlotCount: 0,
@@ -137,6 +142,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
         return acc
       }, [])
 
+      const nextInventoryWeight = calculateInventoryWeight(nextInventoryItems)
       const nextTemporaryDroppedItems = [...state.temporaryDroppedItems]
       const tempIndex = nextTemporaryDroppedItems.findIndex(
         (tempItem) => tempItem.slot === item.slot && tempItem.name === item.name
@@ -154,6 +160,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       return {
         inventoryItems: nextInventoryItems,
+        inventoryWeight: nextInventoryWeight,
         temporaryDroppedItems: nextTemporaryDroppedItems,
       }
     })
@@ -222,6 +229,12 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       return {
         inventoryItems,
+        inventoryWeight: calculateInventoryWeight(inventoryItems),
+        temporaryDroppedItems,
+      }
+      return {
+        inventoryItems,
+        inventoryWeight: calculateInventoryWeight(inventoryItems),
         temporaryDroppedItems,
       }
     })
@@ -272,7 +285,11 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   setAmountDialogType: (value: 'give' | 'drop') => set({ amountDialogType: value }),
   resetAmountDialog: () => set({ isOpenAmountDialog: false, amountDialogType: 'drop' }),
   setDialogItem: (item: TInventoryItem) => set({ dialogItem: item }),
-  setInventoryItems: (items: TInventoryItem[]) => set({ inventoryItems: items }),
+  setInventoryItems: (items: TInventoryItem[]) =>
+    set({
+      inventoryItems: items,
+      inventoryWeight: calculateInventoryWeight(items),
+    }),
   setOtherItems: (items: TInventoryItem[]) => set({ otherItems: items }),
   setOtherItemsType: (value: 'ground' | 'player' | 'stack' | 'container') => set({ otherItemsType: value }),
   setOtherItemsSlotCount: (value: number) => set({ otherItemsSlotCount: value }),
@@ -288,9 +305,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     }
     return totalWeight + (bagItem.info?.maxWeight ?? 0)
   },
-  getTotalWeight: () => {
-    return get().inventoryItems.reduce((acc, item) => acc + (item.weight * item.amount), 0)
-  },
+  getTotalWeight: () => get().inventoryWeight,
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => set({ selectCharacterTab: value }),
   moveInventoryItem: ({ sourceSlot, targetSlot, sourceGroup, targetGroup }, options) => {
     const payload: MoveInventoryItemSuccessPayload = {
@@ -310,75 +325,82 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     let isSuccess = false
 
     set((state) => {
-      const inventoryItems = [...state.inventoryItems]
-      const equipmentItems = [...state.equipmentItems]
-      const otherItems = [...state.otherItems]
-      const backpackItems = [...state.backpackItems]
-
-      const collections: Record<TInventoryGroup, TInventoryItem[]> = {
-        inventory: inventoryItems,
-        equipment: equipmentItems,
-        container: otherItems,
-        devLibrary: [],
-        backpack: backpackItems,
+      const groupToKey: Record<string, 'inventoryItems' | 'equipmentItems' | 'otherItems' | 'backpackItems'> = {
+        inventory: 'inventoryItems',
+        equipment: 'equipmentItems',
+        container: 'otherItems',
+        backpack: 'backpackItems',
       }
 
-      const sourceList = collections[sourceGroup]
-      const targetList = collections[targetGroup]
+      const sourceKey = groupToKey[sourceGroup]
+      // If source group is not managed in state (e.g. devLibrary), we can't move from it.
+      if (!sourceKey) return {}
+
+      const sourceList = state[sourceKey] as TInventoryItem[]
       const sourceIndex = sourceList.findIndex((item) => item.slot === sourceSlot)
 
       if (sourceIndex === -1) {
         return {}
       }
 
-      const targetIndex = targetList.findIndex((item) => item.slot === targetSlot)
+      const nextSourceList = [...sourceList]
 
+      // Handle same group move
       if (sourceGroup === targetGroup) {
-        const sourceItem = sourceList[sourceIndex]
+        const targetIndex = nextSourceList.findIndex((item) => item.slot === targetSlot)
+        const sourceItem = nextSourceList[sourceIndex]
 
-        // Check if we should stack items (same item, not unique, target slot has item)
         if (targetIndex !== -1) {
-          const targetItem = sourceList[targetIndex]
+          const targetItem = nextSourceList[targetIndex]
           const isSameItem = sourceItem.name.toLowerCase() === targetItem.name.toLowerCase()
 
           if (isSameItem) {
-            // Check if item is not unique (can stack)
             const isUnique = sourceItem.unique ?? false
             if (!isUnique) {
-              // Same item and not unique => stack together
-              sourceList[targetIndex] = {
+              // Stack
+              nextSourceList[targetIndex] = {
                 ...targetItem,
                 amount: targetItem.amount + sourceItem.amount,
               }
-              // Remove source item
-              sourceList.splice(sourceIndex, 1)
+              nextSourceList.splice(sourceIndex, 1)
 
               isSuccess = true
-              return {
-                inventoryItems,
-                equipmentItems,
-                otherItems,
+              const updates: Partial<InventoryState> = { [sourceKey]: nextSourceList }
+              if (sourceKey === 'inventoryItems') {
+                updates.inventoryWeight = calculateInventoryWeight(nextSourceList)
               }
+              return updates
             }
           }
         }
 
-        // Different item or same item but unique => swap items
-        sourceList[sourceIndex] = { ...sourceList[sourceIndex], slot: targetSlot }
-
+        // Swap or Move to empty slot
+        nextSourceList[sourceIndex] = { ...nextSourceList[sourceIndex], slot: targetSlot }
         if (targetIndex !== -1) {
-          sourceList[targetIndex] = { ...sourceList[targetIndex], slot: sourceSlot }
+          nextSourceList[targetIndex] = { ...nextSourceList[targetIndex], slot: sourceSlot }
         }
 
         isSuccess = true
-        return {
-          inventoryItems,
-          equipmentItems,
-          otherItems,
+        const updates: Partial<InventoryState> = { [sourceKey]: nextSourceList }
+        if (sourceKey === 'inventoryItems') {
+          updates.inventoryWeight = calculateInventoryWeight(nextSourceList)
         }
+        return updates
       }
 
-      const [extractedSourceItem] = sourceList.splice(sourceIndex, 1)
+      // Handle different group move
+      const targetKey = groupToKey[targetGroup]
+      let nextTargetList: TInventoryItem[]
+
+      if (targetKey) {
+        nextTargetList = [...(state[targetKey] as TInventoryItem[])]
+      } else {
+        // Target is not in state (e.g. devLibrary), use a temporary array
+        nextTargetList = []
+      }
+
+      const targetIndex = nextTargetList.findIndex((item) => item.slot === targetSlot)
+      const [extractedSourceItem] = nextSourceList.splice(sourceIndex, 1)
 
       if (!extractedSourceItem) {
         return {}
@@ -388,25 +410,33 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
       let displacedItem: TInventoryItem | null = null
 
       if (targetIndex !== -1) {
-        const [removedTargetItem] = targetList.splice(targetIndex, 1)
+        const [removedTargetItem] = nextTargetList.splice(targetIndex, 1)
         if (removedTargetItem) {
           displacedItem = removedTargetItem
         }
       }
 
-      targetList.push(movedSourceItem)
+      nextTargetList.push(movedSourceItem)
 
       if (displacedItem) {
-        sourceList.push({ ...displacedItem, slot: sourceSlot })
+        nextSourceList.push({ ...displacedItem, slot: sourceSlot })
         payload.displacedItem = displacedItem
       }
 
       isSuccess = true
-      return {
-        inventoryItems,
-        equipmentItems,
-        otherItems,
+
+      const result: Partial<InventoryState> = { [sourceKey]: nextSourceList }
+      if (sourceKey === 'inventoryItems') {
+        result.inventoryWeight = calculateInventoryWeight(nextSourceList)
       }
+      if (targetKey) {
+        result[targetKey] = nextTargetList
+        if (targetKey === 'inventoryItems') {
+          result.inventoryWeight = calculateInventoryWeight(nextTargetList)
+        }
+      }
+
+      return result
     })
 
     if (isSuccess) {
@@ -477,6 +507,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       return {
         inventoryItems,
+        inventoryWeight: calculateInventoryWeight(inventoryItems),
       }
     })
   },

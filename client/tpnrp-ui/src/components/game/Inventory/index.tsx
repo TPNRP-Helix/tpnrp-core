@@ -5,7 +5,7 @@ import { InventoryItem } from "./Item"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { SheetTitle } from "@/components/ui/sheet"
 import { Separator } from "@/components/ui/separator"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { DndContext, DragOverlay, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import { useWebUIMessage } from "@/hooks/use-hevent"
@@ -20,6 +20,7 @@ import { toast } from "sonner"
 import { FALLBACK_DEFAULT_IMAGE_PATH } from "@/constants"
 import { Image } from "@/components/ui/image"
 import { parseArrayItems } from "@/lib/utils"
+import { useShallow } from "zustand/react/shallow"
 
 const DEFAULT_SLOT_COUNT = 5
 const DEFAULT_MAX_WEIGHT = 15000
@@ -41,11 +42,15 @@ export const Inventory = () => {
     const {
         isOpenInventory,
         setOpenInventory,
-        inventoryItems, setInventoryItems,
+        inventoryItems,
+        setInventoryItems,
         setEquipmentItems,
-        slotCount, setSlotCount,
-        getTotalWeight, setTotalWeight,
-        backpackItems, setBackpackItems,
+        slotCount,
+        setSlotCount,
+        getTotalWeight,
+        setTotalWeight,
+        backpackItems,
+        setBackpackItems,
         setOtherItems,
         setOtherItemsId,
         setOtherItemsType,
@@ -53,7 +58,28 @@ export const Inventory = () => {
         getTotalLimitWeight,
         moveInventoryItem,
         onCloseInventory
-    } = useInventoryStore()
+    } = useInventoryStore(
+        useShallow((state) => ({
+            isOpenInventory: state.isOpenInventory,
+            setOpenInventory: state.setOpenInventory,
+            inventoryItems: state.inventoryItems,
+            setInventoryItems: state.setInventoryItems,
+            setEquipmentItems: state.setEquipmentItems,
+            slotCount: state.slotCount,
+            setSlotCount: state.setSlotCount,
+            getTotalWeight: state.getTotalWeight,
+            setTotalWeight: state.setTotalWeight,
+            backpackItems: state.backpackItems,
+            setBackpackItems: state.setBackpackItems,
+            setOtherItems: state.setOtherItems,
+            setOtherItemsId: state.setOtherItemsId,
+            setOtherItemsType: state.setOtherItemsType,
+            setOtherItemsSlotCount: state.setOtherItemsSlotCount,
+            getTotalLimitWeight: state.getTotalLimitWeight,
+            moveInventoryItem: state.moveInventoryItem,
+            onCloseInventory: state.onCloseInventory
+        }))
+    )
     const { t } = useI18n()
     const [activeDragItem, setActiveDragItem] = useState<{
         item: TInventoryItem | null
@@ -96,7 +122,7 @@ export const Inventory = () => {
         const isGroup = (value: unknown): value is TInventoryGroup =>
             value === "inventory" || value === "equipment" || value === "container" || value === "backpack"
         
-        const isClothItem = item.name.startsWith('cloth_')
+        const isClothItem = item?.name?.startsWith('cloth_')
         // If item is not a cloth item and target group is equipment, don't allow to move
         if (!isClothItem && targetGroup === 'equipment') {
             toast.error(t('inventory.equipment.notCloth'), {
@@ -137,14 +163,17 @@ export const Inventory = () => {
             })
         }
         setActiveDragItem(null)
-    }, [moveInventoryItem])
+    }, [moveInventoryItem, t])
 
     const handleDragCancel = useCallback(() => {
         setActiveDragItem(null)
     }, [])
     
     // Filter items with slot indices from 1 to 6
-    const hotbarItems = inventoryItems.filter(item => item.slot >= 1 && item.slot <= 6).sort((a, b) => a.slot - b.slot)
+    const hotbarItems = useMemo(
+        () => inventoryItems.filter((item) => item.slot >= 1 && item.slot <= 6).sort((a, b) => a.slot - b.slot),
+        [inventoryItems]
+    )
 
     useWebUIMessage<[TOpenInventoryResult]>('openInventory', ([result]) => {
         ///////////////////////////////////////////////////////////////////////////
@@ -261,7 +290,7 @@ export const Inventory = () => {
                                     <SheetTitle>{t("inventory.backpack.title")}</SheetTitle>
                                     <div className="absolute top-2 right-0 text-right text-xs text-muted-foreground">{t('inventory.backpack.slotCount')}: {slotCount - DEFAULT_SLOT_COUNT}</div>
                                     <Separator className="relative mb-4 -top-px" />
-                                    <ScrollArea className="h-[calc(100%-45px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed pt-2">
+                                    <ScrollArea className="h-[calc(100%-50px)] overflow-hidden" viewportClassName="[&>div]:h-full [&>div]:table-fixed pt-2">
                                         {(slotCount - DEFAULT_SLOT_COUNT) > 0 ? (
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
