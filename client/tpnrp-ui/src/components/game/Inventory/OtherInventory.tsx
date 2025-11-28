@@ -39,7 +39,7 @@ export const OtherInventory = () => {
                     <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap">
                         {Array.from({ length: otherItemsSlotCount }, (_, i) => {
                             const slot = i + 1
-                            const item = otherItems.find(item => item.slot === slot)
+                            const item = otherItems.find(item => item?.slot === slot)
                             return <InventoryItem key={slot} item={item} slot={slot} group="container" isShowHotbarNumber={false} />
                         })}
                     </div>

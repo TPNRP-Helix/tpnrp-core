@@ -54,3 +54,25 @@ export type TResponseSplitItem = {
     status: boolean
     message: string
 }
+
+export type TItemData = {
+  itemName: string
+  amount: number
+  fromSlot: number
+}
+
+export type TSyncInventory = {
+    type: string
+    items: TInventoryItem[]
+    backpack: {
+        items: TInventoryItem[]
+        isHaveBackpack: boolean
+        slotCount: number
+        maxWeight: number
+    }
+}
+
+export type TSyncEquipment = {
+    type: string
+    items: TInventoryItem[]
+}

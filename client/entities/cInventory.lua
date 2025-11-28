@@ -23,9 +23,9 @@ function CInventory.new(player)
     local function _contructor()
         -- On Update inventory
         ---@param items table<number, SInventoryItemType> item data
-        ---@param backpackItems table<number, SInventoryItemType> backpack data
-        RegisterClientEvent('clientSyncInventory', function(items, backpackItems)
-            self:onSyncInventory(items, backpackItems)
+        ---@param backpack {items: table<number, SInventoryItemType>, isHaveBackpack: boolean, slotCount: number, maxWeight: number} backpack data
+        RegisterClientEvent('clientSyncInventory', function(items, backpack)
+            self:onSyncInventory(items, backpack)
         end)
 
         --- Open drop inventory
@@ -57,17 +57,17 @@ function CInventory.new(player)
 
         -- On create drop item
         ---@param data {itemName: string, amount: number, fromSlot: number} item data
-        self.core.webUI:registerEventHandler('createDropItem', function(data)
+        self.core.webUI:registerEventHandler('createDropItem', function(data, cb)
             TriggerCallback('createDropItem', function(result)
-                self.core.webUI:sendEvent('onCreateDropResponse', result)
+                cb(result)
             end, data)
         end)
 
         -- On split item
         ---@param data {slot: number} item data
-        self.core.webUI:registerEventHandler('splitItem', function(data)
+        self.core.webUI:registerEventHandler('splitItem', function(data, cb)
             TriggerCallback('splitItem', function(result)
-                self.core.webUI:sendEvent('onSplitItemResponse', result)
+                cb(result)
             end, data)
         end)
 
@@ -79,16 +79,17 @@ function CInventory.new(player)
         end)
 
         ---@param data {itemName: string; slot: number} equip item data
-        self.core.webUI:registerEventHandler('wearItem', function(data)
+        self.core.webUI:registerEventHandler('wearItem', function(data, cb)
             TriggerCallback('wearItem', function(result)
-                self.core.webUI:sendEvent('onWearItemResponse', result)
+                cb(result)
+                -- self.core.webUI:sendEvent('onWearItemResponse', result)
             end, data)
         end)
 
         ---@param data {itemName: string; slot: number} un-equip item data
-        self.core.webUI:registerEventHandler('unequipItem', function(data)
+        self.core.webUI:registerEventHandler('unequipItem', function(data, cb)
             TriggerCallback('unequipItem', function(result)
-                self.core.webUI:sendEvent('onUnequipItemResponse', result)
+                cb(result)
             end, data)
         end)
     end
@@ -99,14 +100,14 @@ function CInventory.new(player)
     
     -- On Update inventory
     ---@param items table<number, SInventoryItemType> item data
-    ---@param backpackItems table<number, SInventoryItemType> backpack data
-    function self:onSyncInventory(items, backpackItems)
+    ---@param backpack {items: table<number, SInventoryItemType>, isHaveBackpack: boolean, slotCount: number, maxWeight: number} backpack data
+    function self:onSyncInventory(items, backpack)
         self.items = items
         -- Update UI for items changes
         self.core.webUI:sendEvent('doSyncInventory', {
             type = 'sync',
             items = items,
-            backpackItems = backpackItems,
+            backpack = backpack
         })
     end
 

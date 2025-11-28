@@ -1,5 +1,5 @@
 import { EEquipmentSlot } from "@/constants/enum"
-import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
+import type { TInventoryGroup, TInventoryItem, TItemData } from "@/types/inventory"
 import { create } from "zustand"
 
 export type TContainer = {
@@ -9,12 +9,6 @@ export type TContainer = {
     weight: number
     slots: number
   }
-}
-
-type TItemData = {
-  itemName: string
-  amount: number
-  fromSlot: number
 }
 
 type MoveInventoryItemParams = {
@@ -62,7 +56,10 @@ type InventoryState = {
   rollbackTemporaryDroppedItem: (item: TItemData) => void
   setLearnedCraftingRecipes: (recipes: string[]) => void
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => void
+  // Equipment
   setEquipmentItems: (items: TInventoryItem[]) => void
+  equipItem: (item: TInventoryItem) => void
+  unequipItem: (item: TInventoryItem) => void
   setSlotCount: (value: number) => void
   setTotalWeight: (value: number) => void
   setInventoryItems: (items: TInventoryItem[]) => void
@@ -232,11 +229,43 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   setLearnedCraftingRecipes: (recipes: string[]) => set({ learnedCraftingRecipes: recipes }),
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => set({ selectOtherTab: value }),
   setEquipmentItems: (items: TInventoryItem[]) => set({ equipmentItems: items }),
+  equipItem: (item: TInventoryItem) => {
+    set((state) => {
+      const equipmentItems = [...state.equipmentItems]
+      const equipmentIndex = equipmentItems.findIndex((equipmentItem) => equipmentItem.slot === item.slot)
+      
+      if (equipmentIndex !== -1) {
+        // Have item with same type (Just replace it)
+        equipmentItems[equipmentIndex] = item
+      } else {
+        // Don't have item with same type (Add it to equipment)
+        equipmentItems.push(item)
+      }
+
+      return { equipmentItems }
+    })
+  },
+  unequipItem: (item: TInventoryItem) => {
+    set((state) => {
+      const equipmentItems = [...state.equipmentItems]
+      const equipmentIndex = equipmentItems.findIndex(
+        (equipmentItem) => equipmentItem.slot === item.slot && equipmentItem.name === item.name
+      )
+      if (equipmentIndex !== -1) {
+        equipmentItems[equipmentIndex] = {
+          ...equipmentItems[equipmentIndex],
+          amount: equipmentItems[equipmentIndex].amount - item.amount,
+        }
+      } else {
+        equipmentItems.push({ ...item, amount: item.amount })
+      }
+      return { equipmentItems }
+    })
+  },
   setSlotCount: (value: number) => set({ slotCount: value }),
   setTotalWeight: (value: number) => set({ totalWeight: value }),
   setOpenInventory: (value: boolean) => {
     let isHaveOtherItems = get().isHaveOtherItems()
-    console.log('isHaveOtherItems', isHaveOtherItems)
     set({ isOpenInventory: value, selectOtherTab: isHaveOtherItems ? 'ground' : 'crafting' })
   },
   setIsOpenAmountDialog: (value: boolean) => set({ isOpenAmountDialog: value }),

@@ -15,12 +15,14 @@ import { PackageOpen } from "lucide-react"
 import { OtherInventory } from "./OtherInventory"
 import { formatWeight } from "@/lib/inventory"
 import { CharacterInfo } from "./CharacterInfo"
-import type { TInventoryGroup, TInventoryItem, TResponseCreateDropItem, TResponseSplitItem } from "@/types/inventory"
+import type { TInventoryGroup, TInventoryItem, TSyncEquipment, TSyncInventory } from "@/types/inventory"
 import { toast } from "sonner"
 import { FALLBACK_DEFAULT_IMAGE_PATH } from "@/constants"
 import { Image } from "@/components/ui/image"
+import { parseArrayItems } from "@/lib/utils"
 
 const DEFAULT_SLOT_COUNT = 5
+const DEFAULT_MAX_WEIGHT = 15000
 
 type TOpenInventoryResult = {
     status: boolean
@@ -50,8 +52,6 @@ export const Inventory = () => {
         setOtherItemsSlotCount,
         getTotalLimitWeight,
         moveInventoryItem,
-        removeTemporaryDroppedItem,
-        rollbackTemporaryDroppedItem,
         onCloseInventory
     } = useInventoryStore()
     const { t } = useI18n()
@@ -95,12 +95,6 @@ export const Inventory = () => {
 
         const isGroup = (value: unknown): value is TInventoryGroup =>
             value === "inventory" || value === "equipment" || value === "container" || value === "backpack"
-        
-        console.log('[UI] handleDragEnd - activeGroup: ', activeGroup)
-        console.log('[UI] handleDragEnd - targetGroup: ', targetGroup)
-        console.log('[UI] handleDragEnd - targetGroupId: ', targetGroupId)
-        console.log('[UI] handleDragEnd - activeGroupId: ', activeGroupId)
-        console.log('[UI] handleDragEnd - item: ', JSON.stringify(item))
         
         const isClothItem = item.name.startsWith('cloth_')
         // If item is not a cloth item and target group is equipment, don't allow to move
@@ -155,87 +149,51 @@ export const Inventory = () => {
     useWebUIMessage<[TOpenInventoryResult]>('openInventory', ([result]) => {
         ///////////////////////////////////////////////////////////////////////////
         // Check if result.inventory is an array or object
-        if (Array.isArray(result.inventory)) {
-            // It's an array
-            setInventoryItems(result.inventory)
-        } else if (result.inventory && typeof result.inventory === 'object') {
-            // It's an object (not an array)
-            const inventoryItems: TInventoryItem[] = Object.values(result.inventory).filter(item => item !== null) as TInventoryItem[]
-            setInventoryItems(inventoryItems)
-        }
+        const parsedInventoryItems = parseArrayItems(result.inventory)
+        setInventoryItems(parsedInventoryItems)
         ///////////////////////////////////////////////////////////////////////////
         // Check if result.equipment is an array or object
-        console.log('[UI] openInventory - result.equipment: ', JSON.stringify(result.equipment))
-        if (Array.isArray(result.equipment)) {
-            // It's an array
-            setEquipmentItems(result.equipment)
-        } else if (result.equipment && typeof result.equipment === 'object') {
-            // It's an object (not an array)
-            const equipmentItems: TInventoryItem[] = Object.values(result.equipment).filter(item => item !== null) as TInventoryItem[]
-            setEquipmentItems(equipmentItems)
-        }
+        const parsedEquipmentItems = parseArrayItems(result.equipment)
+        setEquipmentItems(parsedEquipmentItems)
         ///////////////////////////////////////////////////////////////////////////
         if (result.container) {
             // Check if result.container is an array or object
-            if (Array.isArray(result.container.items)) {
-                // It's an array
-                setOtherItems(result.container.items)
-            } else if (result.container?.items && typeof result.container.items === 'object') {
-                // It's an object (not an array)
-                const containerItems: TInventoryItem[] = Object.values(result.container.items).filter(item => item !== null) as TInventoryItem[]
-                setOtherItems(containerItems)
-            }
-            console.log('[UI] openInventory - container result: ', JSON.stringify(result.container))
+            const parsedContainerItems = parseArrayItems(result.container.items)
+            setOtherItems(parsedContainerItems)
             setOtherItemsId(result.container.id)
             setOtherItemsType('container')
             setOtherItemsSlotCount(result.container.capacity.slots)
         }
         ///////////////////////////////////////////////////////////////////////////
         if (result.backpack) {
-            if (Array.isArray(result.backpack)) {
-                // It's an array
-                setBackpackItems(result.backpack)
-            } else if (result.backpack && typeof result.backpack === 'object') {
-                // It's an object (not an array)
-                const formattedItems = Object.values(result.backpack).filter(item => item !== null) as TInventoryItem[]
-                setBackpackItems(formattedItems)
-            }
-            console.log('[UI] openInventory - backpack result: ', JSON.stringify(result.backpack))
+            const parsedBackpackItems = parseArrayItems(result.backpack)
+            setBackpackItems(parsedBackpackItems)
         }
         setSlotCount(result.capacity.slots)
         setTotalWeight(result.capacity.weight)
         setOpenInventory(true)
     })
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
-    useWebUIMessage<[type: string, items: TInventoryItem[], backpackItems: TInventoryItem[]]>('doSyncInventory', ([type, items, backpackItems]) => {
+    useWebUIMessage<[TSyncInventory]>('doSyncInventory', ([syncInfo]) => {
+        const { type, items, backpack } = syncInfo
         if (type === 'sync') {
-            setInventoryItems(items)
-            if (backpackItems) {
-                setBackpackItems(backpackItems)
+            const parsedItems = parseArrayItems(items)
+            setInventoryItems(parsedItems)
+            // Backpack
+            if (backpack) {
+                const parsedBackpackItems = parseArrayItems(backpack.items)
+                setBackpackItems(parsedBackpackItems)
+                setSlotCount(backpack.slotCount === 0 ? DEFAULT_SLOT_COUNT : backpack.slotCount)
+                setTotalWeight(backpack.maxWeight === 0 ? DEFAULT_MAX_WEIGHT : backpack.maxWeight)
             }
         }
     })
 
-    useWebUIMessage<[TResponseCreateDropItem]>('onCreateDropResponse', ([result]) => {
-        if (result.status) {
-            // Remove temporary item from temporaryDroppedItems
-            removeTemporaryDroppedItem(result.itemData)
-        } else {
-            // Rollback temporary item into inventory item
-            rollbackTemporaryDroppedItem(result.itemData)
+    useWebUIMessage<[TSyncEquipment]>('doSyncEquipment', ([{ type, items }]) => {
+        if (type === 'sync') {
+            const parsedItems = parseArrayItems(items)
+            setEquipmentItems(parsedItems)
         }
-    })
-
-    useWebUIMessage<[TResponseSplitItem]>('onSplitItemResponse', ([result]) => {
-        if (result.status) {
-            return
-        }
-        toast.error(result.message)
-    })
-
-    useWebUIMessage<[unknown]>('onWearItemResponse', ([result]) => {
-        console.log('[UI] onWearItemResponse - result: ', JSON.stringify(result))
-        
     })
     
     useEffect(() => {
@@ -308,7 +266,7 @@ export const Inventory = () => {
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
                                                     const slot = i + (DEFAULT_SLOT_COUNT + 1) // Next slot index
-                                                    const item = backpackItems.find((item) => item.slot === (i + 1))
+                                                    const item = backpackItems.find((item) => item?.slot === (i + 1))
                                                     return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} group="backpack" />
                                                 })}
                                             </div>

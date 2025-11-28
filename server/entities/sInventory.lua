@@ -44,10 +44,22 @@ function SInventory.new(player, inventoryType)
     function self:sync()
         local backpack = self:getBackpackContainer()
         local backpackItems = {}
+        local isHaveBackpack = false
+        local slotCount = 0
+        local maxWeight = 0
         if backpack then
+            isHaveBackpack = true
             backpackItems = backpack.items
+            slotCount = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpack:getMaxSlots()
+            maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpack:getMaxWeight()
         end
-        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, backpackItems)
+
+        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, {
+            isHaveBackpack = isHaveBackpack,
+            slotCount = slotCount,
+            maxWeight = maxWeight,
+            items = backpackItems
+        })
     end
 
     ---Save inventory

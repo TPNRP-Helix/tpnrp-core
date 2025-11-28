@@ -3,7 +3,7 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { ItemMedia } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
-import type { TInventoryItemProps } from "@/types/inventory"
+import type { TInventoryItemProps, TItemData } from "@/types/inventory"
 import { useCallback, useId, useMemo, useState } from "react"
 import { useI18n } from "@/i18n"
 import { FALLBACK_DEFAULT_IMAGE_PATH, RARE_LEVELS } from "@/constants"
@@ -32,7 +32,9 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setAmountDialogType,
         setDialogItem,
         setTemporaryDroppedItem,
-        splitItem
+        splitItem,
+        removeTemporaryDroppedItem,
+        rollbackTemporaryDroppedItem
     } = useInventoryStore()
 
     const { permission } = useDevModeStore()
@@ -71,6 +73,9 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         window.hEvent('wearItem', {
             itemName: item.name,
             slot: item.slot
+        }, (result: unknown) => {
+            console.log('[UI] onClickWear - result: ', JSON.stringify(result))
+            // equipItem(item)
         })
     }, [item])
 
@@ -81,6 +86,11 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                 // Split success
                 window.hEvent('splitItem', {
                     slot: item.slot
+                }, (result: { status: boolean; message: string }) => {
+                    if (result.status) {
+                        return
+                    }
+                    toast.error(result.message)
                 })
             },
             onFail: (reason: string) => {
@@ -108,6 +118,14 @@ export const InventoryItem = (props: TInventoryItemProps) => {
             itemName: item.name,
             amount,
             fromSlot: item.slot
+        }, (result: { status: boolean; itemData: TItemData }) => {
+            if (result.status) {
+                // Remove temporary item from temporaryDroppedItems
+                removeTemporaryDroppedItem(result.itemData)
+            } else {
+                // Rollback temporary item into inventory item
+                rollbackTemporaryDroppedItem(result.itemData)
+            }
         })
     }, [])
 
@@ -124,6 +142,8 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         if (item === null || slot === null) return
         window.hEvent('unequipItem', {
             itemName: item.name
+        }, (result: unknown) => {
+            console.log('[UI] onClickUnequip - result: ', JSON.stringify(result))
         })
     }, [item])
 

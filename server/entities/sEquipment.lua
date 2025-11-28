@@ -30,6 +30,7 @@ function SEquipment.new(player)
             if bagItem then
                 -- Load backpack's container
                 self.core.inventoryManager:initContainer(bagItem.info.containerId, self.player.playerData.citizenId)
+                print('[SERVER] Init backpack container ' .. bagItem.info.containerId)
             end
         end
     end
@@ -45,7 +46,14 @@ function SEquipment.new(player)
     ---Save equipment
     ---@return boolean status
     function self:save()
-        return DAO.equipment.save(self)
+        local isSavedBackpack = false
+        local backpackContainer = self.player.inventory:getBackpackContainer()
+        if backpackContainer then
+            isSavedBackpack = backpackContainer:save()
+        end
+        local isSavedEquipment = DAO.equipment.save(self)
+
+        return isSavedBackpack and isSavedEquipment
     end
 
     ---Get backpack capacity
