@@ -126,8 +126,12 @@ function SInventory.new(player, inventoryType)
     ---@param amount number item amount
     ---@param slotNumber number | nil slot number (optional)
     ---@param info table | nil item info (optional)
+    ---@param isSync boolean | nil is sync inventory to client (optional, default is true)
     ---@return SInventoryAddItemResultType {status=boolean, message=string, slot=number} result of adding item
-    function self:addItem(itemName, amount, slotNumber, info)
+    function self:addItem(itemName, amount, slotNumber, info, isSync)
+        if isSync == nil then
+            isSync = true
+        end
         local result = SStorage.addItem(self, itemName, amount, slotNumber, info)
         if result.status then
              -- Tell player that item is added to inventory
@@ -138,8 +142,10 @@ function SInventory.new(player, inventoryType)
                 amount = amount,
                 info = info or {}
             })
-            -- Sync inventory to client
-            self:sync()
+            if isSync then
+                -- Sync inventory to client
+                self:sync()
+            end
         end
         
         return result
@@ -149,8 +155,12 @@ function SInventory.new(player, inventoryType)
     ---@param itemName string item name
     ---@param amount number item amount
     ---@param slotNumber number | nil slot number (optional)
+    ---@param isSync boolean | nil is sync inventory to client (optional, default is true)
     ---@return {status:boolean, message:string, slot:number} result of removing item
-    function self:removeItem(itemName, amount, slotNumber)
+    function self:removeItem(itemName, amount, slotNumber, isSync)
+        if isSync == nil then
+            isSync = true
+        end
         local result = SStorage.removeItem(self, itemName, amount, slotNumber)
         if result.status then
             -- Tell player that item is remove from inventory
@@ -160,8 +170,10 @@ function SInventory.new(player, inventoryType)
                 name = itemName,
                 amount = amount,
             })
+            if isSync then
             -- Sync inventory to client
-            self:sync()
+                self:sync()
+            end
         end
         
         return result

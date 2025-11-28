@@ -1,5 +1,5 @@
 import { EEquipmentSlot } from "@/constants/enum"
-import type { TInventoryGroup, TInventoryItem, TItemData } from "@/types/inventory"
+import type { TInventoryItem, TItemData } from "@/types/inventory"
 import { create } from "zustand"
 
 export type TContainer = {
@@ -9,22 +9,6 @@ export type TContainer = {
     weight: number
     slots: number
   }
-}
-
-type MoveInventoryItemParams = {
-  sourceSlot: number
-  targetSlot: number
-  sourceGroup: TInventoryGroup
-  targetGroup: TInventoryGroup
-}
-
-type MoveInventoryItemSuccessPayload = MoveInventoryItemParams & {
-  displacedItem: TInventoryItem | null
-}
-
-type MoveInventoryItemOptions = {
-  onSuccess?: (payload: MoveInventoryItemSuccessPayload) => void
-  onFail?: () => void
 }
 
 type SplitItemOptions = {
@@ -77,7 +61,6 @@ type InventoryState = {
   getTotalLimitWeight: () => number
   getTotalWeight: () => number
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => void
-  moveInventoryItem: (params: MoveInventoryItemParams, options?: MoveInventoryItemOptions) => boolean
   setOtherItemsId: (value: string) => void
   // Items
   splitItem: (itemSlot: number, options?: SplitItemOptions) => void
@@ -307,146 +290,6 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   },
   getTotalWeight: () => get().inventoryWeight,
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => set({ selectCharacterTab: value }),
-  moveInventoryItem: ({ sourceSlot, targetSlot, sourceGroup, targetGroup }, options) => {
-    const payload: MoveInventoryItemSuccessPayload = {
-      sourceSlot,
-      targetSlot,
-      sourceGroup,
-      targetGroup,
-      displacedItem: null,
-    }
-
-    // Same slot, same group => Don't do anything
-    if (sourceSlot === targetSlot && sourceGroup === targetGroup) {
-      options?.onFail?.()
-      return false
-    }
-
-    let isSuccess = false
-
-    set((state) => {
-      const groupToKey: Record<string, 'inventoryItems' | 'equipmentItems' | 'otherItems' | 'backpackItems'> = {
-        inventory: 'inventoryItems',
-        equipment: 'equipmentItems',
-        container: 'otherItems',
-        backpack: 'backpackItems',
-      }
-
-      const sourceKey = groupToKey[sourceGroup]
-      // If source group is not managed in state (e.g. devLibrary), we can't move from it.
-      if (!sourceKey) return {}
-
-      const sourceList = state[sourceKey] as TInventoryItem[]
-      const sourceIndex = sourceList.findIndex((item) => item.slot === sourceSlot)
-
-      if (sourceIndex === -1) {
-        return {}
-      }
-
-      const nextSourceList = [...sourceList]
-
-      // Handle same group move
-      if (sourceGroup === targetGroup) {
-        const targetIndex = nextSourceList.findIndex((item) => item.slot === targetSlot)
-        const sourceItem = nextSourceList[sourceIndex]
-
-        if (targetIndex !== -1) {
-          const targetItem = nextSourceList[targetIndex]
-          const isSameItem = sourceItem.name.toLowerCase() === targetItem.name.toLowerCase()
-
-          if (isSameItem) {
-            const isUnique = sourceItem.unique ?? false
-            if (!isUnique) {
-              // Stack
-              nextSourceList[targetIndex] = {
-                ...targetItem,
-                amount: targetItem.amount + sourceItem.amount,
-              }
-              nextSourceList.splice(sourceIndex, 1)
-
-              isSuccess = true
-              const updates: Partial<InventoryState> = { [sourceKey]: nextSourceList }
-              if (sourceKey === 'inventoryItems') {
-                updates.inventoryWeight = calculateInventoryWeight(nextSourceList)
-              }
-              return updates
-            }
-          }
-        }
-
-        // Swap or Move to empty slot
-        nextSourceList[sourceIndex] = { ...nextSourceList[sourceIndex], slot: targetSlot }
-        if (targetIndex !== -1) {
-          nextSourceList[targetIndex] = { ...nextSourceList[targetIndex], slot: sourceSlot }
-        }
-
-        isSuccess = true
-        const updates: Partial<InventoryState> = { [sourceKey]: nextSourceList }
-        if (sourceKey === 'inventoryItems') {
-          updates.inventoryWeight = calculateInventoryWeight(nextSourceList)
-        }
-        return updates
-      }
-
-      // Handle different group move
-      const targetKey = groupToKey[targetGroup]
-      let nextTargetList: TInventoryItem[]
-
-      if (targetKey) {
-        nextTargetList = [...(state[targetKey] as TInventoryItem[])]
-      } else {
-        // Target is not in state (e.g. devLibrary), use a temporary array
-        nextTargetList = []
-      }
-
-      const targetIndex = nextTargetList.findIndex((item) => item.slot === targetSlot)
-      const [extractedSourceItem] = nextSourceList.splice(sourceIndex, 1)
-
-      if (!extractedSourceItem) {
-        return {}
-      }
-
-      const movedSourceItem = { ...extractedSourceItem, slot: targetSlot }
-      let displacedItem: TInventoryItem | null = null
-
-      if (targetIndex !== -1) {
-        const [removedTargetItem] = nextTargetList.splice(targetIndex, 1)
-        if (removedTargetItem) {
-          displacedItem = removedTargetItem
-        }
-      }
-
-      nextTargetList.push(movedSourceItem)
-
-      if (displacedItem) {
-        nextSourceList.push({ ...displacedItem, slot: sourceSlot })
-        payload.displacedItem = displacedItem
-      }
-
-      isSuccess = true
-
-      const result: Partial<InventoryState> = { [sourceKey]: nextSourceList }
-      if (sourceKey === 'inventoryItems') {
-        result.inventoryWeight = calculateInventoryWeight(nextSourceList)
-      }
-      if (targetKey) {
-        result[targetKey] = nextTargetList
-        if (targetKey === 'inventoryItems') {
-          result.inventoryWeight = calculateInventoryWeight(nextTargetList)
-        }
-      }
-
-      return result
-    })
-
-    if (isSuccess) {
-      options?.onSuccess?.(payload)
-    } else {
-      options?.onFail?.()
-    }
-
-    return isSuccess
-  },
   setOtherItemsId: (value: string) => set({ otherItemsId: value }),
   splitItem: (itemSlot: number, options?: SplitItemOptions) => {
     // TODO: Implement split item by slot

@@ -312,7 +312,7 @@ function SInventoryManager.new(core)
                 end
                 if targetItem then
                     -- Remove item from source
-                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot, false)
                     if not removeResult.status then
                         return {
                             status = false,
@@ -321,7 +321,7 @@ function SInventoryManager.new(core)
                     end
                     targetItem.slot = sourceSlot
                     -- Add targetItem back to source
-                    local addResult = player.inventory:addItem(targetItem.name, targetItem.amount, sourceSlot, targetItem.info)
+                    local addResult = player.inventory:addItem(targetItem.name, targetItem.amount, sourceSlot, targetItem.info, false)
                     if not addResult.status then
                         -- Rollback: Add sourceItem back to inventory
                         player.inventory:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
@@ -335,7 +335,7 @@ function SInventoryManager.new(core)
                     local removeBackpackResult = backpack:removeItem(targetItem.name, targetItem.amount, backpackSlotIndex)
                     if not removeBackpackResult.status then
                         -- Rollback: Remove targetItem from inventory and Add sourceItem back to inventory
-                        player.inventory:removeItem(targetItem.name, targetItem.amount, sourceSlot)
+                        player.inventory:removeItem(targetItem.name, targetItem.amount, sourceSlot, false)
                         player.inventory:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
                         return {
                             status = false,
@@ -348,7 +348,7 @@ function SInventoryManager.new(core)
                     if not addBackpackResult.status then
                         -- Rollback: Add targetItem back to backpack, Remove targetItem from inventory, Add sourceItem back to inventory
                         backpack:addItem(targetItem.name, targetItem.amount, backpackSlotIndex, targetItem.info)
-                        player.inventory:removeItem(targetItem.name, targetItem.amount, sourceSlot)
+                        player.inventory:removeItem(targetItem.name, targetItem.amount, sourceSlot, false)
                         player.inventory:addItem(sourceItem.name, sourceItem.amount, sourceSlot, sourceItem.info)
                         return {
                             status = false,
@@ -358,7 +358,7 @@ function SInventoryManager.new(core)
                 else
                     -- Target don't have any item then just move sourceItem to targetSlot
                     -- Remove item from source
-                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot)
+                    local removeResult = player.inventory:removeItem(sourceItem.name, sourceItem.amount, sourceSlot, false)
                     if not removeResult.status then
                         return {
                             status = false,
@@ -377,7 +377,8 @@ function SInventoryManager.new(core)
                         }
                     end
                 end
-
+                -- Sync inventory
+                player.inventory:sync()
                 return {
                     status = true,
                     message = 'Item moved successfully!',
@@ -711,7 +712,99 @@ function SInventoryManager.new(core)
 
         if sourceGroup == 'backpack' then
             if targetGroup == 'inventory' then
-                -- TODO:
+                -- TODO: Move item from backpack to inventory
+                print('===============================================')
+                print('[SERVER] [DEBUG] onMoveInventoryItem: backpack slot ' .. sourceSlot .. ' to inventory slot ' .. targetSlot)
+                print('[SERVER] [DEBUG] onMoveInventoryItem sourceGroup: ' .. sourceGroup .. ' sourceGroupId: ' .. sourceGroupId)
+                print('[SERVER] [DEBUG] onMoveInventoryItem targetGroup: ' .. targetGroup .. ' targetGroupId: ' .. targetGroupId)
+                print('===============================================')
+                local backpackSlot = sourceSlot - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+                local backpack = player.inventory:getBackpackContainer()
+                if not backpack then
+                    return {
+                        status = false,
+                        message = 'Backpack not found!',
+                    }
+                end
+                if targetItem then
+                    -- Swap item 
+                    -- Remove sourceItem from backpack
+                    local removeResult = backpack:removeItem(sourceItem.name, sourceItem.amount, backpackSlot)
+                    if not removeResult.status then
+                        return {
+                            status = false,
+                            message = removeResult.message,
+                        }
+                    end
+                    -- Remove targetItem from inventory
+                    local removeTargetItemResult = player.inventory:removeItem(targetItem.name, targetItem.amount, targetSlot, false)
+                    if not removeTargetItemResult.status then
+                        -- Rollback on failed: Add sourceItem back to backpack
+                        backpack:addItem(sourceItem.name, sourceItem.amount, backpackSlot, sourceItem.info)
+                        return {
+                            status = false,
+                            message = removeTargetItemResult.message,
+                        }
+                    end
+                    -- Add sourceItem to inventory
+                    sourceItem.slot = targetSlot
+                    local addResult = player.inventory:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info, false)
+                    if not addResult.status then
+                        -- Rollback on failed: Add sourceItem back to backpack
+                        sourceItem.slot = sourceSlot -- Reverse slot of sourceItem
+                        backpack:addItem(sourceItem.name, sourceItem.amount, backpackSlot, sourceItem.info)
+                        player.inventory:addItem(targetItem.name, targetItem.amount, targetSlot, targetItem.info)
+                        return {
+                            status = false,
+                            message = addResult.message,
+                        }
+                    end
+                    -- Add targetItem to backpack
+                    targetItem.slot = backpackSlot
+                    local addTargetItemResult = backpack:addItem(targetItem.name, targetItem.amount, backpackSlot, targetItem.info)
+                    if not addTargetItemResult.status then
+                        -- Rollback on failed: Add sourceItem back to inventory
+                        player.inventory:addItem(targetItem.name, targetItem.amount, targetSlot, targetItem.info, false)
+                        sourceItem.slot = sourceSlot -- Reverse slot of sourceItem
+                        backpack:addItem(sourceItem.name, sourceItem.amount, backpackSlot, sourceItem.info)
+                        player.inventory:removeItem(sourceItem.name, sourceItem.amount, targetSlot)
+                        return {
+                            status = false,
+                            message = addTargetItemResult.message,
+                        }
+                    end
+                    player.inventory:sync()
+                    return {
+                        status = true,
+                        message = 'Item moved from backpack to inventory!',
+                        slot = targetSlot,
+                    }
+                else
+                    -- Move item to target slot
+                    local removeResult = backpack:removeItem(sourceItem.name, sourceItem.amount, backpackSlot)
+                    if not removeResult.status then
+                        return {
+                            status = false,
+                            message = removeResult.message,
+                        }
+                    end
+                    sourceItem.slot = targetSlot
+                    local addResult = player.inventory:addItem(sourceItem.name, sourceItem.amount, targetSlot, sourceItem.info, false)
+                    if not addResult.status then
+                        -- Rollback on failed: Add sourceItem back to backpack
+                        backpack:addItem(sourceItem.name, sourceItem.amount, backpackSlot, sourceItem.info, false)
+                        return {
+                            status = false,
+                            message = addResult.message,
+                        }
+                    end
+                    player.inventory:sync()
+                    return {
+                        status = true,
+                        message = 'Item moved from backpack to inventory!',
+                        slot = targetSlot,
+                    }
+                end
             end
 
             if targetGroup == 'equipment' then
@@ -838,11 +931,10 @@ function SInventoryManager.new(core)
         if not result.status then
             return {
                 status = false,
-                message = 'Move operation failed!',
+                message = result.message,
             }
         end
         -- destroy container when move done
-
         if data.sourceGroup == 'container' and self.containers[sourceGroupId] and sourceGroupId ~= nil then
             -- Check if container is empty
             if self.containers[sourceGroupId].isDestroyOnEmpty then
@@ -1041,7 +1133,19 @@ function SInventoryManager.new(core)
                 message = SHARED.t('error.failedToGetPlayer'),
             }
         end
-        return player.inventory:splitItem(data.slot)
+        if data.slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            return player.inventory:splitItem(data.slot)
+        else
+            local backpack = player.inventory:getBackpackContainer()
+            if backpack then
+                local backpackSlot = data.slot - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+                return backpack:splitItem(backpackSlot)
+            end
+        end
+        return {
+            status = false,
+            message = 'Container not found!',
+        }
     end
 
     --- Use item
@@ -1062,7 +1166,8 @@ function SInventoryManager.new(core)
         else
             local backpack = player.inventory:getBackpackContainer()
             if backpack then
-                itemInfo = backpack:getItemBySlot(data.slot)
+                local backpackSlot = data.slot - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+                itemInfo = backpack:getItemBySlot(backpackSlot)
             end
         end
         -- Verify item at slot
@@ -1104,7 +1209,8 @@ function SInventoryManager.new(core)
             else
                 local backpack = player.inventory:getBackpackContainer()
                 if backpack then
-                    backpack:removeItem(data.itemName, 1, data.slot)
+                    local backpackSlot = data.slot - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+                    backpack:removeItem(data.itemName, 1, backpackSlot)
                 end
             end
 

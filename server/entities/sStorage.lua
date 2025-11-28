@@ -441,13 +441,8 @@ function SStorage:moveItem(item, targetSlot)
             self:updateItem(targetItemToSwap, sourceSlot)
         end
     else
-        -- Target slot is empty
-        -- Remove current item at source slot
-        self:pop(item.slot)
-        -- Assign new slot to item
+        -- Target slot is empty; keep existing reference and just update slot
         item.slot = targetSlot
-        -- Assign item to new slot
-        self:updateItem(item, targetSlot)
     end
 
     return { status = true, message = 'Item moved to slot!', slot = targetSlot }

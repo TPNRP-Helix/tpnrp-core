@@ -56,7 +56,6 @@ export const Inventory = () => {
         setOtherItemsType,
         setOtherItemsSlotCount,
         getTotalLimitWeight,
-        moveInventoryItem,
         onCloseInventory
     } = useInventoryStore(
         useShallow((state) => ({
@@ -76,7 +75,6 @@ export const Inventory = () => {
             setOtherItemsType: state.setOtherItemsType,
             setOtherItemsSlotCount: state.setOtherItemsSlotCount,
             getTotalLimitWeight: state.getTotalLimitWeight,
-            moveInventoryItem: state.moveInventoryItem,
             onCloseInventory: state.onCloseInventory
         }))
     )
@@ -138,32 +136,19 @@ export const Inventory = () => {
             isGroup(activeGroup) &&
             isGroup(targetGroup)
         ) {
-            moveInventoryItem({
+            window.hEvent("onMoveInventoryItem", {
                 sourceSlot,
                 targetSlot,
                 sourceGroup: activeGroup,
-                targetGroup
-            }, {
-                onSuccess: () => {
-                    console.log(`Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`)
-                    window.hEvent("onMoveInventoryItem", {
-                        sourceSlot,
-                        targetSlot,
-                        sourceGroup: activeGroup,
-                        targetGroup,
-                        sourceGroupId: activeGroupId ?? '',
-                        targetGroupId: targetGroupId ?? ''
-                    }, (result: unknown) => {
-                        console.log('[UI] handleDragEnd - result: ', result)
-                    })
-                },
-                onFail: () => {
-                    console.log(`Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`)
-                }
+                targetGroup,
+                sourceGroupId: activeGroupId ?? '',
+                targetGroupId: targetGroupId ?? ''
+            }, (result: unknown) => {
+                console.log('[UI] handleDragEnd - result: ', JSON.stringify(result))
             })
         }
         setActiveDragItem(null)
-    }, [moveInventoryItem, t])
+    }, [t])
 
     const handleDragCancel = useCallback(() => {
         setActiveDragItem(null)
