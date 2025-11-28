@@ -68,11 +68,11 @@ DAO.inventory.get = function(citizenId)
     for _, item in pairs(items) do
         local itemData = SHARED.items[item.name:lower()]
         if item then
-            -- Save item slot as index
-            formattedItems[item.slot] = itemData
-            formattedItems[item.slot].amount = item.amount
-            formattedItems[item.slot].info = item.info
-            formattedItems[item.slot].slot = item.slot
+            local nextIndex = #formattedItems + 1
+            formattedItems[nextIndex] = itemData
+            formattedItems[nextIndex].amount = item.amount
+            formattedItems[nextIndex].info = item.info
+            formattedItems[nextIndex].slot = item.slot
         end
     end
     -- Return formatted items

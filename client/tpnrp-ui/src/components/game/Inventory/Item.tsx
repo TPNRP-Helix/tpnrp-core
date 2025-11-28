@@ -302,6 +302,11 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                             {t('inventory.maxWeight')}: {formatWeight(item?.info?.maxWeight, { gram: 'gam', kg: 'kg', ton: 'ton' }, true)} ({t('inventory.canCarry')})
                                         </div>
                                     ) : null}
+                                    {item?.info?.containerId ? (
+                                        <div className='text-xs text-gray-500'>
+                                            ID: {item?.info?.containerId}
+                                        </div>
+                                    ) : null}
                                 </div>
                             </div>
                             <div className='text-xs text-gray-400 mt-4'>

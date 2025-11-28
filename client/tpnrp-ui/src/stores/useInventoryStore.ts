@@ -48,7 +48,7 @@ type InventoryState = {
   amountDialogType: 'give' | 'drop'
   dialogItem: TInventoryItem | null
   inventoryItems: TInventoryItem[]
-  backpack: TContainer | null
+  backpackItems: TInventoryItem[]
   slotCount: number
   totalWeight: number // Total weight of inventory in grams
   equipmentItems: TInventoryItem[]
@@ -56,7 +56,7 @@ type InventoryState = {
   learnedCraftingRecipes: string[]
   selectCharacterTab: 'equipment' | 'skills' | 'stats'
   temporaryDroppedItems: TInventoryItem[]
-  setBackpack: (backpack: TContainer | null) => void
+  setBackpackItems: (backpackItems: TInventoryItem[]) => void
   setTemporaryDroppedItem: (items: TInventoryItem) => void
   removeTemporaryDroppedItem: (item: TItemData) => void
   rollbackTemporaryDroppedItem: (item: TItemData) => void
@@ -92,7 +92,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   amountDialogType: 'drop',
   dialogItem: null,
   inventoryItems: [],
-  backpack: null,
+  backpackItems: [],
   slotCount: 0,
   totalWeight: 15000, // 15kg
   otherItems: [],
@@ -104,9 +104,9 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   learnedCraftingRecipes: [],
   selectCharacterTab: 'equipment',
   temporaryDroppedItems: [],
-  setBackpack: (backpack: TContainer | null) => {
+  setBackpackItems: (backpackItems: TInventoryItem[]) => {
     set(() => {
-      return { backpack: backpack }
+      return { backpackItems: backpackItems }
     })
   },
   setTemporaryDroppedItem: (item: TInventoryItem) => {
@@ -284,12 +284,14 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
       const inventoryItems = [...state.inventoryItems]
       const equipmentItems = [...state.equipmentItems]
       const otherItems = [...state.otherItems]
+      const backpackItems = [...state.backpackItems]
 
       const collections: Record<TInventoryGroup, TInventoryItem[]> = {
         inventory: inventoryItems,
         equipment: equipmentItems,
         container: otherItems,
         devLibrary: [],
+        backpack: backpackItems,
       }
 
       const sourceList = collections[sourceGroup]

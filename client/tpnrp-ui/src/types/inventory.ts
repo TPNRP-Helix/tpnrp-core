@@ -12,10 +12,11 @@ export type TInventoryItem = {
         durability?: number // From 0 to 100
         maxWeight?: number // In gram
         slot?: number // slot count of this item (This field is for backpack)
+        containerId?: string // Container id of this item (This field is for backpack)
     }
 }
 
-export type TInventoryGroup = 'equipment' | 'inventory' | 'container' | 'devLibrary'
+export type TInventoryGroup = 'equipment' | 'inventory' | 'container' | 'devLibrary' | 'backpack'
 
 export type TInventoryItemProps = {
     item?: TInventoryItem

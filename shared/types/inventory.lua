@@ -40,7 +40,7 @@
 ---@field message string -- message
 ---@field inventory table<number, SInventoryItemType> -- player's inventory
 ---@field equipment table<EEquipmentClothType, SEquipmentItemType> -- player's equipment
----@field container {id: string; items: table<number, SInventoryItemType>}|nil -- container's inventory
+---@field container table<number, SInventoryItemType> -- container's inventory
 
 ---@class TResponseCreateDropItem
 ---@field status boolean -- Status of response

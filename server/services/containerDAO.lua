@@ -85,19 +85,19 @@ DAO.container.get = function(containerId)
     for _, item in pairs(items) do
         local itemData = SHARED.items[item.name:lower()]
         if item then
-            -- Save item slot as index
-            formattedItems[item.slot] = itemData
-            formattedItems[item.slot].amount = item.amount
-            formattedItems[item.slot].info = item.info
-            formattedItems[item.slot].slot = item.slot
+            local nextIndex = #formattedItems + 1
+            formattedItems[nextIndex] = itemData
+            formattedItems[nextIndex].amount = item.amount
+            formattedItems[nextIndex].info = item.info
+            formattedItems[nextIndex].slot = item.slot
         end
     end
     -- Return formatted items
     return {
         id = inventory.container_id,
         items = formattedItems,
-        maxSlot = inventory.max_slot,
-        maxWeight = inventory.max_weight,
+        maxSlot = tonumber(inventory.max_slot),
+        maxWeight = tonumber(inventory.max_weight),
         isDestroyOnEmpty = inventory.is_destroy_on_empty,
         position = JSON.parse(inventory.position),
         rotation = JSON.parse(inventory.rotation),

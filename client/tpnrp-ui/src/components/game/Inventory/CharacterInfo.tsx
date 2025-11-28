@@ -13,15 +13,14 @@ export const CharacterInfo = () => {
         selectCharacterTab,
         setSelectCharacterTab,
         getEquipmentItem,
-        // setEquipmentItems
+        setEquipmentItems
     } = useInventoryStore()
     
     const { t } = useI18n()
 
     useWebUIMessage<{ type: 'sync', items: TInventoryItem[] }>('doSyncEquipment', (data) => {
         if (data.type === 'sync') {
-            console.log('doSyncEquipment', JSON.stringify(data.items))
-            // setEquipmentItems(data.items)
+            setEquipmentItems(data.items)
         }
     })
 

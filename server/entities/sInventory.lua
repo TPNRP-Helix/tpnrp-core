@@ -43,7 +43,11 @@ function SInventory.new(player, inventoryType)
     ---Sync inventory
     function self:sync()
         local backpack = self:getBackpackContainer()
-        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, backpack)
+        local backpackItems = {}
+        if backpack then
+            backpackItems = backpack.items
+        end
+        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, backpackItems)
     end
 
     ---Save inventory
@@ -163,20 +167,19 @@ function SInventory.new(player, inventoryType)
             end
         end
         local backpackCapacity = self.player.equipment:getBackpackCapacity()
-        print('[SERVER] Get equipment')
         local equipment = self.player.equipment:getEquipment()
-        print('[SERVER] Get backpack')
         local backpack = self:getBackpackContainer()
-        print('[SERVER] done')
-        print('[SERVER] equipment ' .. JSON.stringify(equipment))
-        print('[SERVER] inventory ' .. JSON.stringify(inventory))
-        print('[SERVER] backpack ' .. JSON.stringify(backpack))
+        local bacpackItems = {}
+        if backpack then
+            bacpackItems = backpack.items
+        end
+
         return {
             status = true,
             message = 'Inventory opened!',
             inventory = inventory,
             equipment = equipment,
-            backpack = backpack,
+            backpack = bacpackItems,
             capacity = {
                 weight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpackCapacity.weightLimit,
                 slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,

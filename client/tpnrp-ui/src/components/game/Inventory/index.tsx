@@ -27,7 +27,7 @@ type TOpenInventoryResult = {
     message: string
     inventory: TInventoryItem[]
     equipment: TInventoryItem[]
-    backpack: TContainer | null
+    backpack: TInventoryItem[]
     container?: TContainer | null
     capacity: {
         weight: number
@@ -43,7 +43,7 @@ export const Inventory = () => {
         setEquipmentItems,
         slotCount, setSlotCount,
         getTotalWeight, setTotalWeight,
-        backpack, setBackpack,
+        backpackItems, setBackpackItems,
         setOtherItems,
         setOtherItemsId,
         setOtherItemsType,
@@ -94,7 +94,7 @@ export const Inventory = () => {
         const item: TInventoryItem = active.data.current?.item
 
         const isGroup = (value: unknown): value is TInventoryGroup =>
-            value === "inventory" || value === "equipment" || value === "container"
+            value === "inventory" || value === "equipment" || value === "container" || value === "backpack"
         
         console.log('[UI] handleDragEnd - activeGroup: ', activeGroup)
         console.log('[UI] handleDragEnd - targetGroup: ', targetGroup)
@@ -165,6 +165,7 @@ export const Inventory = () => {
         }
         ///////////////////////////////////////////////////////////////////////////
         // Check if result.equipment is an array or object
+        console.log('[UI] openInventory - result.equipment: ', JSON.stringify(result.equipment))
         if (Array.isArray(result.equipment)) {
             // It's an array
             setEquipmentItems(result.equipment)
@@ -191,16 +192,13 @@ export const Inventory = () => {
         }
         ///////////////////////////////////////////////////////////////////////////
         if (result.backpack) {
-            if (Array.isArray(result.backpack.items)) {
+            if (Array.isArray(result.backpack)) {
                 // It's an array
-                setBackpack(result.backpack)
-            } else if (result.backpack.items && typeof result.backpack.items === 'object') {
+                setBackpackItems(result.backpack)
+            } else if (result.backpack && typeof result.backpack === 'object') {
                 // It's an object (not an array)
-                const formattedItems = Object.values(result.backpack.items).filter(item => item !== null) as TInventoryItem[]
-                setBackpack({
-                    ...result.backpack,
-                    items: formattedItems // Override items
-                })
+                const formattedItems = Object.values(result.backpack).filter(item => item !== null) as TInventoryItem[]
+                setBackpackItems(formattedItems)
             }
             console.log('[UI] openInventory - backpack result: ', JSON.stringify(result.backpack))
         }
@@ -209,11 +207,11 @@ export const Inventory = () => {
         setOpenInventory(true)
     })
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
-    useWebUIMessage<[type: string, items: TInventoryItem[], backpack: TContainer | null]>('doSyncInventory', ([type, items, backpack]) => {
+    useWebUIMessage<[type: string, items: TInventoryItem[], backpackItems: TInventoryItem[]]>('doSyncInventory', ([type, items, backpackItems]) => {
         if (type === 'sync') {
             setInventoryItems(items)
-            if (backpack) {
-                setBackpack(backpack)
+            if (backpackItems) {
+                setBackpackItems(backpackItems)
             }
         }
     })
@@ -310,8 +308,8 @@ export const Inventory = () => {
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
                                                     const slot = i + (DEFAULT_SLOT_COUNT + 1) // Next slot index
-                                                    const item = backpack?.items.find((item) => item.slot === (i + 1))
-                                                    return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} />
+                                                    const item = backpackItems.find((item) => item.slot === (i + 1))
+                                                    return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} group="backpack" />
                                                 })}
                                             </div>
                                         ) : (
