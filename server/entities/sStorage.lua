@@ -80,6 +80,7 @@ function SStorage:canAddItem(itemName, amount)
             end
         end
         local totalNewUsedSlots = totalUsedSlots + 1
+        print('[SERVER] [DEBUG] SStorage:canAddItem: totalNewUsedSlots: ' .. totalNewUsedSlots .. ' maxSlots: ' .. self:getMaxSlots())
         if totalNewUsedSlots > self:getMaxSlots() then
             return { status = false, message = SHARED.t('error.inventoryFull') }
         end

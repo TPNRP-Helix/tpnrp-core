@@ -70,6 +70,12 @@ function SInventoryManager.new(core)
                 }
             end
             local result = player.inventory:addItem(data.itemName, data.amount, nil, itemInfo)
+            if not result.status and result.message == 'Inventory is full!' then
+                local backpack = player.inventory:getBackpackContainer()
+                if backpack then
+                    result = backpack:addItem(data.itemName, data.amount, nil, itemInfo)
+                end
+            end
             return {
                 status = result.status,
                 message = result.message,

@@ -185,6 +185,15 @@ function SEquipment.new(player)
             })
             return { status = false, message = 'Item not found in equipment!' }
         end
+        
+        -- If unequipping a bag, save the container before removing it from equipment
+        if clothItemType == EEquipmentClothType.Bag then
+            local backpackContainer = self.player.inventory:getBackpackContainer()
+            if backpackContainer then
+                backpackContainer:save()
+            end
+        end
+        
         -- Unequip item from slot
         self:pop(clothItemType)
         local container = nil

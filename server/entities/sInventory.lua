@@ -90,21 +90,13 @@ function SInventory.new(player, inventoryType)
     ---Get max weight
     ---@return number
     function self:getMaxWeight()
-        local inventoryCapacity = { status = false, slots = 0, weightLimit = 0 }
-        if self.type == 'player' then
-            inventoryCapacity = self.player.equipment:getBackpackCapacity()
-        end
-        return SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + inventoryCapacity.weightLimit
+        return SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT
     end
 
     ---Get max slots
     ---@return number
     function self:getMaxSlots()
-        local inventoryCapacity = { status = false, slots = 0, weightLimit = 0 }
-        if self.type == 'player' then
-            inventoryCapacity = self.player.equipment:getBackpackCapacity()
-        end
-        return SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
+        return SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
     end
 
     ---Get backpack container
