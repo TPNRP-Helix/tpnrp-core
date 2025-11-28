@@ -97,7 +97,7 @@ function SInventoryManager.new(core)
         print('---------------------------------------')
         for _, container in pairs(allContainers) do
             -- TODO: Create container entity, spawn them in world, add interaction for them
-            print('[SERVER] container ' .. container.id .. ' loaded')
+            -- print('[SERVER] container ' .. container.containerId .. ' loaded')
         end
         print('---------------------------------------')
     end
@@ -263,7 +263,8 @@ function SInventoryManager.new(core)
         print('[SERVER] getItemFromGroup - group: ' .. group .. ', slot: ' .. slot .. ', sourceGroupId: ' .. sourceGroupId .. ', targetGroupId: ' .. targetGroupId)
         if group == 'inventory' then
             ---@cast slot number
-            return player.inventory:findItemBySlot(slot)
+            local foundSlot, foundIndex = player.inventory:getItemBySlot(slot)
+            return foundSlot
         elseif group == 'equipment' then
             ---@cast slot number
             local clothType = getEquipmentClothTypeFromSlot(slot)
@@ -271,7 +272,7 @@ function SInventoryManager.new(core)
             if not clothType then
                 return nil
             end
-            return player.equipment:findItemByClothType(clothType)
+            return player.equipment:getItemByClothType(clothType)
         elseif group == 'container' and sourceGroupId ~= nil then
             return getItemFromContainer(sourceGroupId, slot)
         end
@@ -860,7 +861,7 @@ function SInventoryManager.new(core)
         local SpawnPosition = playerCoords + (ForwardVec * 200)
         local item = nil
         -- Get item from player's inventory
-        item = container:findItemBySlot(data.fromSlot)
+        item = container:getItemBySlot(data.fromSlot)
         
         if not item then
             self.core.cheatDetector:logCheater({
@@ -1027,11 +1028,11 @@ function SInventoryManager.new(core)
         local itemInfo = nil
         if data.slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
-            itemInfo = player.inventory:findItemBySlot(data.slot)
+            itemInfo = player.inventory:getItemBySlot(data.slot)
         else
             local backpack = player.inventory:getBackpackContainer()
             if backpack then
-                itemInfo = backpack:findItemBySlot(data.slot)
+                itemInfo = backpack:getItemBySlot(data.slot)
             end
         end
         -- Verify item at slot
@@ -1100,6 +1101,7 @@ function SInventoryManager.new(core)
         end
         local container = nil
         local containerType = ''
+        print('[SERVER] data.slot: ' .. JSON.stringify(data))
         if data.slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             container = player.inventory
             containerType = 'inventory'
@@ -1116,7 +1118,7 @@ function SInventoryManager.new(core)
                 message = SHARED.t('error.itemNotFound'),
             }
         end
-        local itemInfo = container:findItemBySlot(data.slot)
+        local itemInfo = container:getItemBySlot(data.slot)
         if not itemInfo then
             return {
                 status = false,

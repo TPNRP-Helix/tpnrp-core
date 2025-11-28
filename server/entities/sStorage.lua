@@ -132,14 +132,20 @@ function SStorage:findItemSlot(itemName)
     return nil
 end
 
----Find an item by slot number
+---Get an item by slot number
 ---@param slotNumber number slot number
 ---@return SInventoryItemType | nil item data, or nil if item not found
-function SStorage:findItemBySlot(slotNumber)
+---@return number index of item in array
+function SStorage:getItemBySlot(slotNumber)
     if not slotNumber then
-        return nil
+        return nil, -1
     end
-    return self.items[slotNumber] or nil
+    for index, value in ipairs(self.items) do
+        if value.slot == slotNumber then
+            return value, index
+        end
+    end
+    return nil, -1
 end
 
 ---Add item to inventory
@@ -183,7 +189,7 @@ function SStorage:addItem(itemName, amount, slotNumber, info)
         end
         
         -- Check if slot is already occupied
-        local existingItem = self.items[slotNumber]
+        local existingItem = self:getItemBySlot(slotNumber)
         
         if existingItem then
             -- Slot is occupied
@@ -232,25 +238,26 @@ function SStorage:addItem(itemName, amount, slotNumber, info)
             end
         end
     end
-    
+    -- Stack new item if it is not unique
     -- Add or update item in inventory
-    if self.items[targetSlot] and not isUnique then
+    local targetSlotItem = self:getItemBySlot(targetSlot)
+    if targetSlotItem and not isUnique then
         -- Stack item (non-unique items can stack)
-        self.items[targetSlot].amount = self.items[targetSlot].amount + amount
+        targetSlotItem.amount = targetSlotItem.amount + amount
         -- Update info if provided
         if info then
             -- Merge info tables if both exist
-            if self.items[targetSlot].info and type(self.items[targetSlot].info) == 'table' then
+            if targetSlotItem.info and type(targetSlotItem.info) == 'table' then
                 for k, v in pairs(info) do
-                    self.items[targetSlot].info[k] = v
+                    targetSlotItem.info[k] = v
                 end
             else
-                self.items[targetSlot].info = info
+                targetSlotItem.info = info
             end
         end
     else
         -- Create new item entry
-        self.items[targetSlot] = {
+        self:push({
             name = itemData.name,
             label = itemData.label,
             weight = itemData.weight,
@@ -263,7 +270,7 @@ function SStorage:addItem(itemName, amount, slotNumber, info)
             amount = amount,
             slot = targetSlot,
             info = info or {}
-        }
+        })
     end
 
     return { status = true, message = SHARED.t('inventory.added'), slot = targetSlot }
@@ -293,7 +300,7 @@ function SStorage:removeItem(itemName, amount, slotNumber)
         end
         
         -- Check if item exists at the specified slot
-        local item = self.items[slotNumber]
+        local item = self:getItemBySlot(slotNumber)
         if not item then
             return { status = false, message = 'No item found at specified slot!', slot = -1 }
         end
@@ -313,7 +320,7 @@ function SStorage:removeItem(itemName, amount, slotNumber)
     end
     
     -- Get the item at the target slot
-    local item = self.items[targetSlot]
+    local item = self:getItemBySlot(targetSlot)
     if not item then
         return { status = false, message = 'Item not found at slot!', slot = -1 }
     end
@@ -333,11 +340,16 @@ function SStorage:removeItem(itemName, amount, slotNumber)
     
     -- If remaining amount is 0 or less, remove the item entirely from the slot
     if remainingAmount <= 0 then
-        self.items[targetSlot] = nil
+        self:pop(targetSlot)
         return { status = true, message = SHARED.t('inventory.removed'), slot = targetSlot }
     else
         -- Update the item amount
-        self.items[targetSlot].amount = remainingAmount
+        local targetSlotItem = self:getItemBySlot(targetSlot)
+        if targetSlotItem then
+            targetSlotItem.amount = remainingAmount
+            self:updateItem(targetSlotItem, targetSlot)
+        end
+
         return { status = true, message = 'Item amount reduced!', slot = targetSlot }
     end
 end
@@ -398,7 +410,7 @@ function SStorage:moveItem(item, targetSlot)
     if not item or not targetSlot then
         return { status = false, message = 'Invalid parameters!', slot = -1 }
     end
-    local targetItem = self:findItemBySlot(targetSlot)
+    local targetItem = self:getItemBySlot(targetSlot)
     if targetItem ~= nil then
         -- Target slot have item
         -- Check if same item and not unique => stack together
@@ -412,36 +424,33 @@ function SStorage:moveItem(item, targetSlot)
                 -- Add source amount to target
                 targetItem.amount = targetItem.amount + item.amount
                 -- Remove source item
-                self.items[sourceSlot] = nil
+                self:pop(sourceSlot)
                 return { status = true, message = 'Items stacked successfully!', slot = targetSlot }
             end
         end
         -- Different item or same item but unique => swap items
         local sourceSlot = item.slot
-        local targetItemToSwap = self.items[targetSlot]
+        local targetItemToSwap = self:getItemBySlot(targetSlot)
         targetItemToSwap.slot = item.slot
         -- Change slot of item
         item.slot = targetSlot
-        self.items[targetSlot] = item
-        -- Assign item to new slot
-        targetItemToSwap.slot = sourceSlot
-        self.items[sourceSlot] = targetItemToSwap
+        self:updateItem(item, targetSlot)
+        if targetItemToSwap then
+            -- Assign item to new slot
+            targetItemToSwap.slot = sourceSlot
+            self:updateItem(targetItemToSwap, sourceSlot)
+        end
     else
         -- Target slot is empty
         -- Remove current item at source slot
-        self.items[item.slot] = nil
+        self:pop(item.slot)
         -- Assign new slot to item
         item.slot = targetSlot
         -- Assign item to new slot
-        self.items[targetSlot] = item
+        self:updateItem(item, targetSlot)
     end
 
     return { status = true, message = 'Item moved to slot!', slot = targetSlot }
-end
-
----Sync inventory (Override this in child class if needed)
-function SStorage:sync()
-    -- Do nothing by default
 end
 
 ---Split item
@@ -452,7 +461,7 @@ function SStorage:splitItem(slot)
         return { status = false, message = 'Invalid slot number!', slot = -1 }
     end
     -- Get item at slot
-    local item = self:findItemBySlot(slot)
+    local item = self:getItemBySlot(slot)
     if not item then
         return { status = false, message = SHARED.t('inventory.itemNotFound'), slot = -1 }
     end
@@ -464,12 +473,13 @@ function SStorage:splitItem(slot)
     end
 
     local splittedAmount = math.floor(item.amount / 2)
-    self.items[slot].amount = item.amount - splittedAmount
+    local itemBySlot = self:getItemBySlot(slot)
+    itemBySlot.amount = item.amount - splittedAmount
     -- Create new item in empty slot
     -- Deep copy info if it exists
     local newItemInfo = item.info and JSON.parse(JSON.stringify(item.info)) or {}
 
-    self.items[emptySlot] = {
+    self:push({
         name = item.name,
         label = item.label,
         weight = item.weight,
@@ -482,10 +492,7 @@ function SStorage:splitItem(slot)
         amount = splittedAmount,
         slot = emptySlot,
         info = newItemInfo
-    }
-
-    -- Sync inventory
-    self:sync()
+    })
 
     return { status = true, message = 'Item split successfully!', slot = emptySlot }
 end
@@ -500,6 +507,43 @@ function SStorage:isEmpty()
       end
   end
   return totalItems == 0
+end
+
+---Push an item into an array
+---@param item SInventoryItemType item data
+function SStorage:push(item)
+    -- push an item into an array
+    self.items[#self.items + 1] = item
+end
+
+---Pop an item from an array by item slot
+---@param slot number item slot
+---@return boolean result of popping item
+function SStorage:pop(slot)
+    -- pop an item from an array by item slot
+    for index, value in ipairs(self.items) do
+        if value.slot == slot then
+            table.remove(self.items, index)
+            return true
+        end
+    end
+
+    return false
+end
+
+---Update an item in an array by item slot
+---@param item SInventoryItemType item data
+---@param slot number item slot
+---@return boolean result of updating item
+function SStorage:updateItem(item, slot)
+    for index, value in ipairs(self.items) do
+        if value.slot == slot then
+            self.items[index] = item
+            return true
+        end
+    end
+
+    return false
 end
 
 return SStorage

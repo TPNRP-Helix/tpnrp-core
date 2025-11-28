@@ -55,8 +55,6 @@ DAO.container.save = function(container)
         position,
         rotation,
     }
-    print('[LOG] DAO.container.save: ' .. sql)
-    print('[LOG] DAO.container.save: ' .. JSON.stringify(params))
     local result = DAO.DB.Execute(sql, params)
     if result then
         DAO.DB.Execute('COMMIT;')

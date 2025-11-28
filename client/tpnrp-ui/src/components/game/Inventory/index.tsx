@@ -126,7 +126,16 @@ export const Inventory = () => {
             }, {
                 onSuccess: () => {
                     console.log(`Moved inventory item from slot ${sourceSlot} to slot ${targetSlot}, group: ${activeGroup} to group: ${targetGroup} item: ${JSON.stringify(item)}`)
-                    window.hEvent("onMoveInventoryItem", { sourceSlot, targetSlot, sourceGroup: activeGroup, targetGroup, sourceGroupId: activeGroupId ?? '', targetGroupId: targetGroupId ?? '' })
+                    window.hEvent("onMoveInventoryItem", {
+                        sourceSlot,
+                        targetSlot,
+                        sourceGroup: activeGroup,
+                        targetGroup,
+                        sourceGroupId: activeGroupId ?? '',
+                        targetGroupId: targetGroupId ?? ''
+                    }, (result: unknown) => {
+                        console.log('[UI] handleDragEnd - result: ', result)
+                    })
                 },
                 onFail: () => {
                     console.log(`Failed to move inventory item from slot ${sourceSlot} to slot ${targetSlot} item: ${JSON.stringify(item)}`)

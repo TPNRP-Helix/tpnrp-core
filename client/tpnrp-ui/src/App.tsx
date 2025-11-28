@@ -10,7 +10,7 @@ import { Inventory } from "./components/game/Inventory"
 
 declare global {
   interface Window {
-    hEvent: (event: string, data?: Record<string, unknown>) => void;
+    hEvent: (event: string, data?: Record<string, unknown>, cb?: (result: unknown) => void) => void;
   }
 }
 

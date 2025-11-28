@@ -30,13 +30,12 @@ DAO.inventory.save = function(inventory)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
     local sql = [[
-        INSERT INTO inventories (type, citizen_id, items)
-        VALUES (?, ?, ?)
-        ON CONFLICT(citizen_id, type) DO UPDATE SET
+        INSERT INTO inventories (citizen_id, items)
+        VALUES (?, ?)
+        ON CONFLICT(citizen_id) DO UPDATE SET
             items = excluded.items
     ]]
     local params = {
-        'player',
         citizenId,
         JSON.stringify(formattedItems),
     }
@@ -54,14 +53,10 @@ end
 
 ---Get player's inventory (type = 'player' | 'stack')
 ---@param citizenId string
----@param type 'player' | 'stack' | ''
 ---@return table<number, SInventoryItemType> | nil
-DAO.inventory.get = function(citizenId, type)
-    if not type then
-        type = 'player'
-    end
+DAO.inventory.get = function(citizenId)
     -- Query inventory items
-    local result = DAO.DB.Select('SELECT * FROM inventories where citizen_id = ? and type = ?', { citizenId, type })
+    local result = DAO.DB.Select('SELECT * FROM inventories where citizen_id = ?', { citizenId })
     local inventory = result[1] and result[1].Columns:ToTable()
     if not inventory then
         return nil

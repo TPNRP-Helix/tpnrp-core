@@ -29,7 +29,7 @@ import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useGameStore } from "@/stores/useGameStore"
 import { Separator } from "@/components/ui/separator"
 import type { TCharacter } from "@/types/game"
-import { cn } from "@/lib/utils"
+import { cn, isInBrowser } from "@/lib/utils"
 
 type TCreateCharacterResponse = {
     name: string
@@ -147,8 +147,7 @@ export const CreateCharacter = () => {
     }, [firstName, lastName, dateOfBirth, gender, isSubmitting])
 
     const onClickJoinGame = useCallback(() => {
-        const isInBrowser = window.location.port === '5173'
-        if (isInBrowser) {
+        if (isInBrowser()) {
             // Hide Select Character
             setShowSelectCharacter(false)
             // Hide Create Character Dialog
@@ -162,9 +161,8 @@ export const CreateCharacter = () => {
     }, [selectedCitizenId])
 
     const onClickDeleteCharacter = useCallback(() => {
-        // TODO: Delete character
-        const isInBrowser = window.location.port === '5173'
-        if (isInBrowser) {
+        // Delete character
+        if (isInBrowser()) {
             setPlayerCharacters(playerCharacters.filter((character) => character.citizenId !== selectedCitizenId))
         }
         setIsShowConfirmDeleteCharacter(false)

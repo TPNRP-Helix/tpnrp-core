@@ -21,8 +21,8 @@ local en = {
         saved = "Player saved.",
     },
     equipment = {
-        equipped = "Equipped {item}.",
-        unequipped = "Unequipped {item}.",
+        equipped = "Equipped",
+        unequipped = "Unequipped",
         slot_occupied = "Slot is already occupied.",
     },
     error = {

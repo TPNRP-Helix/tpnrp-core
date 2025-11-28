@@ -9,5 +9,9 @@ export function cn(...inputs: ClassValue[]) {
 export const getEquipmentSlotName = (value: number) => {
     return Object.keys(EEquipmentSlot).find(key => 
         EEquipmentSlot[key as keyof typeof EEquipmentSlot] === value
-    );
+    )
+}
+
+export const isInBrowser = () => {
+  return typeof window !== 'undefined' && !window.hEvent;
 }
