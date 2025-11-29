@@ -123,7 +123,6 @@ export const CreateCharacter = () => {
         }
         setIsSubmitting(true)
         if (!firstName || firstName.trim() === '') {
-            console.log(t('error.firstNameRequired'), firstName)
             setError({ type: 'firstName', message: t('error.firstNameRequired') })
             setIsSubmitting(false)
             return

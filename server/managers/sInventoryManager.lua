@@ -870,8 +870,24 @@ function SInventoryManager.new(core)
                     message = 'Backpack not found!',
                 }
             end
-            local backpackSlot = targetSlot - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
-            local result = backpack:moveItem(sourceItem, backpackSlot)
+            -- Convert target global slot to backpack slot
+            local targetBackpackSlot = targetSlot - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
+            -- sourceItem.slot should already be the backpack slot (not global slot)
+            -- because getItemFromGroup converts it when retrieving from backpack
+            local sourceBackpackSlot = sourceItem.slot
+            -- Ensure sourceItem.slot matches the actual backpack slot
+            -- Get the item again using the correct backpack slot to ensure we have the right reference
+            local actualSourceItem, _ = backpack:getItemBySlot(sourceBackpackSlot)
+            if not actualSourceItem then
+                return {
+                    status = false,
+                    message = 'Source item not found in backpack!',
+                }
+            end
+            -- Ensure the slot is correct before calling moveItem
+            actualSourceItem.slot = sourceBackpackSlot
+            local result = backpack:moveItem(actualSourceItem, targetBackpackSlot)
+            -- Sync
             player.inventory:sync()
 
             return result

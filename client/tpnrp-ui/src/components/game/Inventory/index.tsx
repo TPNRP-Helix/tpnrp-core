@@ -143,8 +143,6 @@ export const Inventory = () => {
                 targetGroup,
                 sourceGroupId: activeGroupId ?? '',
                 targetGroupId: targetGroupId ?? ''
-            }, (result: unknown) => {
-                console.log('[UI] handleDragEnd - result: ', JSON.stringify(result))
             })
         }
         setActiveDragItem(null)
@@ -160,11 +158,20 @@ export const Inventory = () => {
         [inventoryItems]
     )
 
+    // Create a map for faster item lookups by slot
+    const backpackItemsMap = useMemo(
+        () => new Map(backpackItems.map(item => [item.slot, item])),
+        [backpackItems]
+    )
+
     useWebUIMessage<[TOpenInventoryResult]>('openInventory', ([result]) => {
         ///////////////////////////////////////////////////////////////////////////
         // Check if result.inventory is an array or object
         const parsedInventoryItems = parseArrayItems(result.inventory)
-        setInventoryItems(parsedInventoryItems)
+        // Filter out items that are in the backpack to prevent duplicates
+        // Main inventory should only contain items with slots <= DEFAULT_SLOT_COUNT
+        const filteredInventoryItems = parsedInventoryItems.filter((item) => item.slot <= DEFAULT_SLOT_COUNT)
+        setInventoryItems(filteredInventoryItems)
         ///////////////////////////////////////////////////////////////////////////
         // Check if result.equipment is an array or object
         const parsedEquipmentItems = parseArrayItems(result.equipment)
@@ -182,6 +189,9 @@ export const Inventory = () => {
         if (result.backpack) {
             const parsedBackpackItems = parseArrayItems(result.backpack)
             setBackpackItems(parsedBackpackItems)
+        } else {
+            // If no backpack, clear backpack items
+            setBackpackItems([])
         }
         setSlotCount(result.capacity.slots)
         setTotalWeight(result.capacity.weight)
@@ -192,14 +202,19 @@ export const Inventory = () => {
         const { type, items, backpack } = syncInfo
         if (type === 'sync') {
             const parsedItems = parseArrayItems(items)
-            setInventoryItems(parsedItems)
+            // Filter out items that are in the backpack to prevent duplicates
+            // Main inventory should only contain items with slots <= DEFAULT_SLOT_COUNT
+            const filteredInventoryItems = parsedItems.filter((item) => item.slot <= DEFAULT_SLOT_COUNT)
+            setInventoryItems(filteredInventoryItems)
             // Backpack
             if (backpack) {
                 const parsedBackpackItems = parseArrayItems(backpack.items)
-                console.log('[UI] doSyncInventory - parsedBackpackItems: ', JSON.stringify(parsedBackpackItems))
                 setBackpackItems(parsedBackpackItems)
                 setSlotCount(backpack.slotCount === 0 ? DEFAULT_SLOT_COUNT : backpack.slotCount)
                 setTotalWeight(backpack.maxWeight === 0 ? DEFAULT_MAX_WEIGHT : backpack.maxWeight)
+            } else {
+                // If no backpack, clear backpack items
+                setBackpackItems([])
             }
         }
     })
@@ -266,9 +281,9 @@ export const Inventory = () => {
                                     <div className="grid grid-cols-[repeat(5,96px)] gap-4 justify-center">
                                         {Array.from({ length: 5 }, (_, i) => {
                                             const slot = i + 1
-                                            const item = hotbarItems.find(item => item.slot === slot)
+                                            const item = hotbarItems.find(item => item.slot === slot) ?? null
                                                 
-                                            return <InventoryItem key={`${item?.name}-${slot}`} item={item} slot={slot} />
+                                            return <InventoryItem key={`hotbar-${slot}`} item={item} slot={slot} />
                                         })}
                                     </div>
                                 </div>
@@ -281,7 +296,7 @@ export const Inventory = () => {
                                             <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap justify-center">
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
                                                     const slot = i + (DEFAULT_SLOT_COUNT + 1) // Next slot index
-                                                    const item = backpackItems.find((item) => item?.slot === (i + 1))
+                                                    const item = backpackItemsMap.get(i + 1) ?? null
                                                     return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} group="backpack" />
                                                 })}
                                             </div>
