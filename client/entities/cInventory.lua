@@ -33,6 +33,12 @@ function CInventory.new(player)
         RegisterClientEvent('openContainerInventory', function(data)
             self:openInventory({ type = 'container', containerId = data.containerId })
         end)
+
+        RegisterClientEvent('pickUpItem', function(data)
+            TriggerCallback('onPickUpItem', function(result)
+                
+            end, data)
+        end)
         -- Bind key
         -- [Player] [TAB] Inventory
         Input.BindKey('TAB', function()

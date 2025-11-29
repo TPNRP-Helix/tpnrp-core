@@ -88,15 +88,17 @@ function SEquipment.new(player)
         end
         local item = nil
         local container = nil
+        local actualSlotNumber = slotNumber
         if slotNumber <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
             container = self.player.inventory
             
         else 
-            -- Backpack
+            -- Backpack - convert global slot to backpack-local slot
             local backpackContainer = self.player.inventory:getBackpackContainer()
             if backpackContainer then
                 container = backpackContainer
+                actualSlotNumber = slotNumber - SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
             end
         end
         if not container then
@@ -104,7 +106,7 @@ function SEquipment.new(player)
             return { status = false, message = 'Container not found!' }
         end
 
-        item = container:getItemBySlot(slotNumber)
+        item = container:getItemBySlot(actualSlotNumber)
         if not item then
             -- [CHEAT] possible event cheat
             self.core.cheatDetector:logCheater({
@@ -133,7 +135,8 @@ function SEquipment.new(player)
             end
         end
         -- Remove item from container (inventory for slot <= 5, backpack for slot > 5)
-        local removeResult = container:removeItem(itemName, 1, item.slot)
+        -- Use actualSlotNumber for removal to ensure correct slot is used
+        local removeResult = container:removeItem(itemName, 1, actualSlotNumber)
         if not removeResult.status then
             print(('[ERROR] sEquipment.equipItem: Failed to remove item %s from inventory!'):format(itemName))
             -- [CHEAT] possible event cheat
@@ -194,8 +197,7 @@ function SEquipment.new(player)
             end
         end
         
-        -- Unequip item from slot
-        self:pop(clothItemType)
+        -- Find container and slot BEFORE removing item from equipment to prevent item loss
         local container = nil
         local emptySlotNumber = nil
         if not toSlotNumber then
@@ -213,6 +215,9 @@ function SEquipment.new(player)
         if not container or not emptySlotNumber then
             return { status = false, message = SHARED.t('inventory.full') }
         end
+        
+        -- Unequip item from slot (only after confirming we have space)
+        self:pop(clothItemType)
 
         item.slot = emptySlotNumber
         local addResult = container:addItem(item.name, 1, item.slot, item.info)

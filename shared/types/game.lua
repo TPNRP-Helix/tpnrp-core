@@ -58,6 +58,7 @@
 ---@field rotation Rotator Rotation of mesh
 ---@field collisionType ECollisionType Collision type of mesh
 ---@field mobilityType EMobilityType Mobility type of mesh
+---@field containerId string|nil Container id
 
 ---@alias TInteractAction fun(actor: unknown, instigator: PlayerController)
 

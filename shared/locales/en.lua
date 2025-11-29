@@ -10,6 +10,7 @@ local en = {
         open = "Open",
         canAddItem = "Item can be add to inventory.",
         openDrop = "Open Drop",
+        pickUpItem = "Pick up",
         itemNotFound = "Item not found!",
     },
     backpack = {
@@ -45,6 +46,8 @@ local en = {
         inventoryFull = "Inventory is full!",
         playerNotFound = "Player not found!",
         itemCannotBeUsed = "Item cannot be used",
+        cannotAddItemsToPlayerWeightLimitReached = "Cannot add items to player! Weight limit reached!",
+        cannotAddItemsToPlayerSlotLimitReached = "Cannot add items to player! Slot limit reached!",
     },
     success = {
         joinGame = "Joined game successfully",

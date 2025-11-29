@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react"
 import { HUD } from "./components/game/HUD"
 import { ThemeProvider } from "./components/theme-provider"
 import { CreateCharacterEventListener } from "./components/game/CreateCharacter/EventListener"
+import { DevModeEventListener } from "./components/debug/DevMode/EventListener"
 // Lazy load conditionally rendered components to reduce initial bundle size
 const DevMode = lazy(() => import("./components/debug/DevMode").then(module => ({ default: module.DevMode })))
 const GuideHelper = lazy(() => import("./components/game/GuideHelper").then(module => ({ default: module.GuideHelper })))
@@ -22,6 +23,7 @@ function App() {
       <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
         <HUD />
         <CreateCharacterEventListener />
+        <DevModeEventListener />
         <Suspense fallback={null}>
           <CreateCharacter />
           <DevMode />

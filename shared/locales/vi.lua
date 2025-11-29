@@ -10,6 +10,7 @@ local vi = {
         open = "Mở",
         canAddItem = "Vật phẩm có thể được thêm vào túi.",
         openDrop = "Mở",
+        pickUpItem = "Nhặt",
         itemNotFound = "Không tìm thấy vật phẩm!",
     },
     backpack = {
@@ -45,6 +46,8 @@ local vi = {
         inventoryFull = "Túi đồ đã đầy!",
         playerNotFound = "Không tìm thấy nhân vật!",
         itemCannotBeUsed = "Vật phẩm không thể sử dụng!",
+        cannotAddItemsToPlayerWeightLimitReached = "Không thể thêm vật phẩm vào túi! Trọng lượng đã đầy!",
+        cannotAddItemsToPlayerSlotLimitReached = "Không thể thêm vật phẩm vào túi! Số lượng đã đầy!",
     },
     success = {
         joinGame = "Đã vào game thành công",

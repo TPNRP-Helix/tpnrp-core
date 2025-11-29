@@ -32,6 +32,10 @@ function SInventoryManager.new(core)
             return self:onOpenInventory(source, data)
         end)
 
+        RegisterCallback('onPickUpItem', function(source, data)
+            return self:onPickUpItem(source, data)
+        end)
+
         RegisterCallback('onMoveInventoryItem', function(source, data)
             return self:onMoveInventoryItem(source, data)
         end)
@@ -1084,15 +1088,19 @@ function SInventoryManager.new(core)
         -- TODO: Need a native function to get ground Z
         SpawnPosition.Z = SpawnPosition.Z - 90
         PawnRotation.Yaw = PawnRotation.Yaw + worldItem.rotation
-        -- Spawn bag
-        local spawnResult = self.core.gameManager:spawnStaticMesh({
+        local spawnStaticMeshParams = {
             entityPath = worldItem.path,
             position = SpawnPosition,
             rotation = PawnRotation,
             scale = worldItem.scale,
             collisionType = ECollisionType.IgnoreOnlyPawn,
             mobilityType = EMobilityType.Movable,
-        })
+        }
+        if item.info.containerId then
+            spawnStaticMeshParams.containerId = item.info.containerId
+        end
+        -- Spawn bag
+        local spawnResult = self.core.gameManager:spawnStaticMesh(spawnStaticMeshParams)
         if not spawnResult.status then
             -- Spawn failed => Add item back to player's inventory
             container:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
@@ -1102,19 +1110,32 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-
+        -- Item have an option to pick up item
         local options = {
             {
-                Text = SHARED.t('inventory.openDrop'),
+                Text = SHARED.t('inventory.pickUpItem'),
                 Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
+                Action = function(Drop, Instigator)
+                    local controller = Instigator and Instigator:GetController()
+                    if controller then
+                        TriggerClientEvent(controller, 'pickUpItem', { containerId = spawnResult.entityId })
+                    end
+                end,
+            }
+        }
+        -- If item have containerId then it will have an option to open container inventory
+        if item.info.containerId then
+            table.insert(options, {
+                Text = SHARED.t('inventory.openDrop'),
+                Input = '/Game/Helix/Input/Actions/IA_Weapon_Reload.IA_Weapon_Reload',
                 Action = function(Drop, Instigator)
                     local controller = Instigator and Instigator:GetController()
                     if controller then
                         TriggerClientEvent(controller, 'openContainerInventory', { containerId = spawnResult.entityId })
                     end
                 end,
-            }
-        }
+            })
+        end
         -- Spawn success
         local addInteractableResult = self.core.gameManager:addInteractable({
             entityId = spawnResult.entityId,
@@ -1132,23 +1153,29 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-
-        -- Add container to dictionary (dropItem already has slot = 1)
-        local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
-        dropContainer:initEntity({
-            entityId = spawnResult.entityId,
-            entity = spawnResult.entity,
-            interactableEntity = addInteractableResult.interactableEntity,
-            position = SpawnPosition,
-            rotation = PawnRotation,
-            items = {
-                [1] = dropItem,
-            },
-            maxSlot = 1, -- Drop item should only have 1 slot
-            maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
-            isDestroyOnEmpty = true
-        })
-        self.containers[spawnResult.entityId] = dropContainer
+        if item.info.containerId then
+            self.containers[item.info.containerId].entity = spawnResult.entity
+            self.containers[item.info.containerId].interactableEntity = addInteractableResult.interactableEntity
+            self.containers[item.info.containerId].position = SpawnPosition
+            self.containers[item.info.containerId].rotation = PawnRotation
+        else
+            -- Add container to dictionary (dropItem already has slot = 1)
+            local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
+            dropContainer:initEntity({
+                entityId = spawnResult.entityId,
+                entity = spawnResult.entity,
+                interactableEntity = addInteractableResult.interactableEntity,
+                position = SpawnPosition,
+                rotation = PawnRotation,
+                items = {
+                    [1] = dropItem,
+                },
+                maxSlot = 1, -- Drop item should only have 1 slot
+                maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
+                isDestroyOnEmpty = true
+            })
+            self.containers[spawnResult.entityId] = dropContainer
+        end
 
         return {
             status = true,
@@ -1326,6 +1353,78 @@ function SInventoryManager.new(core)
         end
 
         return player.equipment:unequipItem(clothType, data.toSlotNumber or nil)
+    end
+
+    function self:onPickUpItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        local containerResult = self:openContainerId(data.containerId)
+        if not containerResult.status then
+            return {
+                status = false,
+                message = containerResult.message,
+            }
+        end
+        -- Get container position 
+        local containerPosition = containerResult.container.entity:K2_GetActorLocation()
+        local playerPosition = player:getCoords()
+        local distance = GetDistanceBetweenCoords(playerPosition, containerPosition)
+        -- If item is too far away, return error
+        if distance > 300 then
+            return {
+                status = false,
+                message = 'Item is too far away!',
+            }
+        end
+        local canAddItemsResult = player:canAddContainerItems(data.containerId)
+        if not canAddItemsResult.status then
+            return {
+                status = false,
+                message = canAddItemsResult.message,
+            }
+        end
+        if containerResult.container.holderItem then
+            -- TODO: add container to item
+            local addHolderItemResult = player:addItem(containerResult.container.holderItem.name, containerResult.container.holderItem.amount, containerResult.container.holderItem.info, nil, false)
+            if not addHolderItemResult.status then
+                return {
+                    status = false,
+                    message = addHolderItemResult.message,
+                }
+            end
+        end
+        -- Weight and Slot limit passed => Add items to player's inventory
+        for _, value in ipairs(containerResult.container.items) do
+            local itemName = value.name
+            local amount = value.amount
+            local itemInfo = value.info
+            local addItemResult = player:addItem(itemName, amount, itemInfo, nil, false)
+            if not addItemResult.status then
+                return {
+                    status = false,
+                    message = addItemResult.message,
+                }
+            end
+        end
+        
+        -- Sync inventory to client (Sync when all items are added)
+        player.inventory:sync()
+        
+        -- Reset: position, rotation, interactableEntity, entity on success
+        self.containers[data.containerId].position = nil
+        self.containers[data.containerId].rotation = nil
+        -- Destroy entity and interactable entity
+        self.containers[data.containerId]:destroy()
+
+        return {
+            status = true,
+            message = 'Items picked up from container!',
+        }
     end
 
     _contructor()

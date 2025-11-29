@@ -3,7 +3,8 @@ local SStorage = require('server/entities/sStorage')
 ---@class SContainer : SStorage
 ---@field core TPNRPServer
 ---@field citizenId string Citizen ID
----@field items table<number, SInventoryItemType>
+---@field items table<number, SInventoryItemType> Items in container
+---@field holderItem SInventoryItemType|nil Holder item of container
 ---@field maxSlot number Max slot count
 ---@field maxWeight number Max weight in grams
 SContainer = {}
@@ -26,6 +27,7 @@ function SContainer.new(core, containerId, citizenId)
     self.interactableEntity = nil
     -- items
     self.items = {}
+    self.holderItem = nil
 
     self.position = nil
     self.rotation = nil
@@ -59,6 +61,7 @@ function SContainer.new(core, containerId, citizenId)
         self.isDestroyOnEmpty = data.isDestroyOnEmpty or false
         self.position = data.position or nil
         self.rotation = data.rotation or nil
+        self.holderItem = data.holderItem or nil
     end
 
     ---Create new container
@@ -91,6 +94,7 @@ function SContainer.new(core, containerId, citizenId)
             self.isDestroyOnEmpty = container.isDestroyOnEmpty
             self.position = container.position
             self.rotation = container.rotation
+            self.holderItem = container.holderItem
             return true
         end
         return false
@@ -118,7 +122,7 @@ function SContainer.new(core, containerId, citizenId)
         }
     end
     
-    ---Destroy container
+    ---Destroy entity and interactable entity
     ---@return {status:boolean, message:string} result of destroying container
     function self:destroy()
         if self.interactableEntity then

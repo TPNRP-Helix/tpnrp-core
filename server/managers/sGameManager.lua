@@ -67,7 +67,7 @@ function SGameManager.new(core)
         end
         entity:SetActorScale3D(Vector(spawnScale.x, spawnScale.y, spawnScale.z))
         entity:SetMobility(mobilityType)
-        local entityId = self:createId()
+        local entityId = params.containerId or self:createId()
 
         return {
             status = true,

@@ -2,7 +2,8 @@
 ---@field entityId string|nil
 ---@field entity unknown|nil
 ---@field interactableEntity unknown|nil
----@field items table<number, SInventoryItemType>
+---@field items table<number, SInventoryItemType> Items in container
+---@field holderItem SInventoryItemType|nil Holder item of container
 ---@field maxSlot number
 ---@field maxWeight number
 ---@field isDestroyOnEmpty boolean|nil
@@ -19,3 +20,4 @@
 ---@field position Vector3
 ---@field rotation Rotator
 ---@field displayModel string
+---@field holderItem SInventoryItemType|nil

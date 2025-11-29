@@ -56,6 +56,7 @@ DAO.DB.Execute([[
         max_slot INTEGER,
         max_weight INTEGER,
         items TEXT,
+        holder_item TEXT,
         is_destroy_on_empty BOOLEAN,
         position TEXT,
         rotation TEXT,
