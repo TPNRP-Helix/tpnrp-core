@@ -4,14 +4,14 @@ import { ItemMedia } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
 import type { TInventoryItemProps, TItemData } from "@/types/inventory"
-import { memo, useCallback, useId, useMemo, useState } from "react"
+import { memo, useCallback, useEffect, useId, useMemo, useState } from "react"
 import { useI18n } from "@/i18n"
 import { FALLBACK_DEFAULT_IMAGE_PATH, RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
 import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf, Plus } from "lucide-react"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Progress } from "@/components/ui/progress"
-import { useDraggable, useDroppable } from "@dnd-kit/core"
+import { useDraggable, useDroppable, useDndContext } from "@dnd-kit/core"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { Image } from "@/components/ui/image"
 import { toast } from "sonner"
@@ -212,6 +212,7 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
     const [isHoverCardOpen, setIsHoverCardOpen] = useState(false)
+    const { active } = useDndContext()
 
     const handleContextMenuOpenChange = useCallback((open: boolean) => {
         setIsContextMenuOpen(open)
@@ -227,6 +228,13 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
         }
         setIsHoverCardOpen(open)
     }, [isContextMenuOpen])
+
+    useEffect(() => {
+        // Disable hover card when any item is being dragged (not just this one)
+        if (active !== null) {
+            setIsHoverCardOpen(false)
+        }
+    }, [active])
 
     const slotShell = (
         <div
