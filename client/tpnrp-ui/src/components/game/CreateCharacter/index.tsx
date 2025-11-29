@@ -30,7 +30,6 @@ import { useI18n } from "@/i18n"
 import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useGameStore } from "@/stores/useGameStore"
 import { Separator } from "@/components/ui/separator"
-import type { TCharacter } from "@/types/game"
 import { cn, isInBrowser } from "@/lib/utils"
 
 type TCreateCharacterResponse = {
@@ -53,7 +52,7 @@ export const CreateCharacter = () => {
     const {
         isShowCreateCharacter, setShowCreateCharacter,
         isShowSelectCharacter, setShowSelectCharacter,
-        maxCharacters, setMaxCharacters,
+        maxCharacters,
         isOpenCalendar, setIsOpenCalendar,
         dateOfBirth, setDateOfBirth,
         gender, setGender,
@@ -66,27 +65,7 @@ export const CreateCharacter = () => {
     const [selectedCitizenId, setSelectedCitizenId] = useState<string>('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isShowConfirmDeleteCharacter, setIsShowConfirmDeleteCharacter] = useState(false)
-    const { toggleHud, setIsInGame, setShowLoading } = useGameStore()
-    
-    useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
-        // Set max characters
-        setMaxCharacters(maxCharacters)
-        // Format characters
-        const formattedCharacters: TCharacter[] = Object.entries(characters).map(([_, value]: [string, any]) => {
-            return {
-                name: value.name,
-                citizenId: value.citizenId,
-                level: parseInt(value.level) ?? 1,
-                money: parseInt(value.money) ?? 0,
-                gender: value.gender,
-            }
-        })
-        setPlayerCharacters(formattedCharacters)
-        // Show Select Character Sheet
-        setShowSelectCharacter(true)
-        setShowLoading(false)
-        setIsInGame(true)
-    })
+    const { toggleHud, setIsInGame } = useGameStore()
 
     useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
         // Set preview character info
