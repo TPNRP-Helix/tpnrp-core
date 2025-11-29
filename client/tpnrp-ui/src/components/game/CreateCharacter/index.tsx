@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter } from "@/compon
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { useCallback, useState } from "react"
+import { useCallback, lazy, Suspense, useState } from "react"
 import {
     Item,
     ItemContent,
@@ -19,11 +19,13 @@ import { FieldGroup, FieldSet, FieldLabel, Field, FieldContent, FieldTitle } fro
 import { RadioGroup } from "@/components/ui/radio-group"
 import { RadioGroupItem } from "@/components/ui/radio-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
-import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
+
+// Lazy load conditionally rendered components to reduce bundle size
+const Calendar = lazy(() => import("@/components/ui/calendar").then(module => ({ default: module.Calendar })))
+const UnitedStateFlag = lazy(() => import("@/components/svg/flags/UnitedStateFlag").then(module => ({ default: module.UnitedStateFlag })))
+const VietnamFlag = lazy(() => import("@/components/svg/flags/VietnamFlag").then(module => ({ default: module.VietnamFlag })))
 import { useI18n } from "@/i18n"
 import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useGameStore } from "@/stores/useGameStore"
@@ -265,8 +267,18 @@ export const CreateCharacter = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectItem value="en"> <UnitedStateFlag /> English</SelectItem>
-                                        <SelectItem value="vi"> <VietnamFlag /> Tiếng Việt</SelectItem>
+                                        <SelectItem value="en">
+                                            <Suspense fallback={null}>
+                                                <UnitedStateFlag />
+                                            </Suspense>
+                                            {" "}English
+                                        </SelectItem>
+                                        <SelectItem value="vi">
+                                            <Suspense fallback={null}>
+                                                <VietnamFlag />
+                                            </Suspense>
+                                            {" "}Tiếng Việt
+                                        </SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
@@ -355,16 +367,18 @@ export const CreateCharacter = () => {
                                     </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                                    <Calendar
-                                        mode="single"
-                                        selected={dateOfBirth}
-                                        captionLayout="dropdown"
-                                        onSelect={(date) => {
-                                            setDateOfBirth(date)
-                                            setIsOpenCalendar(false)
-                                            setError(null)
-                                        }}
-                                    />
+                                        <Suspense fallback={<div className="w-[280px] h-[280px] flex items-center justify-center"><Spinner /></div>}>
+                                            <Calendar
+                                                mode="single"
+                                                selected={dateOfBirth}
+                                                captionLayout="dropdown"
+                                                onSelect={(date) => {
+                                                    setDateOfBirth(date)
+                                                    setIsOpenCalendar(false)
+                                                    setError(null)
+                                                }}
+                                            />
+                                        </Suspense>
                                     </PopoverContent>
                                 </Popover>
                             </div>
