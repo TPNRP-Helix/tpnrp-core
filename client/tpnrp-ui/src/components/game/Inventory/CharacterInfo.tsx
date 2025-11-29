@@ -4,20 +4,19 @@ import { Separator } from "@/components/ui/separator"
 import { InventoryItem } from "./Item"
 import { useI18n } from "@/i18n"
 import { EEquipmentSlot } from "@/constants/enum"
-import { useWebUIMessage } from "@/hooks/use-hevent"
-import type { TInventoryItem } from "@/types/inventory"
-import { useMemo, memo, useCallback } from "react"
+import { useMemo, memo } from "react"
 import { useShallow } from "zustand/react/shallow"
 
 const CharacterInfoComponent = () => {
     const {
+        equipmentItems,
         selectCharacterTab,
         setSelectCharacterTab,
-        getEquipmentItem,
-        setEquipmentItems
+        getEquipmentItem
     } = useInventoryStore(
         useShallow((state) => ({
             selectCharacterTab: state.selectCharacterTab,
+            equipmentItems: state.equipmentItems,
             setSelectCharacterTab: state.setSelectCharacterTab,
             getEquipmentItem: state.getEquipmentItem,
             setEquipmentItems: state.setEquipmentItems
@@ -25,14 +24,6 @@ const CharacterInfoComponent = () => {
     )
     
     const { t } = useI18n()
-
-    const handleSyncEquipment = useCallback((data: { type: 'sync', items: TInventoryItem[] }) => {
-        if (data.type === 'sync') {
-            setEquipmentItems(data.items)
-        }
-    }, [setEquipmentItems])
-
-    useWebUIMessage<{ type: 'sync', items: TInventoryItem[] }>('doSyncEquipment', handleSyncEquipment)
 
     const leftColumnItems = useMemo(() => [
         {
@@ -53,7 +44,7 @@ const CharacterInfoComponent = () => {
         {
             slot: EEquipmentSlot.Watch
         }
-    ], [])
+    ], [equipmentItems])
 
     const rightColumnItems = useMemo(() => [
         {
@@ -74,7 +65,7 @@ const CharacterInfoComponent = () => {
         {
             slot: EEquipmentSlot.Bag
         }
-    ], [])
+    ], [equipmentItems])
 
     return (
         <Tabs value={selectCharacterTab} onValueChange={(value) => setSelectCharacterTab(value as 'equipment' | 'skills' | 'stats')} className="relative w-full! h-full flex flex-col">
@@ -89,7 +80,6 @@ const CharacterInfoComponent = () => {
                     <div className="flex flex-col gap-3">
                         {leftColumnItems.map((item) => {
                             const itemInfo = getEquipmentItem(item.slot)
-                            console.log('[UI] CharacterInfo - itemInfo: ', JSON.stringify(itemInfo))
                             return (
                                 <InventoryItem
                                     group="equipment"
@@ -104,7 +94,6 @@ const CharacterInfoComponent = () => {
                     <div className="flex flex-col gap-3">
                         {rightColumnItems.map((item) => {
                             const itemInfo = getEquipmentItem(item.slot)
-                            console.log('[UI] CharacterInfo - itemInfo: ', JSON.stringify(itemInfo))
                             return (
                                 <InventoryItem
                                     group="equipment"
