@@ -21,8 +21,8 @@ local vi = {
         saved = "Đã lưu nhân vật.",
     },
     equipment = {
-        equipped = "Đã trang bị {item}.",
-        unequipped = "Đã tháo {item}.",
+        equipped = "Đã trang bị",
+        unequipped = "Đã tháo",
         slot_occupied = "Ô trang bị đã được sử dụng.",
     },
     error = {

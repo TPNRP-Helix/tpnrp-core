@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter } from "@/compon
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
-import { useCallback, useState } from "react"
+import { useCallback, lazy, Suspense, useState } from "react"
 import {
     Item,
     ItemContent,
@@ -19,17 +19,18 @@ import { FieldGroup, FieldSet, FieldLabel, Field, FieldContent, FieldTitle } fro
 import { RadioGroup } from "@/components/ui/radio-group"
 import { RadioGroupItem } from "@/components/ui/radio-group"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { UnitedStateFlag } from "@/components/svg/flags/UnitedStateFlag"
-import { VietnamFlag } from "@/components/svg/flags/VietnamFlag"
 import { Spinner } from "@/components/ui/spinner"
+
+// Lazy load conditionally rendered components to reduce bundle size
+const Calendar = lazy(() => import("@/components/ui/calendar").then(module => ({ default: module.Calendar })))
+const UnitedStateFlag = lazy(() => import("@/components/svg/flags/UnitedStateFlag").then(module => ({ default: module.UnitedStateFlag })))
+const VietnamFlag = lazy(() => import("@/components/svg/flags/VietnamFlag").then(module => ({ default: module.VietnamFlag })))
 import { useI18n } from "@/i18n"
 import { useGameSettingStore } from "@/stores/useGameSettingStore"
 import { useGameStore } from "@/stores/useGameStore"
 import { Separator } from "@/components/ui/separator"
-import type { TCharacter } from "@/types/game"
-import { cn } from "@/lib/utils"
+import { cn, isInBrowser } from "@/lib/utils"
 
 type TCreateCharacterResponse = {
     name: string
@@ -51,7 +52,7 @@ export const CreateCharacter = () => {
     const {
         isShowCreateCharacter, setShowCreateCharacter,
         isShowSelectCharacter, setShowSelectCharacter,
-        maxCharacters, setMaxCharacters,
+        maxCharacters,
         isOpenCalendar, setIsOpenCalendar,
         dateOfBirth, setDateOfBirth,
         gender, setGender,
@@ -64,27 +65,7 @@ export const CreateCharacter = () => {
     const [selectedCitizenId, setSelectedCitizenId] = useState<string>('')
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isShowConfirmDeleteCharacter, setIsShowConfirmDeleteCharacter] = useState(false)
-    const { toggleHud, setIsInGame, setShowLoading } = useGameStore()
-    
-    useWebUIMessage<[number, unknown[]]>('setPlayerCharacters', ([maxCharacters, characters]) => {
-        // Set max characters
-        setMaxCharacters(maxCharacters)
-        // Format characters
-        const formattedCharacters: TCharacter[] = Object.entries(characters).map(([_, value]: [string, any]) => {
-            return {
-                name: value.name,
-                citizenId: value.citizenId,
-                level: parseInt(value.level) ?? 1,
-                money: parseInt(value.money) ?? 0,
-                gender: value.gender,
-            }
-        })
-        setPlayerCharacters(formattedCharacters)
-        // Show Select Character Sheet
-        setShowSelectCharacter(true)
-        setShowLoading(false)
-        setIsInGame(true)
-    })
+    const { toggleHud, setIsInGame } = useGameStore()
 
     useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
         // Set preview character info
@@ -123,7 +104,6 @@ export const CreateCharacter = () => {
         }
         setIsSubmitting(true)
         if (!firstName || firstName.trim() === '') {
-            console.log(t('error.firstNameRequired'), firstName)
             setError({ type: 'firstName', message: t('error.firstNameRequired') })
             setIsSubmitting(false)
             return
@@ -147,8 +127,7 @@ export const CreateCharacter = () => {
     }, [firstName, lastName, dateOfBirth, gender, isSubmitting])
 
     const onClickJoinGame = useCallback(() => {
-        const isInBrowser = window.location.port === '5173'
-        if (isInBrowser) {
+        if (isInBrowser()) {
             // Hide Select Character
             setShowSelectCharacter(false)
             // Hide Create Character Dialog
@@ -162,9 +141,8 @@ export const CreateCharacter = () => {
     }, [selectedCitizenId])
 
     const onClickDeleteCharacter = useCallback(() => {
-        // TODO: Delete character
-        const isInBrowser = window.location.port === '5173'
-        if (isInBrowser) {
+        // Delete character
+        if (isInBrowser()) {
             setPlayerCharacters(playerCharacters.filter((character) => character.citizenId !== selectedCitizenId))
         }
         setIsShowConfirmDeleteCharacter(false)
@@ -268,8 +246,18 @@ export const CreateCharacter = () => {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectGroup>
-                                        <SelectItem value="en"> <UnitedStateFlag /> English</SelectItem>
-                                        <SelectItem value="vi"> <VietnamFlag /> Tiếng Việt</SelectItem>
+                                        <SelectItem value="en">
+                                            <Suspense fallback={null}>
+                                                <UnitedStateFlag />
+                                            </Suspense>
+                                            {" "}English
+                                        </SelectItem>
+                                        <SelectItem value="vi">
+                                            <Suspense fallback={null}>
+                                                <VietnamFlag />
+                                            </Suspense>
+                                            {" "}Tiếng Việt
+                                        </SelectItem>
                                     </SelectGroup>
                                 </SelectContent>
                             </Select>
@@ -358,16 +346,18 @@ export const CreateCharacter = () => {
                                     </Button>
                                     </PopoverTrigger>
                                     <PopoverContent className="w-auto overflow-hidden p-0" align="start">
-                                    <Calendar
-                                        mode="single"
-                                        selected={dateOfBirth}
-                                        captionLayout="dropdown"
-                                        onSelect={(date) => {
-                                            setDateOfBirth(date)
-                                            setIsOpenCalendar(false)
-                                            setError(null)
-                                        }}
-                                    />
+                                        <Suspense fallback={<div className="w-[280px] h-[280px] flex items-center justify-center"><Spinner /></div>}>
+                                            <Calendar
+                                                mode="single"
+                                                selected={dateOfBirth}
+                                                captionLayout="dropdown"
+                                                onSelect={(date) => {
+                                                    setDateOfBirth(date)
+                                                    setIsOpenCalendar(false)
+                                                    setError(null)
+                                                }}
+                                            />
+                                        </Suspense>
                                     </PopoverContent>
                                 </Popover>
                             </div>

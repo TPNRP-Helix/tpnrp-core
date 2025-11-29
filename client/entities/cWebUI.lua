@@ -126,7 +126,6 @@ function CWebUI.new(core)
 
     ---Hide default UI
     function self:hideDefaultUI()
-       if not SetHUDVisibility then return end
         SetHUDVisibility({
             Healthbar = false,
             Inventory = false,

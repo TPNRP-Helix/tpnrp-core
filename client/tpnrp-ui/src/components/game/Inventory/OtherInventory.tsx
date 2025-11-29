@@ -8,10 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input"
 import { PackageOpen } from "lucide-react"
 import { CRAFTING_CATEGORIES } from "@/constants/crafting"
-import { useState } from "react"
+import { useState, useMemo, memo } from "react"
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty"
+import { useShallow } from "zustand/react/shallow"
 
-export const OtherInventory = () => {
+const OtherInventoryComponent = () => {
     const { t } = useI18n()
     const {
         otherItemsType,
@@ -21,26 +22,42 @@ export const OtherInventory = () => {
         isHaveOtherItems,
         selectOtherTab,
         setSelectOtherTab
-    } = useInventoryStore()
+    } = useInventoryStore(
+        useShallow((state) => ({
+            otherItemsType: state.otherItemsType,
+            otherItemsSlotCount: state.otherItemsSlotCount,
+            otherItems: state.otherItems,
+            otherItemsId: state.otherItemsId,
+            isHaveOtherItems: state.isHaveOtherItems,
+            selectOtherTab: state.selectOtherTab,
+            setSelectOtherTab: state.setSelectOtherTab
+        }))
+    )
     const [craftingCategory, setCraftingCategory] = useState<string>('all')
+
+    // Create a map for faster item lookups by slot
+    const otherItemsMap = useMemo(
+        () => new Map(otherItems.map(item => [item.slot, item])),
+        [otherItems]
+    )
     
     return (
         <Tabs value={selectOtherTab} onValueChange={(value) => setSelectOtherTab(value as 'ground' | 'crafting' | 'missions')} className="relative w-full h-full flex flex-col">
-            <TabsListHelix className="gap-px shrink-0">
+            <TabsListHelix className="gap-px shrink-0 px-2">
                 {isHaveOtherItems() && (
                     <TabsTriggerHelix value={otherItemsType}>{otherItemsId}</TabsTriggerHelix>
                 )}
                 <TabsTriggerHelix value="crafting">{t('inventory.other.crafting.title')}</TabsTriggerHelix>
                 <TabsTriggerHelix value="missions">{t('inventory.other.missions.title')}</TabsTriggerHelix>
             </TabsListHelix>
-            <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)]" />
+            <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)] mx-2" />
             <TabsContent value="ground" className="h-full overflow-hidden">
-                <ScrollArea className="h-full overflow-hidden mt-2">
+                <ScrollArea className="h-full overflow-hidden mt-2 p-2">
                     <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap">
                         {Array.from({ length: otherItemsSlotCount }, (_, i) => {
                             const slot = i + 1
-                            const item = otherItems.find(item => item.slot === slot)
-                            return <InventoryItem key={slot} item={item} slot={slot} group="container" isShowHotbarNumber={false} />
+                            const item = otherItemsMap.get(slot) ?? null
+                            return <InventoryItem key={`container-${slot}`} item={item} slot={slot} group="container" isShowHotbarNumber={false} />
                         })}
                     </div>
                 </ScrollArea>
@@ -85,3 +102,5 @@ export const OtherInventory = () => {
         </Tabs>
     )
 }
+
+export const OtherInventory = memo(OtherInventoryComponent)

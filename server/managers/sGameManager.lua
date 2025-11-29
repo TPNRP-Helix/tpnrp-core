@@ -24,6 +24,18 @@ function SGameManager.new(core)
     ---/*          Functions           */
     ---/********************************/
 
+    ---Create random id
+    ---@param type 'bag_item' | 'entity' | nil type of id
+    ---@return string random id
+    function self:createId(type)
+        local randomId = SHARED.randomId(3) .. '-' .. SHARED.randomInt(11111,99999)
+        if type == 'bag_item' then
+            return SHARED.randomId(3) .. '-' .. randomId
+        end
+
+        return randomId
+    end
+
     ---Spawn static mesh
     ---@param params TSpawnStaticMeshParams
     ---@return {status:boolean; entityId:string; entity:unknown; message: string} returnValue 
@@ -55,7 +67,7 @@ function SGameManager.new(core)
         end
         entity:SetActorScale3D(Vector(spawnScale.x, spawnScale.y, spawnScale.z))
         entity:SetMobility(mobilityType)
-        local entityId = SHARED.randomId(3) .. '-' .. SHARED.randomInt(11111,99999)
+        local entityId = self:createId()
 
         return {
             status = true,

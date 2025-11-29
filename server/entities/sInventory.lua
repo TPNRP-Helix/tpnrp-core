@@ -42,7 +42,24 @@ function SInventory.new(player, inventoryType)
 
     ---Sync inventory
     function self:sync()
-        TriggerClientEvent(self.player.playerController, 'TPN:inventory:sync', self.items)
+        local backpack = self:getBackpackContainer()
+        local backpackItems = {}
+        local isHaveBackpack = false
+        local slotCount = 0
+        local maxWeight = 0
+        if backpack then
+            isHaveBackpack = true
+            backpackItems = backpack.items
+            slotCount = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpack:getMaxSlots()
+            maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpack:getMaxWeight()
+        end
+
+        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, {
+            isHaveBackpack = isHaveBackpack,
+            slotCount = slotCount,
+            maxWeight = maxWeight,
+            items = backpackItems
+        })
     end
 
     ---Save inventory
@@ -62,7 +79,7 @@ function SInventory.new(player, inventoryType)
         -- Assign type
         self.type = inventoryType
         -- Get inventory items
-        local inventories = DAO.inventory.get(self.player.playerData.citizenId, self.type)
+        local inventories = DAO.inventory.get(self.player.playerData.citizenId)
         if inventories then
             self.items = inventories
         end
@@ -73,27 +90,19 @@ function SInventory.new(player, inventoryType)
     ---Get max weight
     ---@return number
     function self:getMaxWeight()
-        local inventoryCapacity = { status = false, slots = 0, weightLimit = 0 }
-        if self.type == 'player' then
-            inventoryCapacity = self.player.equipment:getBackpackCapacity()
-        end
-        return SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + inventoryCapacity.weightLimit
+        return SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT
     end
 
     ---Get max slots
     ---@return number
     function self:getMaxSlots()
-        local inventoryCapacity = { status = false, slots = 0, weightLimit = 0 }
-        if self.type == 'player' then
-            inventoryCapacity = self.player.equipment:getBackpackCapacity()
-        end
-        return SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + inventoryCapacity.slots
+        return SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
     end
 
     ---Get backpack container
     ---@return SContainer | nil
     function self:getBackpackContainer()
-        local backpack = self.player.equipment:findItemByClothType(EEquipmentClothType.Bag)
+        local backpack = self.player.equipment:getItemByClothType(EEquipmentClothType.Bag)
         if backpack and backpack.info and backpack.info.containerId then
             local containerId = backpack.info.containerId
             local containerResult = self.core.inventoryManager:openContainerId(containerId)
@@ -109,8 +118,12 @@ function SInventory.new(player, inventoryType)
     ---@param amount number item amount
     ---@param slotNumber number | nil slot number (optional)
     ---@param info table | nil item info (optional)
+    ---@param isSync boolean | nil is sync inventory to client (optional, default is true)
     ---@return SInventoryAddItemResultType {status=boolean, message=string, slot=number} result of adding item
-    function self:addItem(itemName, amount, slotNumber, info)
+    function self:addItem(itemName, amount, slotNumber, info, isSync)
+        if isSync == nil then
+            isSync = true
+        end
         local result = SStorage.addItem(self, itemName, amount, slotNumber, info)
         if result.status then
              -- Tell player that item is added to inventory
@@ -121,8 +134,10 @@ function SInventory.new(player, inventoryType)
                 amount = amount,
                 info = info or {}
             })
-            -- Sync inventory to client
-            self:sync()
+            if isSync then
+                -- Sync inventory to client
+                self:sync()
+            end
         end
         
         return result
@@ -132,8 +147,12 @@ function SInventory.new(player, inventoryType)
     ---@param itemName string item name
     ---@param amount number item amount
     ---@param slotNumber number | nil slot number (optional)
+    ---@param isSync boolean | nil is sync inventory to client (optional, default is true)
     ---@return {status:boolean, message:string, slot:number} result of removing item
-    function self:removeItem(itemName, amount, slotNumber)
+    function self:removeItem(itemName, amount, slotNumber, isSync)
+        if isSync == nil then
+            isSync = true
+        end
         local result = SStorage.removeItem(self, itemName, amount, slotNumber)
         if result.status then
             -- Tell player that item is remove from inventory
@@ -143,8 +162,10 @@ function SInventory.new(player, inventoryType)
                 name = itemName,
                 amount = amount,
             })
+            if isSync then
             -- Sync inventory to client
-            self:sync()
+                self:sync()
+            end
         end
         
         return result
@@ -163,12 +184,18 @@ function SInventory.new(player, inventoryType)
         end
         local backpackCapacity = self.player.equipment:getBackpackCapacity()
         local equipment = self.player.equipment:getEquipment()
+        local backpack = self:getBackpackContainer()
+        local bacpackItems = {}
+        if backpack then
+            bacpackItems = backpack.items
+        end
 
         return {
             status = true,
             message = 'Inventory opened!',
             inventory = inventory,
             equipment = equipment,
+            backpack = bacpackItems,
             capacity = {
                 weight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpackCapacity.weightLimit,
                 slots = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpackCapacity.slots,
@@ -188,25 +215,39 @@ function SInventory.new(player, inventoryType)
     end
 
     ---Get container with empty slot
-    ---@return SContainer|SInventory|nil container
+    ---@return {status: boolean; container: SContainer|SInventory|nil; slotNumber: number} response
     function self:getContainerWithEmptySlot()
         -- Looking empty slot from inventory first
         local emptySlot = self:getEmptySlot()
         if emptySlot then
-            return self
+            return {
+                status = true,
+                container = self,
+                slotNumber = emptySlot,
+            }
         end
         -- Looking empty slot from 
         local backpack = self:getBackpackContainer()
         if not backpack then
             -- Don't have backpack and inventory is full
-            return nil
+            return {
+                status = false,
+                message = 'Don\'t have backpack and inventory is full',
+            }
         end
         emptySlot = backpack:getEmptySlot()
         if emptySlot then
-            return backpack
+            return {
+                status = true,
+                container = backpack,
+                slotNumber = emptySlot,
+            }
         end
         -- Backpack and inventory is full
-        return nil
+        return {
+            status = false,
+            message = 'Backpack and inventory is full',
+        }
     end
 
     _contructor()

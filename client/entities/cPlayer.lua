@@ -102,14 +102,14 @@ function CPlayer.new(core, playerData)
     function self:bindTPNEvents()
         -- On Update playerData
         ---@param playerData PlayerData
-        RegisterClientEvent('TPN:player:updatePlayerData', function(playerData, properties)
+        RegisterClientEvent('updatePlayerData', function(playerData, properties)
             self.playerData = playerData
             self.properties = properties or {}
         end)
 
         -- On Update basic needs
-        RegisterClientEvent('TPN:player:updateBasicNeeds', function(newHunger, newThirst)
-            print('[CPlayer] TPN:player:updateBasicNeeds ' .. newHunger .. ' ' .. newThirst)
+        RegisterClientEvent('updateBasicNeeds', function(newHunger, newThirst)
+            print('[CPlayer] updateBasicNeeds ' .. newHunger .. ' ' .. newThirst)
             self.core.webUI:sendEvent('setBasicNeeds', {
                 hunger = newHunger,
                 thirst = newThirst,

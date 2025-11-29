@@ -42,10 +42,17 @@ DAO.DB.Execute([[
 --- Init table 'inventories'
 DAO.DB.Execute([[
     CREATE TABLE IF NOT EXISTS inventories (
-        inventory_id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE,
+        citizen_id VARCHAR(11) NOT NULL UNIQUE,
+        items TEXT
+    );
+]])
+
+--- Init table 'containers'
+DAO.DB.Execute([[
+    CREATE TABLE IF NOT EXISTS containers (
+        container_id VARCHAR(255) UNIQUE,
         citizen_id VARCHAR(11),
         "type" TEXT,
-        container_id VARCHAR(255),
         max_slot INTEGER,
         max_weight INTEGER,
         items TEXT,

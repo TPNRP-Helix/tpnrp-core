@@ -1,13 +1,14 @@
 ---@class InitContainer
----@field entityId string
----@field entity unknown
----@field interactableEntity unknown
+---@field entityId string|nil
+---@field entity unknown|nil
+---@field interactableEntity unknown|nil
 ---@field items table<number, SInventoryItemType>
 ---@field maxSlot number
 ---@field maxWeight number
----@field isDestroyOnEmpty boolean
----@field position Vector3
----@field rotation Rotator
+---@field isDestroyOnEmpty boolean|nil
+---@field position Vector3|nil
+---@field rotation Rotator|nil
+---@field containerId string|nil
 
 ---@class ResponseGetContainer
 ---@field id string

@@ -26,7 +26,7 @@ DAO.container.save = function(container)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
     local sql = [[
-        INSERT INTO inventories (container_id, type, citizen_id, max_slot, max_weight, items, is_destroy_on_empty, position, rotation)
+        INSERT INTO containers (container_id, type, citizen_id, max_slot, max_weight, items, is_destroy_on_empty, position, rotation)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(container_id) DO UPDATE SET
             items = excluded.items,
@@ -34,8 +34,16 @@ DAO.container.save = function(container)
             max_weight = excluded.max_weight,
             is_destroy_on_empty = excluded.is_destroy_on_empty,
             position = excluded.position,
-            rotation = excluded.rotation,
+            rotation = excluded.rotation;
     ]]
+    local position = ''
+    if container.position then
+        position = JSON.stringify({ x = container.position.x, y = container.position.y, z = container.position.z })
+    end
+    local rotation = ''
+    if container.rotation then
+        rotation = JSON.stringify({ Yaw = container.rotation.Yaw })
+    end
     local params = {
         container.containerId,
         'container',
@@ -44,8 +52,8 @@ DAO.container.save = function(container)
         container.maxWeight,
         JSON.stringify(formattedItems),
         container.isDestroyOnEmpty,
-        JSON.stringify({ x = container.position.x, y = container.position.y, z = container.position.z }),
-        JSON.stringify({ Yaw = container.rotation.Yaw }),
+        position,
+        rotation,
     }
     local result = DAO.DB.Execute(sql, params)
     if result then
@@ -65,7 +73,7 @@ DAO.container.get = function(containerId)
     local type = 'container'
 
     -- Query inventory items
-    local result = DAO.DB.Select('SELECT * FROM inventories where container_id = ? and type= ?', { containerId, type })
+    local result = DAO.DB.Select('SELECT * FROM containers where container_id = ? and type= ?', { containerId, type })
     local inventory = result[1] and result[1].Columns:ToTable()
     if not inventory then
         return nil
@@ -77,19 +85,19 @@ DAO.container.get = function(containerId)
     for _, item in pairs(items) do
         local itemData = SHARED.items[item.name:lower()]
         if item then
-            -- Save item slot as index
-            formattedItems[item.slot] = itemData
-            formattedItems[item.slot].amount = item.amount
-            formattedItems[item.slot].info = item.info
-            formattedItems[item.slot].slot = item.slot
+            local nextIndex = #formattedItems + 1
+            formattedItems[nextIndex] = itemData
+            formattedItems[nextIndex].amount = item.amount
+            formattedItems[nextIndex].info = item.info
+            formattedItems[nextIndex].slot = item.slot
         end
     end
     -- Return formatted items
     return {
         id = inventory.container_id,
         items = formattedItems,
-        maxSlot = inventory.max_slot,
-        maxWeight = inventory.max_weight,
+        maxSlot = tonumber(inventory.max_slot),
+        maxWeight = tonumber(inventory.max_weight),
         isDestroyOnEmpty = inventory.is_destroy_on_empty,
         position = JSON.parse(inventory.position),
         rotation = JSON.parse(inventory.rotation),
@@ -100,7 +108,7 @@ end
 ---Get all containers
 ---@return table<string, {id:string; items: table<number,SInventoryItemType>; maxSlot: number; maxWeight: number}> containers
 DAO.container.getAll = function()
-    local result = DAO.Action('Select', 'SELECT * FROM inventories where type = ?', { 'container' })
+    local result = DAO.Action('Select', 'SELECT * FROM containers where type = ?', { 'container' })
     if not result or #result == 0 then
         return {}
     end

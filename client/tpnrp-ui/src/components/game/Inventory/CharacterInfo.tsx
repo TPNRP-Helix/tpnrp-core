@@ -6,24 +6,33 @@ import { useI18n } from "@/i18n"
 import { EEquipmentSlot } from "@/constants/enum"
 import { useWebUIMessage } from "@/hooks/use-hevent"
 import type { TInventoryItem } from "@/types/inventory"
-import { useMemo } from "react"
+import { useMemo, memo, useCallback } from "react"
+import { useShallow } from "zustand/react/shallow"
 
-export const CharacterInfo = () => {
+const CharacterInfoComponent = () => {
     const {
         selectCharacterTab,
         setSelectCharacterTab,
         getEquipmentItem,
         setEquipmentItems
-    } = useInventoryStore()
+    } = useInventoryStore(
+        useShallow((state) => ({
+            selectCharacterTab: state.selectCharacterTab,
+            setSelectCharacterTab: state.setSelectCharacterTab,
+            getEquipmentItem: state.getEquipmentItem,
+            setEquipmentItems: state.setEquipmentItems
+        }))
+    )
     
     const { t } = useI18n()
 
-    useWebUIMessage<{ type: 'sync', items: TInventoryItem[] }>('doSyncEquipment', (data) => {
+    const handleSyncEquipment = useCallback((data: { type: 'sync', items: TInventoryItem[] }) => {
         if (data.type === 'sync') {
-            console.log('doSyncEquipment', JSON.stringify(data.items))
             setEquipmentItems(data.items)
         }
-    })
+    }, [setEquipmentItems])
+
+    useWebUIMessage<{ type: 'sync', items: TInventoryItem[] }>('doSyncEquipment', handleSyncEquipment)
 
     const leftColumnItems = useMemo(() => [
         {
@@ -77,26 +86,34 @@ export const CharacterInfo = () => {
             <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)]" />
             <TabsContent value="equipment" className="h-full">
                 <div className="grid grid-cols-[96px_1fr_96px] h-full">
-                    <div className="flex flex-col gap-2">
-                        {leftColumnItems.map((item) => (
-                            <InventoryItem
-                                group="equipment"
-                                slot={item.slot}
-                                item={getEquipmentItem(item.slot)}
-                                isShowHotbarNumber
-                            />
-                        ))}
+                    <div className="flex flex-col gap-3">
+                        {leftColumnItems.map((item) => {
+                            const itemInfo = getEquipmentItem(item.slot)
+                            console.log('[UI] CharacterInfo - itemInfo: ', JSON.stringify(itemInfo))
+                            return (
+                                <InventoryItem
+                                    group="equipment"
+                                    slot={item.slot}
+                                    item={itemInfo}
+                                    isShowHotbarNumber
+                                />
+                            )
+                        })}
                     </div>
                     <div></div>
-                    <div className="flex flex-col gap-2">
-                        {rightColumnItems.map((item) => (
-                            <InventoryItem
-                                group="equipment"
-                                slot={item.slot}
-                                item={getEquipmentItem(item.slot)}
-                                isShowHotbarNumber
-                            />
-                        ))}
+                    <div className="flex flex-col gap-3">
+                        {rightColumnItems.map((item) => {
+                            const itemInfo = getEquipmentItem(item.slot)
+                            console.log('[UI] CharacterInfo - itemInfo: ', JSON.stringify(itemInfo))
+                            return (
+                                <InventoryItem
+                                    group="equipment"
+                                    slot={item.slot}
+                                    item={itemInfo}
+                                    isShowHotbarNumber
+                                />
+                            )
+                        })}
                     </div>
                 </div>
             </TabsContent>
@@ -109,3 +126,5 @@ export const CharacterInfo = () => {
         </Tabs>
     )
 }
+
+export const CharacterInfo = memo(CharacterInfoComponent)

@@ -127,7 +127,7 @@ function SPlayer.new(core, playerController, playerData)
     ---Sync playerData to client-side
     function self:updatePlayerData()
         -- Sync player data
-        TriggerClientEvent(self.playerController, 'TPN:player:updatePlayerData', self.playerData, self.properties)
+        TriggerClientEvent(self.playerController, 'updatePlayerData', self.playerData, self.properties)
         -- Sync player inventory
         -- Inventory already sync by each addItem, removeItem
         -- Player level already sync at each addExp, addSkillExp
@@ -221,7 +221,7 @@ function SPlayer.new(core, playerController, playerData)
         -- Set metadata and sync to client
         self:setMetaData('thirst', newThirst)
         -- Update hunger and thirst in client-side UI
-        TriggerClientEvent(self.playerController, 'TPN:player:updateBasicNeeds', newHunger, newThirst)
+        TriggerClientEvent(self.playerController, 'updateBasicNeeds', newHunger, newThirst)
     end
 
     ---Add Money

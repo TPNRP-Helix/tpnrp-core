@@ -1,6 +1,6 @@
 ---@class TPNRPServer
 ---@field players table<number, SPlayer>
----@field shared SHARED shared entity
+---@field shared TSHARED shared entity
 ---@field useableItems table<string, function> Dictionary of useable items, keyed by item name
 ---@field cheatDetector SCheatDetector cheat detector entity
 ---@field gameManager SGameManager game manager entity

@@ -1,27 +1,14 @@
 import { EEquipmentSlot } from "@/constants/enum"
-import type { TInventoryGroup, TInventoryItem } from "@/types/inventory"
+import type { TInventoryItem, TItemData } from "@/types/inventory"
 import { create } from "zustand"
 
-type TItemData = {
-  itemName: string
-  amount: number
-  fromSlot: number
-}
-
-type MoveInventoryItemParams = {
-  sourceSlot: number
-  targetSlot: number
-  sourceGroup: TInventoryGroup
-  targetGroup: TInventoryGroup
-}
-
-type MoveInventoryItemSuccessPayload = MoveInventoryItemParams & {
-  displacedItem: TInventoryItem | null
-}
-
-type MoveInventoryItemOptions = {
-  onSuccess?: (payload: MoveInventoryItemSuccessPayload) => void
-  onFail?: () => void
+export type TContainer = {
+  items: TInventoryItem[]
+  id: string
+  capacity: {
+    weight: number
+    slots: number
+  }
 }
 
 type SplitItemOptions = {
@@ -39,19 +26,25 @@ type InventoryState = {
   amountDialogType: 'give' | 'drop'
   dialogItem: TInventoryItem | null
   inventoryItems: TInventoryItem[]
+  backpackItems: TInventoryItem[]
   slotCount: number
   totalWeight: number // Total weight of inventory in grams
+  inventoryWeight: number
   equipmentItems: TInventoryItem[]
   selectOtherTab: 'ground' | 'crafting' | 'missions' | ''
   learnedCraftingRecipes: string[]
   selectCharacterTab: 'equipment' | 'skills' | 'stats'
   temporaryDroppedItems: TInventoryItem[]
+  setBackpackItems: (backpackItems: TInventoryItem[]) => void
   setTemporaryDroppedItem: (items: TInventoryItem) => void
   removeTemporaryDroppedItem: (item: TItemData) => void
   rollbackTemporaryDroppedItem: (item: TItemData) => void
   setLearnedCraftingRecipes: (recipes: string[]) => void
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => void
+  // Equipment
   setEquipmentItems: (items: TInventoryItem[]) => void
+  equipItem: (item: TInventoryItem) => void
+  unequipItem: (item: TInventoryItem) => void
   setSlotCount: (value: number) => void
   setTotalWeight: (value: number) => void
   setInventoryItems: (items: TInventoryItem[]) => void
@@ -68,12 +61,14 @@ type InventoryState = {
   getTotalLimitWeight: () => number
   getTotalWeight: () => number
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => void
-  moveInventoryItem: (params: MoveInventoryItemParams, options?: MoveInventoryItemOptions) => boolean
   setOtherItemsId: (value: string) => void
   // Items
   splitItem: (itemSlot: number, options?: SplitItemOptions) => void
   onCloseInventory: () => void
 }
+
+const calculateInventoryWeight = (items: TInventoryItem[]) =>
+  items.reduce((acc, item) => acc + item.weight * item.amount, 0)
 
 export const useInventoryStore = create<InventoryState>((set, get) => ({
   isOpenInventory: false,
@@ -81,8 +76,10 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   amountDialogType: 'drop',
   dialogItem: null,
   inventoryItems: [],
+  backpackItems: [],
   slotCount: 0,
   totalWeight: 15000, // 15kg
+  inventoryWeight: 0,
   otherItems: [],
   otherItemsType: 'ground',
   otherItemsSlotCount: 0,
@@ -92,6 +89,11 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   learnedCraftingRecipes: [],
   selectCharacterTab: 'equipment',
   temporaryDroppedItems: [],
+  setBackpackItems: (backpackItems: TInventoryItem[]) => {
+    set(() => {
+      return { backpackItems: backpackItems }
+    })
+  },
   setTemporaryDroppedItem: (item: TInventoryItem) => {
     set((state) => {
       const matchedItem = state.inventoryItems.find(
@@ -123,6 +125,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
         return acc
       }, [])
 
+      const nextInventoryWeight = calculateInventoryWeight(nextInventoryItems)
       const nextTemporaryDroppedItems = [...state.temporaryDroppedItems]
       const tempIndex = nextTemporaryDroppedItems.findIndex(
         (tempItem) => tempItem.slot === item.slot && tempItem.name === item.name
@@ -140,6 +143,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       return {
         inventoryItems: nextInventoryItems,
+        inventoryWeight: nextInventoryWeight,
         temporaryDroppedItems: nextTemporaryDroppedItems,
       }
     })
@@ -208,6 +212,12 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       return {
         inventoryItems,
+        inventoryWeight: calculateInventoryWeight(inventoryItems),
+        temporaryDroppedItems,
+      }
+      return {
+        inventoryItems,
+        inventoryWeight: calculateInventoryWeight(inventoryItems),
         temporaryDroppedItems,
       }
     })
@@ -215,18 +225,54 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   setLearnedCraftingRecipes: (recipes: string[]) => set({ learnedCraftingRecipes: recipes }),
   setSelectOtherTab: (value: 'ground' | 'crafting' | 'missions') => set({ selectOtherTab: value }),
   setEquipmentItems: (items: TInventoryItem[]) => set({ equipmentItems: items }),
+  equipItem: (item: TInventoryItem) => {
+    set((state) => {
+      const equipmentItems = [...state.equipmentItems]
+      const equipmentIndex = equipmentItems.findIndex((equipmentItem) => equipmentItem.slot === item.slot)
+      
+      if (equipmentIndex !== -1) {
+        // Have item with same type (Just replace it)
+        equipmentItems[equipmentIndex] = item
+      } else {
+        // Don't have item with same type (Add it to equipment)
+        equipmentItems.push(item)
+      }
+
+      return { equipmentItems }
+    })
+  },
+  unequipItem: (item: TInventoryItem) => {
+    set((state) => {
+      const equipmentItems = [...state.equipmentItems]
+      const equipmentIndex = equipmentItems.findIndex(
+        (equipmentItem) => equipmentItem.slot === item.slot && equipmentItem.name === item.name
+      )
+      if (equipmentIndex !== -1) {
+        equipmentItems[equipmentIndex] = {
+          ...equipmentItems[equipmentIndex],
+          amount: equipmentItems[equipmentIndex].amount - item.amount,
+        }
+      } else {
+        equipmentItems.push({ ...item, amount: item.amount })
+      }
+      return { equipmentItems }
+    })
+  },
   setSlotCount: (value: number) => set({ slotCount: value }),
   setTotalWeight: (value: number) => set({ totalWeight: value }),
   setOpenInventory: (value: boolean) => {
     let isHaveOtherItems = get().isHaveOtherItems()
-    console.log('isHaveOtherItems', isHaveOtherItems)
     set({ isOpenInventory: value, selectOtherTab: isHaveOtherItems ? 'ground' : 'crafting' })
   },
   setIsOpenAmountDialog: (value: boolean) => set({ isOpenAmountDialog: value }),
   setAmountDialogType: (value: 'give' | 'drop') => set({ amountDialogType: value }),
   resetAmountDialog: () => set({ isOpenAmountDialog: false, amountDialogType: 'drop' }),
   setDialogItem: (item: TInventoryItem) => set({ dialogItem: item }),
-  setInventoryItems: (items: TInventoryItem[]) => set({ inventoryItems: items }),
+  setInventoryItems: (items: TInventoryItem[]) =>
+    set({
+      inventoryItems: items,
+      inventoryWeight: calculateInventoryWeight(items),
+    }),
   setOtherItems: (items: TInventoryItem[]) => set({ otherItems: items }),
   setOtherItemsType: (value: 'ground' | 'player' | 'stack' | 'container') => set({ otherItemsType: value }),
   setOtherItemsSlotCount: (value: number) => set({ otherItemsSlotCount: value }),
@@ -242,133 +288,8 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
     }
     return totalWeight + (bagItem.info?.maxWeight ?? 0)
   },
-  getTotalWeight: () => {
-    return get().inventoryItems.reduce((acc, item) => acc + (item.weight * item.amount), 0)
-  },
+  getTotalWeight: () => get().inventoryWeight,
   setSelectCharacterTab: (value: 'equipment' | 'skills' | 'stats') => set({ selectCharacterTab: value }),
-  moveInventoryItem: ({ sourceSlot, targetSlot, sourceGroup, targetGroup }, options) => {
-    const payload: MoveInventoryItemSuccessPayload = {
-      sourceSlot,
-      targetSlot,
-      sourceGroup,
-      targetGroup,
-      displacedItem: null,
-    }
-
-    // Same slot, same group => Don't do anything
-    if (sourceSlot === targetSlot && sourceGroup === targetGroup) {
-      options?.onFail?.()
-      return false
-    }
-
-    let isSuccess = false
-
-    set((state) => {
-      const inventoryItems = [...state.inventoryItems]
-      const equipmentItems = [...state.equipmentItems]
-      const otherItems = [...state.otherItems]
-
-      const collections: Record<TInventoryGroup, TInventoryItem[]> = {
-        inventory: inventoryItems,
-        equipment: equipmentItems,
-        container: otherItems,
-        devLibrary: [],
-      }
-
-      const sourceList = collections[sourceGroup]
-      const targetList = collections[targetGroup]
-      const sourceIndex = sourceList.findIndex((item) => item.slot === sourceSlot)
-
-      if (sourceIndex === -1) {
-        return {}
-      }
-
-      const targetIndex = targetList.findIndex((item) => item.slot === targetSlot)
-
-      if (sourceGroup === targetGroup) {
-        const sourceItem = sourceList[sourceIndex]
-
-        // Check if we should stack items (same item, not unique, target slot has item)
-        if (targetIndex !== -1) {
-          const targetItem = sourceList[targetIndex]
-          const isSameItem = sourceItem.name.toLowerCase() === targetItem.name.toLowerCase()
-
-          if (isSameItem) {
-            // Check if item is not unique (can stack)
-            const isUnique = sourceItem.unique ?? false
-            if (!isUnique) {
-              // Same item and not unique => stack together
-              sourceList[targetIndex] = {
-                ...targetItem,
-                amount: targetItem.amount + sourceItem.amount,
-              }
-              // Remove source item
-              sourceList.splice(sourceIndex, 1)
-
-              isSuccess = true
-              return {
-                inventoryItems,
-                equipmentItems,
-                otherItems,
-              }
-            }
-          }
-        }
-
-        // Different item or same item but unique => swap items
-        sourceList[sourceIndex] = { ...sourceList[sourceIndex], slot: targetSlot }
-
-        if (targetIndex !== -1) {
-          sourceList[targetIndex] = { ...sourceList[targetIndex], slot: sourceSlot }
-        }
-
-        isSuccess = true
-        return {
-          inventoryItems,
-          equipmentItems,
-          otherItems,
-        }
-      }
-
-      const [extractedSourceItem] = sourceList.splice(sourceIndex, 1)
-
-      if (!extractedSourceItem) {
-        return {}
-      }
-
-      const movedSourceItem = { ...extractedSourceItem, slot: targetSlot }
-      let displacedItem: TInventoryItem | null = null
-
-      if (targetIndex !== -1) {
-        const [removedTargetItem] = targetList.splice(targetIndex, 1)
-        if (removedTargetItem) {
-          displacedItem = removedTargetItem
-        }
-      }
-
-      targetList.push(movedSourceItem)
-
-      if (displacedItem) {
-        sourceList.push({ ...displacedItem, slot: sourceSlot })
-        payload.displacedItem = displacedItem
-      }
-
-      isSuccess = true
-      return {
-        inventoryItems,
-        equipmentItems,
-        otherItems,
-      }
-    })
-
-    if (isSuccess) {
-      options?.onSuccess?.(payload)
-    } else {
-      options?.onFail?.()
-    }
-
-    return isSuccess
-  },
   setOtherItemsId: (value: string) => set({ otherItemsId: value }),
   splitItem: (itemSlot: number, options?: SplitItemOptions) => {
     // TODO: Implement split item by slot
@@ -429,6 +350,7 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
 
       return {
         inventoryItems,
+        inventoryWeight: calculateInventoryWeight(inventoryItems),
       }
     })
   },

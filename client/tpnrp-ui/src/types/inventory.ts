@@ -12,13 +12,14 @@ export type TInventoryItem = {
         durability?: number // From 0 to 100
         maxWeight?: number // In gram
         slot?: number // slot count of this item (This field is for backpack)
+        containerId?: string // Container id of this item (This field is for backpack)
     }
 }
 
-export type TInventoryGroup = 'equipment' | 'inventory' | 'container' | 'devLibrary'
+export type TInventoryGroup = 'equipment' | 'inventory' | 'container' | 'devLibrary' | 'backpack'
 
 export type TInventoryItemProps = {
-    item?: TInventoryItem
+    item?: TInventoryItem | null
     slot?: number
     group?: TInventoryGroup
     isShowHotbarNumber?: boolean
@@ -52,4 +53,26 @@ export type TResponseCreateDropItem = {
 export type TResponseSplitItem = {
     status: boolean
     message: string
+}
+
+export type TItemData = {
+  itemName: string
+  amount: number
+  fromSlot: number
+}
+
+export type TSyncInventory = {
+    type: string
+    items: TInventoryItem[]
+    backpack: {
+        items: TInventoryItem[]
+        isHaveBackpack: boolean
+        slotCount: number
+        maxWeight: number
+    }
+}
+
+export type TSyncEquipment = {
+    type: string
+    items: TInventoryItem[]
 }

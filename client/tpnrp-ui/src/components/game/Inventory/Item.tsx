@@ -3,21 +3,21 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { ItemMedia } from "@/components/ui/item"
 import { Item } from "@/components/ui/item"
 import { Badge } from "@/components/ui/badge"
-import type { TInventoryItemProps } from "@/types/inventory"
-import { useCallback, useId, useMemo, useState } from "react"
+import type { TInventoryItemProps, TItemData } from "@/types/inventory"
+import { memo, useCallback, useEffect, useId, useMemo, useState } from "react"
 import { useI18n } from "@/i18n"
 import { FALLBACK_DEFAULT_IMAGE_PATH, RARE_LEVELS } from "@/constants"
 import { formatWeight } from "@/lib/inventory"
 import { CircleEllipsis, ArrowDownCircle, Hand, HandHeart, Sparkles, Split, Star, StarHalf, Plus } from "lucide-react"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Progress } from "@/components/ui/progress"
-import { useDraggable, useDroppable } from "@dnd-kit/core"
+import { useDraggable, useDroppable, useDndContext } from "@dnd-kit/core"
 import { useDevModeStore } from "@/stores/useDevModeStore"
 import { Image } from "@/components/ui/image"
 import { toast } from "sonner"
 import { getEquipmentSlotName } from "@/lib/utils"
 
-export const InventoryItem = (props: TInventoryItemProps) => {
+const InventoryItemComponent = (props: TInventoryItemProps) => {
     const {
         item = null,
         slot = null,
@@ -26,37 +26,37 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         isDragDropDisabled = false
     } = props
     const { t } = useI18n()
-    const {
-        otherItemsId,
-        setIsOpenAmountDialog,
-        setAmountDialogType,
-        setDialogItem,
-        setTemporaryDroppedItem,
-        splitItem
-    } = useInventoryStore()
+    const otherItemsId = useInventoryStore((state) => state.otherItemsId)
+    const setIsOpenAmountDialog = useInventoryStore((state) => state.setIsOpenAmountDialog)
+    const setAmountDialogType = useInventoryStore((state) => state.setAmountDialogType)
+    const setDialogItem = useInventoryStore((state) => state.setDialogItem)
+    const setTemporaryDroppedItem = useInventoryStore((state) => state.setTemporaryDroppedItem)
+    const splitItem = useInventoryStore((state) => state.splitItem)
+    const removeTemporaryDroppedItem = useInventoryStore((state) => state.removeTemporaryDroppedItem)
+    const rollbackTemporaryDroppedItem = useInventoryStore((state) => state.rollbackTemporaryDroppedItem)
 
-    const { permission } = useDevModeStore()
+    const permission = useDevModeStore((state) => state.permission)
 
     const itemImage = useMemo(() => {
         if (item === null) {
             return null
         }
         return `./assets/images/items/${item.name}.png`
-    }, [item])
+    }, [item, slot])
 
     const itemLabel = useMemo(() => {
         if (item === null) {
             return ''
         }
         return t(`inventory.item.label.${item.name}`)
-    }, [item])
+    }, [item, t])
 
     const rareLevel = useMemo(() => {
         if (item === null || item?.info?.rare === undefined) {
             return null
         }
         return RARE_LEVELS.find((rareItem) => rareItem.id === item?.info?.rare)
-    }, [item])
+    }, [item, slot])
 
     const onClickUse = useCallback(() => {
         if (item === null || slot === null) return
@@ -64,13 +64,16 @@ export const InventoryItem = (props: TInventoryItemProps) => {
             itemName: item.name,
             slot: item.slot
         })
-    }, [item])
+    }, [item, slot])
 
     const onClickWear = useCallback(() => {
         if (item === null || slot === null) return
         window.hEvent('wearItem', {
             itemName: item.name,
             slot: item.slot
+        }, (result: unknown) => {
+            console.log('[UI] onClickWear - result: ', JSON.stringify(result))
+            // equipItem(item)
         })
     }, [item])
 
@@ -81,13 +84,18 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                 // Split success
                 window.hEvent('splitItem', {
                     slot: item.slot
+                }, (result: { status: boolean; message: string }) => {
+                    if (result.status) {
+                        return
+                    }
+                    toast.error(result.message)
                 })
             },
             onFail: (reason: string) => {
                 toast.error(t(reason))
             }
         })
-    }, [item, slot, splitItem])
+    }, [item, slot, splitItem, t])
 
     const onClickGive = useCallback((giveType: 'half' | 'one' | 'all') => {
         console.log('onClickGive', giveType)
@@ -108,8 +116,16 @@ export const InventoryItem = (props: TInventoryItemProps) => {
             itemName: item.name,
             amount,
             fromSlot: item.slot
+        }, (result: { status: boolean; itemData: TItemData }) => {
+            if (result.status) {
+                // Remove temporary item from temporaryDroppedItems
+                removeTemporaryDroppedItem(result.itemData)
+            } else {
+                // Rollback temporary item into inventory item
+                rollbackTemporaryDroppedItem(result.itemData)
+            }
         })
-    }, [])
+    }, [item, removeTemporaryDroppedItem, rollbackTemporaryDroppedItem, setTemporaryDroppedItem])
 
     const onOpenAmountDialog = useCallback((dialogType: 'give' | 'drop') => {
         if (item === null) {
@@ -118,12 +134,14 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setDialogItem(item)
         setAmountDialogType(dialogType)
         setIsOpenAmountDialog(true)
-    }, [])
+    }, [item, setAmountDialogType, setDialogItem, setIsOpenAmountDialog])
 
     const onClickUnequip = useCallback(() => {
         if (item === null || slot === null) return
         window.hEvent('unequipItem', {
             itemName: item.name
+        }, (result: unknown) => {
+            console.log('[UI] onClickUnequip - result: ', JSON.stringify(result))
         })
     }, [item])
 
@@ -161,15 +179,17 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setDraggableNodeRef(node)
     }, [setDroppableNodeRef, setDraggableNodeRef])
 
+    const itemName = item?.name ?? null
+
     const onClickAddItemToInventory = useCallback(() => {
         if (permission !== 'admin') {
             return
         }
         window.hEvent('devAddItem', {
-            itemName: item?.name,
+            itemName,
             amount: 1
         })
-    }, [])
+    }, [itemName, permission])
 
     const slotClasses = useMemo(() => {
         const base = ["w-24 h-24 bg-accent rounded transition-all duration-150 ease-out"]
@@ -192,6 +212,7 @@ export const InventoryItem = (props: TInventoryItemProps) => {
 
     const [isContextMenuOpen, setIsContextMenuOpen] = useState(false)
     const [isHoverCardOpen, setIsHoverCardOpen] = useState(false)
+    const { active } = useDndContext()
 
     const handleContextMenuOpenChange = useCallback((open: boolean) => {
         setIsContextMenuOpen(open)
@@ -208,43 +229,63 @@ export const InventoryItem = (props: TInventoryItemProps) => {
         setIsHoverCardOpen(open)
     }, [isContextMenuOpen])
 
+    useEffect(() => {
+        // Disable hover card when any item is being dragged (not just this one)
+        if (active !== null) {
+            setIsHoverCardOpen(false)
+        }
+    }, [active])
+
+    const slotShell = (
+        <div
+            ref={setRefs}
+            className={`${slotClasses} ${cursorClass}`}
+            {...(draggableAttributes ?? {})}
+            {...(draggableListeners ?? {})}
+        >
+            <Item className="relative gap-1 p-0 w-full h-full border-none">
+                {slot !== null && isShowHotbarNumber ? (
+                    <Badge variant={group === 'equipment' ? 'info' : 'default'} className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
+                        {group === 'equipment' ? t(`equipment.category.${getEquipmentSlotName(slot)}`) : slot}
+                    </Badge>
+                ) : null}
+                {item !== null && (
+                    <>
+                        {item.amount > 1 && (
+                            <div className="absolute top-0 right-0 text-shadow-2xs text-xs p-1">
+                                x{item.amount}
+                            </div>
+                        )}
+                        <ItemMedia className="relative z-10 w-full object-cover p-4">
+                            <Image
+                                src={itemImage ?? ''}
+                                alt={item?.label ?? item?.name}
+                                className="w-11/12 h-11/12 object-cover select-none pointer-events-none"
+                                draggable={false}
+                                fallbackSrc={FALLBACK_DEFAULT_IMAGE_PATH}
+                            />
+                        </ItemMedia>
+                        {item.info?.durability && (
+                            <div className="absolute bottom-0 left-0 w-full">
+                                <Progress value={item?.info?.durability ?? 0} className="rounded h-1" />
+                            </div>
+                        )}
+                    </>
+                )}
+            </Item>
+        </div>
+    )
+
+    if (!item) {
+        return slotShell
+    }
+
     return (
         <ContextMenu onOpenChange={handleContextMenuOpenChange}>
             <HoverCard open={!isContextMenuOpen && isHoverCardOpen} onOpenChange={handleHoverCardOpenChange}>
                 <ContextMenuTrigger asChild>
                     <HoverCardTrigger asChild>
-                        <div ref={setRefs} className={`${slotClasses} ${cursorClass}`} {...(draggableAttributes ?? {})} {...(draggableListeners ?? {})}>
-                            <Item className="relative gap-1 p-0 w-full h-full border-none">
-                                {slot !== null && isShowHotbarNumber ? (
-                                    <Badge variant={group === 'equipment' ? 'info' : 'default'} className="absolute -top-1.5 -left-1.5 rounded [clip-path:polygon(0_0,100%_0,100%_calc(100%-8px),calc(100%-8px)_100%,0_100%)]!">
-                                        {group === 'equipment' ? t(`equipment.category.${getEquipmentSlotName(slot)}`) : slot}
-                                    </Badge>
-                                ) : null}
-                                {item !== null && (
-                                    <>
-                                        {item.amount > 1 && (
-                                            <div className="absolute top-0 right-0 text-shadow-2xs text-xs p-1">
-                                                x{item.amount}
-                                            </div>
-                                        )}
-                                        <ItemMedia className="relative z-10 w-full object-cover p-4">
-                                            <Image
-                                                src={itemImage ?? ''}
-                                                alt={item?.label ?? item?.name}
-                                                className="w-11/12 h-11/12 object-cover select-none pointer-events-none"
-                                                draggable={false}
-                                                fallbackSrc={FALLBACK_DEFAULT_IMAGE_PATH}
-                                            />
-                                        </ItemMedia>
-                                        {item.info?.durability && (
-                                            <div className="absolute bottom-0 left-0 w-full">
-                                                <Progress value={item?.info?.durability ?? 0} className="rounded h-1" />
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </Item>
-                        </div>
+                        {slotShell}
                     </HoverCardTrigger>
                 </ContextMenuTrigger>
                 {!!item && (
@@ -300,6 +341,11 @@ export const InventoryItem = (props: TInventoryItemProps) => {
                                     {item?.info?.maxWeight ? (
                                         <div className='text-xs text-gray-500'>
                                             {t('inventory.maxWeight')}: {formatWeight(item?.info?.maxWeight, { gram: 'gam', kg: 'kg', ton: 'ton' }, true)} ({t('inventory.canCarry')})
+                                        </div>
+                                    ) : null}
+                                    {item?.info?.containerId ? (
+                                        <div className='text-xs text-gray-500'>
+                                            ID: {item?.info?.containerId}
                                         </div>
                                     ) : null}
                                 </div>
@@ -386,3 +432,31 @@ export const InventoryItem = (props: TInventoryItemProps) => {
 
     )
 }
+
+const areInventoryItemPropsEqual = (prev: TInventoryItemProps, next: TInventoryItemProps) => {
+    const prevItem = prev.item
+    const nextItem = next.item
+
+    const isSameItem =
+        (prevItem === nextItem) ||
+        (
+            !!prevItem &&
+            !!nextItem &&
+            prevItem.slot === nextItem.slot &&
+            prevItem.name === nextItem.name &&
+            prevItem.amount === nextItem.amount &&
+            prevItem.weight === nextItem.weight &&
+            (prevItem.info?.durability ?? null) === (nextItem.info?.durability ?? null) &&
+            (prevItem.info?.rare ?? null) === (nextItem.info?.rare ?? null)
+        )
+
+    return (
+        isSameItem &&
+        prev.slot === next.slot &&
+        prev.group === next.group &&
+        prev.isShowHotbarNumber === next.isShowHotbarNumber &&
+        prev.isDragDropDisabled === next.isDragDropDisabled
+    )
+}
+
+export const InventoryItem = memo(InventoryItemComponent, areInventoryItemPropsEqual)

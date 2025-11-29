@@ -62,7 +62,7 @@ DAO.equipment.get = function(citizenId)
     -- Mapping base item data with the item data from the database
     for _, item in pairs(items) do
         local itemData = SHARED.items[item.name:lower()]
-        if item then
+        if itemData then
             local nextIndex = #formattedItems + 1
             formattedItems[nextIndex] = itemData
             formattedItems[nextIndex].amount = 1

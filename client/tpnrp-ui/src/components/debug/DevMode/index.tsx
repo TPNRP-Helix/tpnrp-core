@@ -5,6 +5,7 @@ import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Library } from "../Library"
 import { FAKE_INVENTORY_ITEMS } from "../constants"
 import type { TInventoryItem } from "@/types/inventory"
+import { isInBrowser } from "@/lib/utils"
 
 export const DevMode = () => {
     const {
@@ -40,14 +41,14 @@ export const DevMode = () => {
     })
 
     useEffect(() => {
-        const isInBrowser = window.location.port === '5173'
-        if (isInBrowser) {
-            setEnableDevMode(true)
-            setPermission('admin')
-            // Set some fake inventory item for debugging
-            setInventoryItems([...inventoryItems, ...FAKE_INVENTORY_ITEMS])
-            setItemLibrary(FAKE_INVENTORY_ITEMS)
+        if (!isInBrowser()) {
+            return
         }
+        setEnableDevMode(true)
+        setPermission('admin')
+        // Set some fake inventory item for debugging
+        setInventoryItems([...inventoryItems, ...FAKE_INVENTORY_ITEMS])
+        setItemLibrary(FAKE_INVENTORY_ITEMS)
     }, [])
     
     // Don't render the dev mode tools if not in browser

@@ -27,6 +27,7 @@ function TPNRPClient.new()
     ---Contructor function
     local function _contructor()
         self.webUI = CWebUI.new(self)
+        self.game = CGame.new(self)
         self:bindHelixEvents()
         self:bindTPNEvents()
         self:bindWebUIEvents()
