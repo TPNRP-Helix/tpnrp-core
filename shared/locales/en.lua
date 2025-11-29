@@ -10,6 +10,7 @@ local en = {
         open = "Open",
         canAddItem = "Item can be add to inventory.",
         openDrop = "Open Drop",
+        pickUpItem = "Pick up",
         itemNotFound = "Item not found!",
     },
     backpack = {

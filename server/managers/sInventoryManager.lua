@@ -1084,15 +1084,19 @@ function SInventoryManager.new(core)
         -- TODO: Need a native function to get ground Z
         SpawnPosition.Z = SpawnPosition.Z - 90
         PawnRotation.Yaw = PawnRotation.Yaw + worldItem.rotation
-        -- Spawn bag
-        local spawnResult = self.core.gameManager:spawnStaticMesh({
+        local spawnStaticMeshParams = {
             entityPath = worldItem.path,
             position = SpawnPosition,
             rotation = PawnRotation,
             scale = worldItem.scale,
             collisionType = ECollisionType.IgnoreOnlyPawn,
             mobilityType = EMobilityType.Movable,
-        })
+        }
+        if item.info.containerId then
+            spawnStaticMeshParams.containerId = item.info.containerId
+        end
+        -- Spawn bag
+        local spawnResult = self.core.gameManager:spawnStaticMesh(spawnStaticMeshParams)
         if not spawnResult.status then
             -- Spawn failed => Add item back to player's inventory
             container:addItem(data.itemName, data.amount, data.fromSlot, dropItem.info)
@@ -1102,9 +1106,22 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-
+        -- Item have an option to pick up item
         local options = {
             {
+                Text = SHARED.t('inventory.pickUpItem'),
+                Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
+                Action = function(Drop, Instigator)
+                    local controller = Instigator and Instigator:GetController()
+                    if controller then
+                        TriggerClientEvent(controller, 'pickUpItem', { containerId = spawnResult.entityId })
+                    end
+                end,
+            }
+        }
+        -- If item have containerId then it will have an option to open container inventory
+        if item.info.containerId then
+            table.insert(options, {
                 Text = SHARED.t('inventory.openDrop'),
                 Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
                 Action = function(Drop, Instigator)
@@ -1113,8 +1130,8 @@ function SInventoryManager.new(core)
                         TriggerClientEvent(controller, 'openContainerInventory', { containerId = spawnResult.entityId })
                     end
                 end,
-            }
-        }
+            })
+        end
         -- Spawn success
         local addInteractableResult = self.core.gameManager:addInteractable({
             entityId = spawnResult.entityId,
@@ -1132,23 +1149,24 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-
-        -- Add container to dictionary (dropItem already has slot = 1)
-        local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
-        dropContainer:initEntity({
-            entityId = spawnResult.entityId,
-            entity = spawnResult.entity,
-            interactableEntity = addInteractableResult.interactableEntity,
-            position = SpawnPosition,
-            rotation = PawnRotation,
-            items = {
-                [1] = dropItem,
-            },
-            maxSlot = 1, -- Drop item should only have 1 slot
-            maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
-            isDestroyOnEmpty = true
-        })
-        self.containers[spawnResult.entityId] = dropContainer
+        if not item.info.containerId then
+            -- Add container to dictionary (dropItem already has slot = 1)
+            local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
+            dropContainer:initEntity({
+                entityId = spawnResult.entityId,
+                entity = spawnResult.entity,
+                interactableEntity = addInteractableResult.interactableEntity,
+                position = SpawnPosition,
+                rotation = PawnRotation,
+                items = {
+                    [1] = dropItem,
+                },
+                maxSlot = 1, -- Drop item should only have 1 slot
+                maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT,
+                isDestroyOnEmpty = true
+            })
+            self.containers[spawnResult.entityId] = dropContainer
+        end
 
         return {
             status = true,

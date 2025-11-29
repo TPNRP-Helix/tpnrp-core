@@ -10,6 +10,7 @@ local vi = {
         open = "Mở",
         canAddItem = "Vật phẩm có thể được thêm vào túi.",
         openDrop = "Mở",
+        pickUpItem = "Nhặt",
         itemNotFound = "Không tìm thấy vật phẩm!",
     },
     backpack = {
