@@ -33,6 +33,7 @@
         "SetEntityRotation",
         "EComponentMobility",
         "Rotator",
-        "DeleteEntity"
+        "DeleteEntity",
+        "GetDistanceBetweenCoords"
     ]
 }

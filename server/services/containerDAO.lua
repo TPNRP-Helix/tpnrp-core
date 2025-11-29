@@ -26,12 +26,13 @@ DAO.container.save = function(container)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
     local sql = [[
-        INSERT INTO containers (container_id, type, citizen_id, max_slot, max_weight, items, is_destroy_on_empty, position, rotation)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO containers (container_id, type, citizen_id, max_slot, max_weight, items, holder_item, is_destroy_on_empty, position, rotation)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(container_id) DO UPDATE SET
             items = excluded.items,
             max_slot = excluded.max_slot,
             max_weight = excluded.max_weight,
+            holder_item = excluded.holder_item,
             is_destroy_on_empty = excluded.is_destroy_on_empty,
             position = excluded.position,
             rotation = excluded.rotation;
@@ -44,12 +45,18 @@ DAO.container.save = function(container)
     if container.rotation then
         rotation = JSON.stringify({ Yaw = container.rotation.Yaw })
     end
+    local holderItem = ''
+    if container.holderItem then
+        holderItem = JSON.stringify(container.holderItem)
+    end
+
     local params = {
         container.containerId,
         'container',
         container.citizenId,
         container.maxSlot,
         container.maxWeight,
+        holderItem,
         JSON.stringify(formattedItems),
         container.isDestroyOnEmpty,
         position,
@@ -102,6 +109,7 @@ DAO.container.get = function(containerId)
         position = JSON.parse(inventory.position),
         rotation = JSON.parse(inventory.rotation),
         displayModel = inventory.display_model,
+        holderItem = JSON.parse(inventory.holder_item),
     }
 end
 

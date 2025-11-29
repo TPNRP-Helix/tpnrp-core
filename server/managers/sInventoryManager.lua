@@ -32,6 +32,10 @@ function SInventoryManager.new(core)
             return self:onOpenInventory(source, data)
         end)
 
+        RegisterCallback('onPickUpItem', function(source, data)
+            return self:onPickUpItem(source, data)
+        end)
+
         RegisterCallback('onMoveInventoryItem', function(source, data)
             return self:onMoveInventoryItem(source, data)
         end)
@@ -1123,7 +1127,7 @@ function SInventoryManager.new(core)
         if item.info.containerId then
             table.insert(options, {
                 Text = SHARED.t('inventory.openDrop'),
-                Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
+                Input = '/Game/Helix/Input/Actions/IA_Weapon_Reload.IA_Weapon_Reload',
                 Action = function(Drop, Instigator)
                     local controller = Instigator and Instigator:GetController()
                     if controller then
@@ -1149,7 +1153,12 @@ function SInventoryManager.new(core)
                 itemData = data,
             }
         end
-        if not item.info.containerId then
+        if item.info.containerId then
+            self.containers[item.info.containerId].entity = spawnResult.entity
+            self.containers[item.info.containerId].interactableEntity = addInteractableResult.interactableEntity
+            self.containers[item.info.containerId].position = SpawnPosition
+            self.containers[item.info.containerId].rotation = PawnRotation
+        else
             -- Add container to dictionary (dropItem already has slot = 1)
             local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
             dropContainer:initEntity({
@@ -1344,6 +1353,78 @@ function SInventoryManager.new(core)
         end
 
         return player.equipment:unequipItem(clothType, data.toSlotNumber or nil)
+    end
+
+    function self:onPickUpItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        local containerResult = self:openContainerId(data.containerId)
+        if not containerResult.status then
+            return {
+                status = false,
+                message = containerResult.message,
+            }
+        end
+        -- Get container position 
+        local containerPosition = containerResult.container.entity:K2_GetActorLocation()
+        local playerPosition = player:getCoords()
+        local distance = GetDistanceBetweenCoords(playerPosition, containerPosition)
+        -- If item is too far away, return error
+        if distance > 300 then
+            return {
+                status = false,
+                message = 'Item is too far away!',
+            }
+        end
+        local canAddItemsResult = player:canAddContainerItems(data.containerId)
+        if not canAddItemsResult.status then
+            return {
+                status = false,
+                message = canAddItemsResult.message,
+            }
+        end
+        if containerResult.container.holderItem then
+            -- TODO: add container to item
+            local addHolderItemResult = player:addItem(containerResult.container.holderItem.name, containerResult.container.holderItem.amount, containerResult.container.holderItem.info, nil, false)
+            if not addHolderItemResult.status then
+                return {
+                    status = false,
+                    message = addHolderItemResult.message,
+                }
+            end
+        end
+        -- Weight and Slot limit passed => Add items to player's inventory
+        for _, value in ipairs(containerResult.container.items) do
+            local itemName = value.name
+            local amount = value.amount
+            local itemInfo = value.info
+            local addItemResult = player:addItem(itemName, amount, itemInfo, nil, false)
+            if not addItemResult.status then
+                return {
+                    status = false,
+                    message = addItemResult.message,
+                }
+            end
+        end
+        
+        -- Sync inventory to client (Sync when all items are added)
+        player.inventory:sync()
+        
+        -- Reset: position, rotation, interactableEntity, entity on success
+        self.containers[data.containerId].position = nil
+        self.containers[data.containerId].rotation = nil
+        -- Destroy entity and interactable entity
+        self.containers[data.containerId]:destroy()
+
+        return {
+            status = true,
+            message = 'Items picked up from container!',
+        }
     end
 
     _contructor()

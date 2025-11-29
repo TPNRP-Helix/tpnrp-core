@@ -289,10 +289,37 @@ function SPlayer.new(core, playerController, playerData)
     ---@param amount number amount to add
     ---@param info table|nil item info (optional)
     ---@param slot number|nil slot to add (optional) (1-5: inventory | 6 -> n: backpack)
-    function self:addItem(itemName, amount, info, slot)
+    ---@param isSync boolean|nil is sync inventory to client (optional, default is true)
+    ---@return SInventoryAddItemResultType result of adding item
+    function self:addItem(itemName, amount, info, slot, isSync)
+        if isSync == nil then
+            isSync = true
+        end
+        
+        -- If slot is nil, try inventory first, then backpack if inventory is full
+        if slot == nil then
+            -- Try to add to inventory first
+            local inventoryResult = self.inventory:addItem(itemName, amount, nil, info, isSync)
+            if inventoryResult.status then
+                return inventoryResult
+            end
+            
+            -- Inventory is full, try backpack
+            local backpack = self.inventory:getBackpackContainer()
+            if not backpack then
+                return {status = false, message = 'Backpack not found!'}
+            end
+            return backpack:addItem(itemName, amount, nil, info)
+        end
+        
+        -- Slot is provided, convert to number if needed
+        if type(slot) ~= 'number' then
+            slot = tonumber(slot)
+        end
+        
         if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
-            return self.inventory:addItem(itemName, amount, slot, info)
+            return self.inventory:addItem(itemName, amount, slot, info, isSync)
         else
             -- Backpack
             local backpack = self.inventory:getBackpackContainer()
@@ -307,11 +334,16 @@ function SPlayer.new(core, playerController, playerData)
     ---@param itemName string item name
     ---@param amount number amount to remove
     ---@param slot number|nil slot to remove (optional) (1-5: inventory | 6 -> n: backpack)
-    function self:removeItem(itemName, amount, slot)
+    ---@param isSync boolean|nil is sync inventory to client (optional, default is true)
+    ---@return {status:boolean, message:string, slot:number} result of removing item
+    function self:removeItem(itemName, amount, slot, isSync)
+        if isSync == nil then
+            isSync = true
+        end
         if not slot then
             -- Remove slot from inventory first
             -- Remove slot from backpack if not exist in inventory
-            local removeItemResult = self.inventory:removeItem(itemName, amount, slot)
+            local removeItemResult = self.inventory:removeItem(itemName, amount, slot, isSync)
             if removeItemResult.status then
                 return removeItemResult
             end
@@ -335,6 +367,56 @@ function SPlayer.new(core, playerController, playerData)
             end
             return backpack:removeItem(itemName, amount, slot)
         end
+    end
+
+    ---Check if player can add items to container
+    ---@param containerId string container id
+    ---@return {status: boolean; message: string} result is this player can add items to container or not
+    function self:canAddContainerItems(containerId)
+        local containerResult = self.core.inventoryManager:openContainerId(containerId)
+        if not containerResult.status then
+            return {
+                status = false,
+                message = containerResult.message,
+            }
+        end
+        local holderItemData = SHARED.items[containerResult.container.holderItem.name:lower()]
+        
+        local totalContainerWeight = containerResult.container:calculateTotalWeight() + (holderItemData.weight * containerResult.container.holderItem.amount)
+        local totalContainerItemsCount = #containerResult.container.items
+        -- Backpack info
+        local totalBackpackMaxWeight = 0
+        local totalBackpackMaxSlots = 0
+        local totalBackpackWeight = 0
+        local totalBackpackItemsCount = 0
+        local backpack = self.inventory:getBackpackContainer()
+        if backpack then
+            totalBackpackMaxWeight = backpack:getMaxWeight()
+            totalBackpackMaxSlots = backpack:getMaxSlots()
+            totalBackpackWeight = backpack:calculateTotalWeight()
+            totalBackpackItemsCount = #backpack.items
+        end
+        -- Player info
+        local totalPlayerMaxWeight = self.inventory:getMaxWeight() + totalBackpackMaxWeight
+        local totalPlayerMaxSlots = self.inventory:getMaxSlots() + totalBackpackMaxSlots
+        local currentPlayerWeight = self.inventory:calculateTotalWeight() + totalBackpackWeight
+        local currentPlayerItemsCount = #self.inventory.items + totalBackpackItemsCount
+        if currentPlayerWeight + totalContainerWeight > totalPlayerMaxWeight then
+            return {
+                status = false,
+                message = SHARED.t('error.cannotAddItemsToPlayerWeightLimitReached'),
+            }
+        end
+        if currentPlayerItemsCount + totalContainerItemsCount > totalPlayerMaxSlots then
+            return {
+                status = false,
+                message = SHARED.t('error.cannotAddItemsToPlayerSlotLimitReached'),
+            }
+        end
+        return {
+            status = true,
+            message = 'Player can add items to container',
+        }
     end
 
     _contructor()

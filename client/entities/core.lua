@@ -39,16 +39,6 @@ function TPNRPClient.new()
 
     ---Bind Helix events
     function self:bindHelixEvents()
-        -- Helix event
-        RegisterClientEvent('HEvent:PlayerLoggedIn', function()
-            print('[TPN][CLIENT] HEvent:PlayerLoggedIn')
-            
-        end)
-        
-        RegisterClientEvent('HEvent:PlayerLoaded', function()
-            print('[TPN][CLIENT] HEvent:PlayerLoaded')
-            
-        end)    
         -- On Player unpossessed
         RegisterClientEvent('HEvent:PlayerPossessed', function()
             TriggerCallback('getPermissions', function(result)
@@ -68,7 +58,8 @@ function TPNRPClient.new()
 
         RegisterClientEvent('TPN:client:setCharacters', function(result)
             -- TODO: Teleport player to Select character Room
-
+            -- Hide default UI
+            self.webUI:hideDefaultUI()
             -- Lock game input (Focus input on UI)
             self.webUI:focus()
             -- Show Select Character UI

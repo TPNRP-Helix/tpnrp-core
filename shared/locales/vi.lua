@@ -46,6 +46,8 @@ local vi = {
         inventoryFull = "Túi đồ đã đầy!",
         playerNotFound = "Không tìm thấy nhân vật!",
         itemCannotBeUsed = "Vật phẩm không thể sử dụng!",
+        cannotAddItemsToPlayerWeightLimitReached = "Không thể thêm vật phẩm vào túi! Trọng lượng đã đầy!",
+        cannotAddItemsToPlayerSlotLimitReached = "Không thể thêm vật phẩm vào túi! Số lượng đã đầy!",
     },
     success = {
         joinGame = "Đã vào game thành công",

@@ -222,6 +222,7 @@ export const Inventory = () => {
     useWebUIMessage<[TSyncEquipment]>('doSyncEquipment', ([{ type, items }]) => {
         if (type === 'sync') {
             const parsedItems = parseArrayItems(items)
+            console.log('doSyncEquipment', JSON.stringify(parsedItems))
             setEquipmentItems(parsedItems)
         }
     })

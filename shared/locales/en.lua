@@ -46,6 +46,8 @@ local en = {
         inventoryFull = "Inventory is full!",
         playerNotFound = "Player not found!",
         itemCannotBeUsed = "Item cannot be used",
+        cannotAddItemsToPlayerWeightLimitReached = "Cannot add items to player! Weight limit reached!",
+        cannotAddItemsToPlayerSlotLimitReached = "Cannot add items to player! Slot limit reached!",
     },
     success = {
         joinGame = "Joined game successfully",
