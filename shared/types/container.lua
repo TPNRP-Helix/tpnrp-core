@@ -3,7 +3,7 @@
 ---@field entity unknown|nil
 ---@field interactableEntity unknown|nil
 ---@field items table<number, SInventoryItemType> Items in container
----@field holderItem SInventoryItemType|nil Holder item of container
+---@field holderItem SHolderItemType|nil Holder item of container
 ---@field maxSlot number
 ---@field maxWeight number
 ---@field isDestroyOnEmpty boolean|nil
@@ -13,6 +13,7 @@
 
 ---@class ResponseGetContainer
 ---@field id string
+---@field citizenId string
 ---@field items table<number,SInventoryItemType>
 ---@field maxSlot number
 ---@field maxWeight number
@@ -20,4 +21,5 @@
 ---@field position Vector3
 ---@field rotation Rotator
 ---@field displayModel string
----@field holderItem SInventoryItemType|nil
+---@field holderItem SHolderItemType|nil
+

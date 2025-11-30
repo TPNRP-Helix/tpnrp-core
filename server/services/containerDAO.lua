@@ -56,8 +56,8 @@ DAO.container.save = function(container)
         container.citizenId,
         container.maxSlot,
         container.maxWeight,
-        holderItem,
         JSON.stringify(formattedItems),
+        holderItem,
         container.isDestroyOnEmpty,
         position,
         rotation,
@@ -117,11 +117,43 @@ DAO.container.get = function(containerId)
 end
 
 ---Get all containers
----@return table<string, {id:string; items: table<number,SInventoryItemType>; maxSlot: number; maxWeight: number}> containers
+---@return table<string, ResponseGetContainer> containers
 DAO.container.getAll = function()
-    local result = DAO.Action('Select', 'SELECT * FROM containers where type = ?', { 'container' })
+    local result = DAO.Action('Select', 'SELECT * FROM containers WHERE type = ? AND position IS NOT NULL AND position != ? AND rotation IS NOT NULL AND rotation != ?', { 'container', '', '' })
     if not result or #result == 0 then
         return {}
     end
-    return result
+    local containers = {}
+    for _, container in pairs(result) do
+        local rotation = JSON.parse(container.rotation)
+        local position = JSON.parse(container.position)
+        local items = JSON.parse(container.items)
+        local formattedItems = {}
+    -- Mapping base item data with the item data from the database
+        for _, item in ipairs(items) do
+            local itemData = SHARED.items[item.name:lower()]
+            if item then
+                local nextIndex = #formattedItems + 1
+                formattedItems[nextIndex] = itemData
+                formattedItems[nextIndex].amount = item.amount
+                formattedItems[nextIndex].info = item.info
+                formattedItems[nextIndex].slot = item.slot
+            end
+        end
+        containers[#containers + 1] = {
+            id = container.container_id,
+            citizenId = container.citizen_id,
+            items = formattedItems,
+            maxSlot = tonumber(container.max_slot),
+            maxWeight = tonumber(container.max_weight),
+            rotation = Rotator(0, rotation.Yaw, 0),
+            position = Vector(position.x, position.y, position.z),
+            isDestroyOnEmpty = container.is_destroy_on_empty,
+            type = container.type,
+            displayModel = container.display_model,
+            holderItem = JSON.parse(container.holder_item),
+        }
+    end
+
+    return containers
 end

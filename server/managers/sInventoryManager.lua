@@ -102,14 +102,88 @@ function SInventoryManager.new(core)
             return self:unequipItem(source, data)
         end)
 
-        -- TODO: Load container from DB and create entity
+        -- Load container from DB and create entity
         local allContainers = DAO.container.getAll()
-        print('---------------------------------------')
-        for _, container in pairs(allContainers) do
-            -- TODO: Create container entity, spawn them in world, add interaction for them
-            -- print('[SERVER] container ' .. container.containerId .. ' loaded')
+        -- Loop through containers
+        if allContainers and type(allContainers) == 'table' then
+            for _, container in pairs(allContainers) do
+                if not container then
+                    goto nextContainer
+                end
+                -- TODO: Create container entity, spawn them in world, add interaction for them
+                -- Safely serialize container for debugging (convert userdata to plain tables)
+                local worldItem = SHARED.getWorldItemPath(container.holderItem.name or '')
+                local spawnPosition = Vector(container.position.x, container.position.y, container.position.z)
+                local spawnRotation = Rotator(0, container.rotation.Yaw, 0)
+                
+                local spawnStaticMeshParams = {
+                    containerId = container.id,
+                    entityPath = worldItem.path,
+                    position = spawnPosition,
+                    rotation = spawnRotation,
+                    scale = worldItem.scale,
+                    collisionType = ECollisionType.IgnoreOnlyPawn,
+                    mobilityType = EMobilityType.Movable,
+                }
+                -- Spawn bag
+                local spawnResult = self.core.gameManager:spawnStaticMesh(spawnStaticMeshParams)
+                if not spawnResult.status then
+                    print('[WARNING] Failed to spawn container ' .. container.id .. '!')
+                    goto nextContainer
+                end
+                -- Item have an option to pick up item
+                local options = {
+                    {
+                        Text = SHARED.t('inventory.pickUpItem'),
+                        Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
+                        Action = function(Drop, Instigator)
+                            local controller = Instigator and Instigator:GetController()
+                            if controller then
+                                TriggerClientEvent(controller, 'pickUpItem', { containerId = spawnResult.entityId })
+                            end
+                        end,
+                    },
+                    {
+                        Text = SHARED.t('inventory.openDrop'),
+                        Input = '/Game/Helix/Input/Actions/IA_Weapon_Reload.IA_Weapon_Reload',
+                        Action = function(Drop, Instigator)
+                            local controller = Instigator and Instigator:GetController()
+                            if controller then
+                                TriggerClientEvent(controller, 'openContainerInventory', { containerId = spawnResult.entityId })
+                            end
+                        end,
+                    }
+                }
+                -- Spawn success
+                local addInteractableResult = self.core.gameManager:addInteractable({
+                    entityId = spawnResult.entityId,
+                    entity = spawnResult.entity,
+                    options = options,
+                })
+                if not addInteractableResult.status then
+                    -- On failed to create interactable => Destroy bag
+                    DeleteEntity(spawnResult.entity)
+                    goto nextContainer
+                end
+
+                local newContainerObj = SContainer.new(self.core, container.id, container.citizenId)
+                newContainerObj:initEntity({
+                    entityId = spawnResult.entityId,
+                    entity = spawnResult.entity,
+                    interactableEntity = addInteractableResult.interactableEntity,
+                    position = spawnPosition,
+                    rotation = spawnRotation,
+                    items = container.items,
+                    maxSlot = container.maxSlot,
+                    maxWeight = container.maxWeight,
+                    isDestroyOnEmpty = container.isDestroyOnEmpty,
+                    holderItem = container.holderItem,
+                })
+                self.containers[spawnResult.entityId] = newContainerObj
+
+                ::nextContainer::
+            end
         end
-        print('---------------------------------------')
     end
 
     ---On shutdown
@@ -1159,7 +1233,11 @@ function SInventoryManager.new(core)
             self.containers[spawnResult.entityId].interactableEntity = addInteractableResult.interactableEntity
             self.containers[spawnResult.entityId].position = SpawnPosition
             self.containers[spawnResult.entityId].rotation = PawnRotation
-            
+            self.containers[spawnResult.entityId].holderItem = {
+                name = dropItem.name,
+                amount = dropItem.amount,
+                info = dropItem.info,
+            }
         else
             -- Add container to dictionary (dropItem already has slot = 1)
             local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)

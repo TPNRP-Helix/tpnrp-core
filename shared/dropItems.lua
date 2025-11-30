@@ -9,14 +9,18 @@ SHARED.dropItems = {
 ---@param itemName string
 ---@return TWorldItem worldItem
 SHARED.getWorldItemPath = function(itemName)
+    local defaultItem = {
+        path = "/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag",
+        scale = Vector(0.8, 0.8, 0.8),
+        rotation = 90,
+    }
+    if not itemName or itemName == '' then
+        return defaultItem
+    end
     local item = SHARED.dropItems[itemName:lower()]
     if item then
         return item
     end
     -- Fallback to default path
-    return {
-        path = "/Game/QBCore/Meshes/SM_DuffelBag.SM_DuffelBag",
-        scale = Vector(0.8, 0.8, 0.8),
-        rotation = 90,
-    }
+    return defaultItem
 end

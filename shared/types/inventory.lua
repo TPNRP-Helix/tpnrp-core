@@ -8,7 +8,7 @@
 ---@field amount number
 ---@field info table
 ---@field slot number
----@field name string           -- [DB]
+---@field name string
 ---@field label string          -- [DB]
 ---@field weight number         -- [DB]
 ---@field type string           -- [DB] 'item' | 'weapon' | 'ammo' | 'tool' | 'material' | 'other'
@@ -17,6 +17,11 @@
 ---@field useable boolean       -- [DB]
 ---@field shouldClose boolean   -- [DB]
 ---@field description string    -- [DB]
+
+---@class SHolderItemType
+---@field amount number
+---@field info table
+---@field name string
 
 ---@class SInventoryCanAddItemResultType
 ---@field status boolean

@@ -4,7 +4,7 @@ local SStorage = require('server/entities/sStorage')
 ---@field core TPNRPServer
 ---@field citizenId string Citizen ID
 ---@field items table<number, SInventoryItemType> Items in container
----@field holderItem SInventoryItemType|nil Holder item of container
+---@field holderItem SHolderItemType|nil Holder item of container
 ---@field maxSlot number Max slot count
 ---@field maxWeight number Max weight in grams
 SContainer = {}
