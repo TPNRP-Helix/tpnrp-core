@@ -95,7 +95,7 @@ const OtherInventoryComponent = () => {
                 </ScrollArea>
             </TabsContent>
             <TabsContent value="missions" className="h-full overflow-hidden">
-                <ScrollArea className="h-full overflow-hidden">
+                <ScrollArea className="h-full overflow-hidden" viewportClassName="pt-1 px-1">
                     Missions
                 </ScrollArea>
             </TabsContent>

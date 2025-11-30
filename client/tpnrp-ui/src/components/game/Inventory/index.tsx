@@ -199,7 +199,7 @@ export const Inventory = () => {
     })
     useWebUIMessage<[]>('closeInventory', () => setOpenInventory(false))
     useWebUIMessage<[TSyncInventory]>('doSyncInventory', ([syncInfo]) => {
-        const { type, items, backpack } = syncInfo
+        const { type, items, backpack, openingContainer } = syncInfo
         if (type === 'sync') {
             const parsedItems = parseArrayItems(items)
             // Filter out items that are in the backpack to prevent duplicates
@@ -216,13 +216,26 @@ export const Inventory = () => {
                 // If no backpack, clear backpack items
                 setBackpackItems([])
             }
+            // Opening container
+            if (openingContainer) {
+                const parsedOpeningContainerItems = parseArrayItems(openingContainer.items)
+                setOtherItems(parsedOpeningContainerItems)
+                setOtherItemsId(openingContainer.id)
+                setOtherItemsType('container')
+                setOtherItemsSlotCount(openingContainer.slotCount)
+            } else {
+                // If no opening container, clear other items
+                setOtherItems([])
+                setOtherItemsId('')
+                setOtherItemsType('ground')
+                setOtherItemsSlotCount(0)
+            }
         }
     })
 
     useWebUIMessage<[TSyncEquipment]>('doSyncEquipment', ([{ type, items }]) => {
         if (type === 'sync') {
             const parsedItems = parseArrayItems(items)
-            console.log('doSyncEquipment', JSON.stringify(parsedItems))
             setEquipmentItems(parsedItems)
         }
     })

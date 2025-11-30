@@ -87,6 +87,9 @@ DAO.container.get = function(containerId)
     end
     -- Format items
     local items = JSON.parse(inventory.items)
+    if not items then
+        items = {}
+    end
     local formattedItems = {}
     -- Mapping base item data with the item data from the database
     for _, item in pairs(items) do

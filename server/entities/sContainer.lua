@@ -134,6 +134,37 @@ function SContainer.new(core, containerId, citizenId)
         return { status = true, message = 'Container destroyed successfully!' }
     end
 
+    ---Get container weight
+    ---@return number total container weight in Grams
+    function self:getContainerWeight()
+        local totalWeight = 0
+        for _, item in pairs(self.items) do
+            local itemData = SHARED.items[item.name:lower()]
+            if itemData then
+                totalWeight = totalWeight + (itemData.weight * item.amount)
+            end
+        end
+        if self.holderItem then
+            local itemData = SHARED.items[self.holderItem.name:lower()]
+            if itemData then
+                -- Add holder item weight to total weight
+                totalWeight = totalWeight + (itemData.weight * self.holderItem.amount)
+            end
+        end
+        return totalWeight
+    end
+
+    ---Get container items count
+    ---@return number total container items count
+    function self:getContainerItemsCount()
+        local itemsCount = #self.items
+        
+        if self.holderItem then
+            itemsCount = itemsCount + 1
+        end
+        return itemsCount
+    end
+
     _contructor()
     ---- END ----
     return self

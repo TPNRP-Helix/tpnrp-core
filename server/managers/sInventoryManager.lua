@@ -214,6 +214,7 @@ function SInventoryManager.new(core)
                     message = 'Container not found!',
                 }
             end
+            player.inventory.openingContainerId = container.containerId
             result.container = {
                 id = container.containerId,
                 items = container.items,
@@ -1154,10 +1155,11 @@ function SInventoryManager.new(core)
             }
         end
         if item.info.containerId then
-            self.containers[item.info.containerId].entity = spawnResult.entity
-            self.containers[item.info.containerId].interactableEntity = addInteractableResult.interactableEntity
-            self.containers[item.info.containerId].position = SpawnPosition
-            self.containers[item.info.containerId].rotation = PawnRotation
+            self.containers[spawnResult.entityId].entity = spawnResult.entity
+            self.containers[spawnResult.entityId].interactableEntity = addInteractableResult.interactableEntity
+            self.containers[spawnResult.entityId].position = SpawnPosition
+            self.containers[spawnResult.entityId].rotation = PawnRotation
+            
         else
             -- Add container to dictionary (dropItem already has slot = 1)
             local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
@@ -1176,6 +1178,8 @@ function SInventoryManager.new(core)
             })
             self.containers[spawnResult.entityId] = dropContainer
         end
+        -- Save container to db
+        self.containers[spawnResult.entityId]:save()
 
         return {
             status = true,
@@ -1355,6 +1359,10 @@ function SInventoryManager.new(core)
         return player.equipment:unequipItem(clothType, data.toSlotNumber or nil)
     end
 
+    --- Pick up item from container
+    ---@param source PlayerController player controller
+    ---@param data {containerId: string} data
+    ---@return {status: boolean; message: string} result of picking up item
     function self:onPickUpItem(source, data)
         local player = self.core:getPlayerBySource(source)
         if not player then

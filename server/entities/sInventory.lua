@@ -23,7 +23,8 @@ function SInventory.new(player, inventoryType)
     self.player = player
     self.type = inventoryType
     self.items = {}
-
+    ---@type string | nil opening container id
+    self.openingContainerId = nil
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
@@ -53,13 +54,25 @@ function SInventory.new(player, inventoryType)
             slotCount = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpack:getMaxSlots()
             maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpack:getMaxWeight()
         end
-
-        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, {
+        local responseData = {
             isHaveBackpack = isHaveBackpack,
             slotCount = slotCount,
             maxWeight = maxWeight,
             items = backpackItems
-        })
+        }
+        local openingContainerId = self.openingContainerId
+        if openingContainerId then
+            local containerResult = self.core.inventoryManager:openContainerId(openingContainerId)
+            if containerResult.status then
+                responseData.openingContainer = {
+                    id = containerResult.container.containerId,
+                    items = containerResult.container.items,
+                    maxWeight = containerResult.container.maxWeight,
+                    slotCount = containerResult.container.maxSlot,
+                }
+            end
+        end
+        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, responseData)
     end
 
     ---Save inventory
