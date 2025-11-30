@@ -10,6 +10,7 @@
 ---@field position Vector3|nil
 ---@field rotation Rotator|nil
 ---@field containerId string|nil
+---@field timeExpired number|nil Unix timestamp when container expires
 
 ---@class ResponseGetContainer
 ---@field id string
@@ -22,4 +23,5 @@
 ---@field rotation Rotator
 ---@field displayModel string
 ---@field holderItem SHolderItemType|nil
+---@field timeExpired number Unix timestamp when container expires
 

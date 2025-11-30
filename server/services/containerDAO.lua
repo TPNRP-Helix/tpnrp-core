@@ -25,9 +25,13 @@ DAO.container.save = function(container)
     end
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
+    local expirationHours = SHARED.CONFIG.CONTAINER_EXPIRATION_HOURS or 24
+    local expirationSeconds = expirationHours * 3600
+    local currentTimestamp = os.time()
+    local expirationTimestamp = currentTimestamp + expirationSeconds
     local sql = [[
-        INSERT INTO containers (container_id, type, citizen_id, max_slot, max_weight, items, holder_item, is_destroy_on_empty, position, rotation)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO containers (container_id, type, citizen_id, max_slot, max_weight, items, holder_item, is_destroy_on_empty, position, rotation, time_expired)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ON CONFLICT(container_id) DO UPDATE SET
             items = excluded.items,
             max_slot = excluded.max_slot,
@@ -35,7 +39,8 @@ DAO.container.save = function(container)
             holder_item = excluded.holder_item,
             is_destroy_on_empty = excluded.is_destroy_on_empty,
             position = excluded.position,
-            rotation = excluded.rotation;
+            rotation = excluded.rotation,
+            time_expired = excluded.time_expired;
     ]]
     local position = ''
     if container.position then
@@ -61,6 +66,7 @@ DAO.container.save = function(container)
         container.isDestroyOnEmpty and 1 or 0,
         position,
         rotation,
+        expirationTimestamp,
     }
     local result = DAO.DB.Execute(sql, params)
     if result then
@@ -102,6 +108,14 @@ DAO.container.get = function(containerId)
             formattedItems[nextIndex].slot = item.slot
         end
     end
+    -- Calculate expiration time if not set (for backward compatibility)
+    local timeExpired = tonumber(inventory.time_expired)
+    if not timeExpired then
+        local expirationHours = SHARED.CONFIG.CONTAINER_EXPIRATION_HOURS or 24
+        local expirationSeconds = expirationHours * 3600
+        timeExpired = os.time() + expirationSeconds
+    end
+    
     -- Return formatted items
     return {
         id = inventory.container_id,
@@ -113,6 +127,7 @@ DAO.container.get = function(containerId)
         rotation = JSON.parse(inventory.rotation),
         displayModel = inventory.display_model,
         holderItem = JSON.parse(inventory.holder_item),
+        timeExpired = timeExpired,
     }
 end
 
@@ -140,6 +155,14 @@ DAO.container.getAll = function()
                 formattedItems[nextIndex].slot = item.slot
             end
         end
+        -- Calculate expiration time if not set (for backward compatibility)
+        local timeExpired = tonumber(container.time_expired)
+        if not timeExpired then
+            local expirationHours = SHARED.CONFIG.CONTAINER_EXPIRATION_HOURS or 24
+            local expirationSeconds = expirationHours * 3600
+            timeExpired = os.time() + expirationSeconds
+        end
+        
         containers[#containers + 1] = {
             id = container.container_id,
             citizenId = container.citizen_id,
@@ -152,6 +175,7 @@ DAO.container.getAll = function()
             type = container.type,
             displayModel = container.display_model,
             holderItem = JSON.parse(container.holder_item),
+            timeExpired = timeExpired,
         }
     end
 
