@@ -58,7 +58,7 @@ DAO.container.save = function(container)
         container.maxWeight,
         JSON.stringify(formattedItems),
         holderItem,
-        container.isDestroyOnEmpty,
+        container.isDestroyOnEmpty and 1 or 0,
         position,
         rotation,
     }
@@ -148,7 +148,7 @@ DAO.container.getAll = function()
             maxWeight = tonumber(container.max_weight),
             rotation = Rotator(0, rotation.Yaw, 0),
             position = Vector(position.x, position.y, position.z),
-            isDestroyOnEmpty = container.is_destroy_on_empty,
+            isDestroyOnEmpty = container.is_destroy_on_empty == 1,
             type = container.type,
             displayModel = container.display_model,
             holderItem = JSON.parse(container.holder_item),
@@ -156,4 +156,15 @@ DAO.container.getAll = function()
     end
 
     return containers
+end
+
+---Delete container by containerId
+---@param containerId string
+---@return boolean success
+DAO.container.delete = function(containerId)
+    local result = DAO.DB.Execute('DELETE FROM containers WHERE container_id = ?', { containerId })
+    if result then
+        return true
+    end
+    return false
 end

@@ -134,6 +134,16 @@ function SContainer.new(core, containerId, citizenId)
         return { status = true, message = 'Container destroyed successfully!' }
     end
 
+    ---Completely delete container from database
+    ---@return {status:boolean, message:string} result of deleting container
+    function self:hardDelete()
+        local result = DAO.container.delete(self.containerId)
+        if result then
+            return { status = true, message = 'Container deleted successfully!' }
+        end
+        return { status = false, message = 'Failed to delete container!' }
+    end
+
     ---Get container weight
     ---@return number total container weight in Grams
     function self:getContainerWeight()
