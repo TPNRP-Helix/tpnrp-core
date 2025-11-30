@@ -112,7 +112,13 @@ function SInventoryManager.new(core)
                 end
                 -- Create container entity, spawn it in world, add interaction for it
                 -- Safely serialize container for debugging (convert userdata to plain tables)
-                local worldItem = SHARED.getWorldItemPath(container.holderItem.name or '')
+                local itemName = ''
+                if container.holderItem then
+                    itemName = container.holderItem.name or ''
+                else
+                    itemName = (container.items and container.items[1] and container.items[1].name) or ''
+                end
+                local worldItem = SHARED.getWorldItemPath(itemName)
                 local spawnPosition = Vector(container.position.x, container.position.y, container.position.z)
                 local spawnRotation = Rotator(0, container.rotation.Yaw, 0)
                 
@@ -142,8 +148,10 @@ function SInventoryManager.new(core)
                                 TriggerClientEvent(controller, 'pickUpItem', { containerId = spawnResult.entityId })
                             end
                         end,
-                    },
-                    {
+                    }
+                }
+                if container.holderItem then
+                    table.insert(options, {
                         Text = SHARED.t('inventory.openDrop'),
                         Input = '/Game/Helix/Input/Actions/IA_Weapon_Reload.IA_Weapon_Reload',
                         Action = function(Drop, Instigator)
@@ -152,8 +160,8 @@ function SInventoryManager.new(core)
                                 TriggerClientEvent(controller, 'openContainerInventory', { containerId = spawnResult.entityId })
                             end
                         end,
-                    }
-                }
+                    })
+                end
                 -- Spawn success
                 local addInteractableResult = self.core.gameManager:addInteractable({
                     entityId = spawnResult.entityId,
