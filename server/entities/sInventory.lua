@@ -64,9 +64,30 @@ function SInventory.new(player, inventoryType)
         if openingContainerId then
             local containerResult = self.core.inventoryManager:openContainerId(openingContainerId)
             if containerResult.status then
+                -- Create copies of container items to prevent slot syncing issues
+                -- when the same item exists in both inventory and container
+                local containerItems = {}
+                for _, item in pairs(containerResult.container.items) do
+                    if item and item.slot then
+                        containerItems[#containerItems + 1] = {
+                            name = item.name,
+                            label = item.label,
+                            weight = item.weight,
+                            type = item.type,
+                            image = item.image,
+                            unique = item.unique,
+                            useable = item.useable,
+                            shouldClose = item.shouldClose,
+                            description = item.description,
+                            amount = item.amount,
+                            slot = item.slot,
+                            info = item.info and JSON.parse(JSON.stringify(item.info)) or {}
+                        }
+                    end
+                end
                 responseData.openingContainer = {
                     id = containerResult.container.containerId,
-                    items = containerResult.container.items,
+                    items = containerItems,
                     maxWeight = containerResult.container.maxWeight,
                     slotCount = containerResult.container.maxSlot,
                 }

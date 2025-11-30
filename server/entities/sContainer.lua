@@ -32,6 +32,10 @@ function SContainer.new(core, containerId, citizenId)
     self.position = nil
     self.rotation = nil
 
+    -- Expiration timestamp
+    -- When expired, container will be destroyed and removed from database
+    self.timeExpired = nil -- Unix timestamp when container expires
+
     -- Max slot count of this container
     self.maxSlot = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
     -- Max weight in grams
@@ -102,19 +106,10 @@ function SContainer.new(core, containerId, citizenId)
 
     ---Open container
     function self:openContainer()
-        local inventory = nil
-        -- Filter out nil values from inventory and convert to array
-        inventory = {}
-        for _, item in pairs(self.items) do
-            if item ~= nil then
-                table.insert(inventory, item)
-            end
-        end
-
         return {
             status = true,
             message = 'Container opened!',
-            inventory = inventory,
+            inventory = self.items,
             capacity = {
                 weight = self.maxWeight,
                 slots = self.maxSlot,

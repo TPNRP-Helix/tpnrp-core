@@ -180,6 +180,7 @@ export const Inventory = () => {
         if (result.container) {
             // Check if result.container is an array or object
             const parsedContainerItems = parseArrayItems(result.container.items)
+            console.log('[UI] parsedContainerItems', JSON.stringify(parsedContainerItems))
             setOtherItems(parsedContainerItems)
             setOtherItemsId(result.container.id)
             setOtherItemsType('container')
@@ -311,7 +312,7 @@ export const Inventory = () => {
                                                 {Array.from({ length: (slotCount - DEFAULT_SLOT_COUNT) }, (_, i) => {
                                                     const slot = i + (DEFAULT_SLOT_COUNT + 1) // Next slot index
                                                     const item = backpackItemsMap.get(i + 1) ?? null
-                                                    return <InventoryItem key={slot} item={item} slot={slot} isShowHotbarNumber={false} group="backpack" />
+                                                    return <InventoryItem key={`backpack-${slot}-${item?.name ?? ''}`} item={item} slot={slot} isShowHotbarNumber={false} group="backpack" />
                                                 })}
                                             </div>
                                         ) : (
