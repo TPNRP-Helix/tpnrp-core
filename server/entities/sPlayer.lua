@@ -380,9 +380,15 @@ function SPlayer.new(core, playerController, playerData)
                 message = containerResult.message,
             }
         end
-        local holderItemData = SHARED.items[containerResult.container.holderItem.name:lower()]
-        
-        local totalContainerWeight = containerResult.container:calculateTotalWeight() + (holderItemData.weight * containerResult.container.holderItem.amount)
+
+        local totalContainerWeight = containerResult.container:calculateTotalWeight()
+        if containerResult.container.holderItem then
+            local holderItemName = containerResult.container.holderItem.name or ''
+            local holderItemAmount = containerResult.container.holderItem.amount or 0
+            local holderItemData = SHARED.items[holderItemName]
+
+            totalContainerWeight = totalContainerWeight + (holderItemData.weight * holderItemAmount)
+        end
         local totalContainerItemsCount = #containerResult.container.items
         -- Backpack info
         local totalBackpackMaxWeight = 0

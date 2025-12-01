@@ -52,12 +52,12 @@ const OtherInventoryComponent = () => {
             </TabsListHelix>
             <Separator className="absolute mb-4 top-[calc(var(--spacing)*7-1px)] mx-2" />
             <TabsContent value="ground" className="h-full overflow-hidden">
-                <ScrollArea className="h-full overflow-hidden mt-2 p-2">
+                <ScrollArea className="h-full overflow-hidden mt-2" viewportClassName="[&>div]:h-full [&>div]:table-fixed p-2">
                     <div className="grid grid-cols-[repeat(5,96px)] gap-4 grid-wrap">
                         {Array.from({ length: otherItemsSlotCount }, (_, i) => {
                             const slot = i + 1
                             const item = otherItemsMap.get(slot) ?? null
-                            return <InventoryItem key={`container-${slot}`} item={item} slot={slot} group="container" isShowHotbarNumber={false} />
+                            return <InventoryItem key={`container-${slot}-${item?.name ?? ''}`} item={item} slot={slot} group="container" isShowHotbarNumber={false} />
                         })}
                     </div>
                 </ScrollArea>
@@ -95,7 +95,7 @@ const OtherInventoryComponent = () => {
                 </ScrollArea>
             </TabsContent>
             <TabsContent value="missions" className="h-full overflow-hidden">
-                <ScrollArea className="h-full overflow-hidden">
+                <ScrollArea className="h-full overflow-hidden" viewportClassName="pt-1 px-1">
                     Missions
                 </ScrollArea>
             </TabsContent>

@@ -27,45 +27,57 @@ const CharacterInfoComponent = () => {
 
     const leftColumnItems = useMemo(() => [
         {
-            slot: EEquipmentSlot.Glasses
+            slot: EEquipmentSlot.Glasses,
+            item: getEquipmentItem(EEquipmentSlot.Glasses)
         },
         {
-            slot: EEquipmentSlot.Ears
+            slot: EEquipmentSlot.Ears,
+            item: getEquipmentItem(EEquipmentSlot.Ears)
         },
         {
-            slot: EEquipmentSlot.Gloves
+            slot: EEquipmentSlot.Gloves,
+            item: getEquipmentItem(EEquipmentSlot.Gloves)
         },
         {
-            slot: EEquipmentSlot.Armor
+            slot: EEquipmentSlot.Armor,
+            item: getEquipmentItem(EEquipmentSlot.Armor)
         },
         {
-            slot: EEquipmentSlot.Mask
+            slot: EEquipmentSlot.Mask,
+            item: getEquipmentItem(EEquipmentSlot.Mask)
         },
         {
-            slot: EEquipmentSlot.Watch
+            slot: EEquipmentSlot.Watch,
+            item: getEquipmentItem(EEquipmentSlot.Watch)
         }
-    ], [equipmentItems])
+    ], [equipmentItems, getEquipmentItem])
 
     const rightColumnItems = useMemo(() => [
         {
-            slot: EEquipmentSlot.Hat
+            slot: EEquipmentSlot.Hat,
+            item: getEquipmentItem(EEquipmentSlot.Hat)
         },
         {
-            slot: EEquipmentSlot.Top
+            slot: EEquipmentSlot.Top,
+            item: getEquipmentItem(EEquipmentSlot.Top)
         },
         {
-            slot: EEquipmentSlot.Undershirts
+            slot: EEquipmentSlot.Undershirts,
+            item: getEquipmentItem(EEquipmentSlot.Undershirts)
         },
         {
-            slot: EEquipmentSlot.Leg
+            slot: EEquipmentSlot.Leg,
+            item: getEquipmentItem(EEquipmentSlot.Leg)
         },
         {
-            slot: EEquipmentSlot.Shoes
+            slot: EEquipmentSlot.Shoes,
+            item: getEquipmentItem(EEquipmentSlot.Shoes)
         },
         {
-            slot: EEquipmentSlot.Bag
+            slot: EEquipmentSlot.Bag,
+            item: getEquipmentItem(EEquipmentSlot.Bag)
         }
-    ], [equipmentItems])
+    ], [equipmentItems, getEquipmentItem])
 
     return (
         <Tabs value={selectCharacterTab} onValueChange={(value) => setSelectCharacterTab(value as 'equipment' | 'skills' | 'stats')} className="relative w-full! h-full flex flex-col">
@@ -78,31 +90,25 @@ const CharacterInfoComponent = () => {
             <TabsContent value="equipment" className="h-full">
                 <div className="grid grid-cols-[96px_1fr_96px] h-full">
                     <div className="flex flex-col gap-3">
-                        {leftColumnItems.map((item) => {
-                            const itemInfo = getEquipmentItem(item.slot)
-                            return (
-                                <InventoryItem
-                                    group="equipment"
-                                    slot={item.slot}
-                                    item={itemInfo}
-                                    isShowHotbarNumber
-                                />
-                            )
-                        })}
+                        {leftColumnItems.map((slotInfo) => (
+                            <InventoryItem
+                                group="equipment"
+                                slot={slotInfo.slot}
+                                item={slotInfo.item}
+                                isShowHotbarNumber
+                            />
+                        ))}
                     </div>
                     <div></div>
                     <div className="flex flex-col gap-3">
-                        {rightColumnItems.map((item) => {
-                            const itemInfo = getEquipmentItem(item.slot)
-                            return (
-                                <InventoryItem
-                                    group="equipment"
-                                    slot={item.slot}
-                                    item={itemInfo}
-                                    isShowHotbarNumber
-                                />
-                            )
-                        })}
+                        {rightColumnItems.map((slotInfo) => (
+                            <InventoryItem
+                                group="equipment"
+                                slot={slotInfo.slot}
+                                item={slotInfo.item}
+                                isShowHotbarNumber
+                            />
+                        ))}
                     </div>
                 </div>
             </TabsContent>

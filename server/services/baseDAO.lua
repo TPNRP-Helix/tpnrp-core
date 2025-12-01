@@ -60,7 +60,8 @@ DAO.DB.Execute([[
         is_destroy_on_empty BOOLEAN,
         position TEXT,
         rotation TEXT,
-        display_model TEXT
+        display_model TEXT,
+        time_expired INTEGER
     );
 ]])
 

@@ -71,9 +71,6 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
         window.hEvent('wearItem', {
             itemName: item.name,
             slot: item.slot
-        }, (result: unknown) => {
-            console.log('[UI] onClickWear - result: ', JSON.stringify(result))
-            // equipItem(item)
         })
     }, [item])
 
@@ -140,8 +137,6 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
         if (item === null || slot === null) return
         window.hEvent('unequipItem', {
             itemName: item.name
-        }, (result: unknown) => {
-            console.log('[UI] onClickUnequip - result: ', JSON.stringify(result))
         })
     }, [item])
 

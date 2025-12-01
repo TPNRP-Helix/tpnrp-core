@@ -70,6 +70,12 @@ export type TSyncInventory = {
         slotCount: number
         maxWeight: number
     }
+    openingContainer: {
+        id: string
+        items: TInventoryItem[]
+        slotCount: number
+        maxWeight: number
+    }
 }
 
 export type TSyncEquipment = {

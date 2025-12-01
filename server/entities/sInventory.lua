@@ -23,7 +23,8 @@ function SInventory.new(player, inventoryType)
     self.player = player
     self.type = inventoryType
     self.items = {}
-
+    ---@type string | nil opening container id
+    self.openingContainerId = nil
     ---/********************************/
     ---/*         Initializes          */
     ---/********************************/
@@ -53,13 +54,46 @@ function SInventory.new(player, inventoryType)
             slotCount = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS + backpack:getMaxSlots()
             maxWeight = SHARED.CONFIG.INVENTORY_CAPACITY.WEIGHT + backpack:getMaxWeight()
         end
-
-        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, {
+        local responseData = {
             isHaveBackpack = isHaveBackpack,
             slotCount = slotCount,
             maxWeight = maxWeight,
             items = backpackItems
-        })
+        }
+        local openingContainerId = self.openingContainerId
+        if openingContainerId then
+            local containerResult = self.core.inventoryManager:openContainerId(openingContainerId)
+            if containerResult.status then
+                -- Create copies of container items to prevent slot syncing issues
+                -- when the same item exists in both inventory and container
+                local containerItems = {}
+                for _, item in pairs(containerResult.container.items) do
+                    if item and item.slot then
+                        containerItems[#containerItems + 1] = {
+                            name = item.name,
+                            label = item.label,
+                            weight = item.weight,
+                            type = item.type,
+                            image = item.image,
+                            unique = item.unique,
+                            useable = item.useable,
+                            shouldClose = item.shouldClose,
+                            description = item.description,
+                            amount = item.amount,
+                            slot = item.slot,
+                            info = item.info and JSON.parse(JSON.stringify(item.info)) or {}
+                        }
+                    end
+                end
+                responseData.openingContainer = {
+                    id = containerResult.container.containerId,
+                    items = containerItems,
+                    maxWeight = containerResult.container.maxWeight,
+                    slotCount = containerResult.container.maxSlot,
+                }
+            end
+        end
+        TriggerClientEvent(self.player.playerController, 'clientSyncInventory', self.items, responseData)
     end
 
     ---Save inventory

@@ -4,7 +4,7 @@ local SStorage = require('server/entities/sStorage')
 ---@field core TPNRPServer
 ---@field citizenId string Citizen ID
 ---@field items table<number, SInventoryItemType> Items in container
----@field holderItem SInventoryItemType|nil Holder item of container
+---@field holderItem SHolderItemType|nil Holder item of container
 ---@field maxSlot number Max slot count
 ---@field maxWeight number Max weight in grams
 SContainer = {}
@@ -31,6 +31,10 @@ function SContainer.new(core, containerId, citizenId)
 
     self.position = nil
     self.rotation = nil
+
+    -- Expiration timestamp
+    -- When expired, container will be destroyed and removed from database
+    self.timeExpired = nil -- Unix timestamp when container expires
 
     -- Max slot count of this container
     self.maxSlot = SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS
@@ -102,19 +106,10 @@ function SContainer.new(core, containerId, citizenId)
 
     ---Open container
     function self:openContainer()
-        local inventory = nil
-        -- Filter out nil values from inventory and convert to array
-        inventory = {}
-        for _, item in pairs(self.items) do
-            if item ~= nil then
-                table.insert(inventory, item)
-            end
-        end
-
         return {
             status = true,
             message = 'Container opened!',
-            inventory = inventory,
+            inventory = self.items,
             capacity = {
                 weight = self.maxWeight,
                 slots = self.maxSlot,
@@ -132,6 +127,47 @@ function SContainer.new(core, containerId, citizenId)
             DeleteEntity(self.entity)
         end
         return { status = true, message = 'Container destroyed successfully!' }
+    end
+
+    ---Completely delete container from database
+    ---@return {status:boolean, message:string} result of deleting container
+    function self:hardDelete()
+        local result = DAO.container.delete(self.containerId)
+        if result then
+            return { status = true, message = 'Container deleted successfully!' }
+        end
+        return { status = false, message = 'Failed to delete container!' }
+    end
+
+    ---Get container weight
+    ---@return number total container weight in Grams
+    function self:getContainerWeight()
+        local totalWeight = 0
+        for _, item in pairs(self.items) do
+            local itemData = SHARED.items[item.name:lower()]
+            if itemData then
+                totalWeight = totalWeight + (itemData.weight * item.amount)
+            end
+        end
+        if self.holderItem then
+            local itemData = SHARED.items[self.holderItem.name:lower()]
+            if itemData then
+                -- Add holder item weight to total weight
+                totalWeight = totalWeight + (itemData.weight * self.holderItem.amount)
+            end
+        end
+        return totalWeight
+    end
+
+    ---Get container items count
+    ---@return number total container items count
+    function self:getContainerItemsCount()
+        local itemsCount = #self.items
+        
+        if self.holderItem then
+            itemsCount = itemsCount + 1
+        end
+        return itemsCount
     end
 
     _contructor()

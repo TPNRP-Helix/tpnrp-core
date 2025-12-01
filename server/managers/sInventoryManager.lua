@@ -102,14 +102,96 @@ function SInventoryManager.new(core)
             return self:unequipItem(source, data)
         end)
 
-        -- TODO: Load container from DB and create entity
+        -- Load container from DB and create entity
         local allContainers = DAO.container.getAll()
-        print('---------------------------------------')
-        for _, container in pairs(allContainers) do
-            -- TODO: Create container entity, spawn them in world, add interaction for them
-            -- print('[SERVER] container ' .. container.containerId .. ' loaded')
+        -- Loop through containers
+        if allContainers and type(allContainers) == 'table' then
+            for _, container in pairs(allContainers) do
+                if not container then
+                    goto nextContainer
+                end
+                -- Create container entity, spawn it in world, add interaction for it
+                -- Safely serialize container for debugging (convert userdata to plain tables)
+                local itemName = ''
+                if container.holderItem then
+                    itemName = container.holderItem.name or ''
+                else
+                    itemName = (container.items and container.items[1] and container.items[1].name) or ''
+                end
+                local worldItem = SHARED.getWorldItemPath(itemName)
+                local spawnPosition = Vector(container.position.x, container.position.y, container.position.z)
+                local spawnRotation = Rotator(0, container.rotation.Yaw, 0)
+                
+                local spawnStaticMeshParams = {
+                    containerId = container.id,
+                    entityPath = worldItem.path,
+                    position = spawnPosition,
+                    rotation = spawnRotation,
+                    scale = worldItem.scale,
+                    collisionType = ECollisionType.IgnoreOnlyPawn,
+                    mobilityType = EMobilityType.Movable,
+                }
+                -- Spawn bag
+                local spawnResult = self.core.gameManager:spawnStaticMesh(spawnStaticMeshParams)
+                if not spawnResult.status then
+                    print('[WARNING] Failed to spawn container ' .. container.id .. '!')
+                    goto nextContainer
+                end
+                -- Item have an option to pick up item
+                local options = {
+                    {
+                        Text = SHARED.t('inventory.pickUpItem'),
+                        Input = '/Game/Helix/Input/Actions/IA_Interact.IA_Interact',
+                        Action = function(Drop, Instigator)
+                            local controller = Instigator and Instigator:GetController()
+                            if controller then
+                                TriggerClientEvent(controller, 'pickUpItem', { containerId = spawnResult.entityId })
+                            end
+                        end,
+                    }
+                }
+                if container.holderItem then
+                    table.insert(options, {
+                        Text = SHARED.t('inventory.openDrop'),
+                        Input = '/Game/Helix/Input/Actions/IA_Weapon_Reload.IA_Weapon_Reload',
+                        Action = function(Drop, Instigator)
+                            local controller = Instigator and Instigator:GetController()
+                            if controller then
+                                TriggerClientEvent(controller, 'openContainerInventory', { containerId = spawnResult.entityId })
+                            end
+                        end,
+                    })
+                end
+                -- Spawn success
+                local addInteractableResult = self.core.gameManager:addInteractable({
+                    entityId = spawnResult.entityId,
+                    entity = spawnResult.entity,
+                    options = options,
+                })
+                if not addInteractableResult.status then
+                    -- On failed to create interactable => Destroy bag
+                    DeleteEntity(spawnResult.entity)
+                    goto nextContainer
+                end
+                
+                local newContainerObj = SContainer.new(self.core, container.id, container.citizenId)
+                newContainerObj:initEntity({
+                    entityId = spawnResult.entityId,
+                    entity = spawnResult.entity,
+                    interactableEntity = addInteractableResult.interactableEntity,
+                    position = spawnPosition,
+                    rotation = spawnRotation,
+                    items = container.items,
+                    maxSlot = container.maxSlot,
+                    maxWeight = container.maxWeight,
+                    isDestroyOnEmpty = container.isDestroyOnEmpty,
+                    holderItem = container.holderItem,
+                })
+                self.containers[spawnResult.entityId] = newContainerObj
+
+                ::nextContainer::
+            end
         end
-        print('---------------------------------------')
     end
 
     ---On shutdown
@@ -214,9 +296,34 @@ function SInventoryManager.new(core)
                     message = 'Container not found!',
                 }
             end
+            player.inventory.openingContainerId = container.containerId
+            -- Ensure container items have correct slot properties
+            -- Items are stored as an array, so we need to ensure each item's slot property is correct
+            -- Use ipairs to iterate in order and preserve slot numbers correctly
+            local containerItems = {}
+            for index, item in ipairs(container.items) do
+                if item and item.slot then
+                    -- Create a copy to ensure slot property is preserved correctly
+                    -- IMPORTANT: Use item.slot (from database) not array index
+                    containerItems[#containerItems + 1] = {
+                        name = item.name,
+                        label = item.label,
+                        weight = item.weight,
+                        type = item.type,
+                        image = item.image,
+                        unique = item.unique,
+                        useable = item.useable,
+                        shouldClose = item.shouldClose,
+                        description = item.description,
+                        amount = item.amount,
+                        slot = item.slot, -- Preserve the slot property from the item (NOT array index)
+                        info = item.info and JSON.parse(JSON.stringify(item.info)) or {}
+                    }
+                end
+            end
             result.container = {
                 id = container.containerId,
-                items = container.items,
+                items = containerItems,
                 capacity = {
                     weight = container.maxWeight,
                     slots = container.maxSlot,
@@ -259,7 +366,26 @@ function SInventoryManager.new(core)
         if not container then
             return nil
         end
-        return container.items[slot] or nil
+        -- Use getItemBySlot to properly find item by slot number
+        local item, _ = container:getItemBySlot(slot)
+        if not item then
+            return nil
+        end
+        -- Create a copy to prevent slot syncing issues when the same item exists in both inventory and container
+        return {
+            name = item.name,
+            label = item.label,
+            weight = item.weight,
+            type = item.type,
+            image = item.image,
+            unique = item.unique,
+            useable = item.useable,
+            shouldClose = item.shouldClose,
+            description = item.description,
+            amount = item.amount,
+            slot = item.slot,
+            info = item.info and JSON.parse(JSON.stringify(item.info)) or {}
+        }
     end
 
     ---Get item from a specific group and slot
@@ -701,6 +827,8 @@ function SInventoryManager.new(core)
                         message = addResult.message,
                     }
                 end
+                -- Save container to database to persist the item removal
+                container:save()
                 return {
                     status = true,
                     message = 'Item moved from container to inventory!',
@@ -850,7 +978,15 @@ function SInventoryManager.new(core)
         end
 
         if sourceGroup == 'inventory' then
-            return player.inventory:moveItem(sourceItem, targetSlot)
+            local moveResult = player.inventory:moveItem(sourceItem, targetSlot)
+            if not moveResult.status then
+                return {
+                    status = false,
+                    message = moveResult.message,
+                }
+            end
+            player.inventory:sync()
+            return moveResult
         elseif sourceGroup == 'equipment' then
             return {
                 status = false,
@@ -865,7 +1001,16 @@ function SInventoryManager.new(core)
                     message = 'Container not found!',
                 }
             end
-            return container:moveItem(sourceItem, targetSlot)
+            local moveResult = container:moveItem(sourceItem, targetSlot)
+            if not moveResult.status then
+                return {
+                    status = false,
+                    message = moveResult.message,
+                }
+            end
+            container:save()
+            player.inventory:sync()
+            return moveResult
         elseif sourceGroup == 'backpack' then
             local backpack = player.inventory:getBackpackContainer()
             if not backpack then
@@ -938,17 +1083,68 @@ function SInventoryManager.new(core)
             }
         end
 
+        -- Validate sourceGroupId for container operations
+        if sourceGroup == 'container' and not sourceGroupId then
+            return {
+                status = false,
+                message = 'Container ID is required when moving from container!',
+            }
+        end
+
+        -- Validate targetGroupId for container operations
+        if targetGroup == 'container' and not targetGroupId then
+            return {
+                status = false,
+                message = 'Container ID is required when moving to container!',
+            }
+        end
+
+        -- Validate container exists if source is container
+        if sourceGroup == 'container' and sourceGroupId and not self.containers[sourceGroupId] then
+            return {
+                status = false,
+                message = 'Source container not found!',
+            }
+        end
+
+        -- Validate container exists if target is container
+        if targetGroup == 'container' and targetGroupId and not self.containers[targetGroupId] then
+            return {
+                status = false,
+                message = 'Target container not found!',
+            }
+        end
+
         -- Get source item
         local sourceItem = getItemFromGroup(player, sourceGroup, sourceSlot, sourceGroupId, targetGroupId)
         if not sourceItem then
+            -- Provide more specific error message based on source group
+            local errorMessage = ''
+            if sourceGroup == 'container' then
+                if not sourceGroupId then
+                    errorMessage = ('[ERROR] [0] SInventoryManager.onMoveInventoryItem: Container ID is missing! Cannot move item from container.')
+                elseif not self.containers[sourceGroupId] then
+                    errorMessage = ('[ERROR] [0] SInventoryManager.onMoveInventoryItem: Container %s not found! Source item not found in slot %s of container!')
+                        :format(sourceGroupId, sourceSlot)
+                else
+                    errorMessage = ('[ERROR] [0] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s of container %s!')
+                        :format(sourceSlot, sourceGroupId)
+                end
+            elseif sourceGroup == 'backpack' then
+                errorMessage = ('[ERROR] [0] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s of backpack!')
+                    :format(sourceSlot)
+            else
+                errorMessage = ('[ERROR] [0] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s of %s! Player trying to move item that they don\'t have!')
+                    :format(sourceSlot, sourceGroup)
+            end
+            
             self.core.cheatDetector:logCheater({
                 action = 'moveInventoryItem',
                 player = player or nil,
                 citizenId = player.playerData.citizenId or '',
                 license = player.playerData.license or '',
                 name = player.playerData.name or '',
-                content = ('[ERROR] [0] SInventoryManager.onMoveInventoryItem: Source item not found in slot %s! Player trying to move item that they don\'t have in their inventory!')
-                    :format(sourceSlot)
+                content = errorMessage
             })
             return {
                 status = false,
@@ -1154,10 +1350,15 @@ function SInventoryManager.new(core)
             }
         end
         if item.info.containerId then
-            self.containers[item.info.containerId].entity = spawnResult.entity
-            self.containers[item.info.containerId].interactableEntity = addInteractableResult.interactableEntity
-            self.containers[item.info.containerId].position = SpawnPosition
-            self.containers[item.info.containerId].rotation = PawnRotation
+            self.containers[spawnResult.entityId].entity = spawnResult.entity
+            self.containers[spawnResult.entityId].interactableEntity = addInteractableResult.interactableEntity
+            self.containers[spawnResult.entityId].position = SpawnPosition
+            self.containers[spawnResult.entityId].rotation = PawnRotation
+            self.containers[spawnResult.entityId].holderItem = {
+                name = dropItem.name,
+                amount = dropItem.amount,
+                info = dropItem.info,
+            }
         else
             -- Add container to dictionary (dropItem already has slot = 1)
             local dropContainer = SContainer.new(self.core, spawnResult.entityId, player.playerData.citizenId)
@@ -1176,6 +1377,8 @@ function SInventoryManager.new(core)
             })
             self.containers[spawnResult.entityId] = dropContainer
         end
+        -- Save container to db
+        self.containers[spawnResult.entityId]:save()
 
         return {
             status = true,
@@ -1355,6 +1558,10 @@ function SInventoryManager.new(core)
         return player.equipment:unequipItem(clothType, data.toSlotNumber or nil)
     end
 
+    --- Pick up item from container
+    ---@param source PlayerController player controller
+    ---@param data {containerId: string} data
+    ---@return {status: boolean; message: string} result of picking up item
     function self:onPickUpItem(source, data)
         local player = self.core:getPlayerBySource(source)
         if not player then
@@ -1418,6 +1625,7 @@ function SInventoryManager.new(core)
         -- Reset: position, rotation, interactableEntity, entity on success
         self.containers[data.containerId].position = nil
         self.containers[data.containerId].rotation = nil
+        self.containers[data.containerId].timeExpired = nil
         -- Destroy entity and interactable entity
         self.containers[data.containerId]:destroy()
 
