@@ -36,9 +36,17 @@ function CInventory.new(player)
 
         RegisterClientEvent('pickUpItem', function(data)
             TriggerCallback('onPickUpItem', function(result)
-                
+                if not result.status then
+                    self.core:showNotification({
+                        title = result.message,
+                        type = 'error',
+                        duration = 5000,
+                    })
+                    return
+                end
             end, data)
         end)
+        
         -- Bind key
         -- [Player] [TAB] Inventory
         Input.BindKey('TAB', function()
@@ -133,6 +141,7 @@ function CInventory.new(player)
             -- Open inventory
             self.core.webUI:focus()
             self.core.webUI:sendEvent('openInventory', result)
+            TriggerServerEvent('onOpenInventory')
         end, data)
     end
 
