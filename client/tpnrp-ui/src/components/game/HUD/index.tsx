@@ -37,7 +37,7 @@ export const HUD = () => {
   })
 
   useWebUIMessage<[number, number]>('setBasicNeeds', ([hunger, thirst]) => {
-    console.log('setBasicNeeds', hunger, thirst)
+    console.log('[UI] setBasicNeeds', hunger, thirst)
     setBasicNeeds({ hunger, thirst })
   })
 
