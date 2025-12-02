@@ -115,13 +115,14 @@ function SGameManager.new(core)
             return {
                 status = false,
                 message = 'Player not found!',
+                players = {},
             }
         end
         local playerCoords = player:getCoords()
         local playersInArea = GetPlayersInArea(playerCoords, data.radius or 5)
         local players = {}
-        for _, playerId in pairs(playersInArea) do
-            print('playerId', playerId)
+        for index, playerId in pairs(playersInArea) do
+            print('playerId', index)
         end
         return {
             status = true,
