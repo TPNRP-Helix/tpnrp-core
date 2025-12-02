@@ -1,23 +1,32 @@
 import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useInventoryStore } from "@/stores/useInventoryStore"
 import { Button } from "@/components/ui/button"
-import { useCallback } from "react"
+import { useCallback, useState } from "react"
 import { useI18n } from "@/i18n"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
-import { useWebUIMessage } from "@/hooks/use-hevent"
+import { useGameStore } from "@/stores/useGameStore"
 
 export const GiveDialog = () => {
     const { isOpenGiveDialog, setIsOpenGiveDialog, dialogItem, dialogAmountItem } = useInventoryStore()
+    const { playersNearBy } = useGameStore()
     const { t } = useI18n()
+    const [selectedPlayer, setSelectedPlayer] = useState<string>(playersNearBy[0]?.citizenId ?? '')
     
     const onGiveAction = useCallback(() => {
         console.log('onGiveAction')
-    }, [])
-
-    useWebUIMessage<[string]>('setGivePlayerList', ([playerId]) => {
-        console.log('setGivePlayerList', playerId)
-    })
+        if (dialogItem === null || selectedPlayer === '' || dialogAmountItem === 0 || dialogItem?.name === '') {
+            return
+        }
+        window.hEvent('givePlayerItem', {
+            citizenId: selectedPlayer,
+            itemName: dialogItem.name,
+            amount: dialogAmountItem,
+            slot: dialogItem.slot
+        }, (response: { status: boolean; message: string; }) => {
+            console.log('[UI] givePlayerItem ', JSON.stringify(response))
+        })
+    }, [selectedPlayer, dialogItem, dialogAmountItem])
 
     return (
         <Dialog open={isOpenGiveDialog} onOpenChange={setIsOpenGiveDialog}>
@@ -28,16 +37,14 @@ export const GiveDialog = () => {
                         {t('inventory.giveDialog.description', { item: dialogItem?.label ?? '', amount: dialogAmountItem ?? 0 })}
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
-                    <RadioGroup defaultValue="option-one">
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="option-one" id="option-one" />
-                            <Label htmlFor="option-one">Option One</Label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                            <RadioGroupItem value="option-two" id="option-two" />
-                            <Label htmlFor="option-two">Option Two</Label>
-                        </div>
+                <div className="grid gap-4 p-4">
+                    <RadioGroup defaultValue={selectedPlayer}>
+                        {playersNearBy.map((player) => (
+                            <div className="flex items-center space-x-2" key={player.citizenId}>
+                                <RadioGroupItem value={player.citizenId} id={player.citizenId} onClick={() => setSelectedPlayer(player.citizenId)} />
+                                <Label htmlFor={player.citizenId}>{player.name}</Label>
+                            </div>
+                        ))}
                     </RadioGroup>
                 </div>
                 <DialogFooter>

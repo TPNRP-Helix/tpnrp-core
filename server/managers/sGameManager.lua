@@ -121,8 +121,14 @@ function SGameManager.new(core)
         local playerCoords = player:getCoords()
         local playersInArea = GetPlayersInArea(playerCoords, data.radius or 5)
         local players = {}
-        for index, playerId in pairs(playersInArea) do
-            print('playerId', index)
+        for index, playerController in pairs(playersInArea) do
+            local playerInfo = self.core:getPlayerBySource(playerController)
+            if playerInfo then
+                players[#players + 1] = {
+                    citizenId = playerInfo.playerData.citizenId,
+                    name = playerInfo.playerData.name or 'Unknown'
+                }
+            end
         end
         return {
             status = true,

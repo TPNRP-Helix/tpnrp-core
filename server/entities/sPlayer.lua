@@ -162,15 +162,17 @@ function SPlayer.new(core, playerController, playerData)
         -- This will broadcast the event to all other resources in server-side
         TriggerLocalServerEvent('TPN:server:onPlayerUnloaded', self.playerController)
 
-        -- Wait for 200ms to ensure the player is logged out
-        Wait(200)
-        -- Save player data into database
-        local isSaved = self:save()
-        if not isSaved then
-            print('[ERROR] SPLAYER.LOGOUT - Failed to save player data!')
-        end
-        -- Remove player from players table
-        TPNRPServer.players[self.playerController] = nil
+        Timer.CreateThread(function()
+            -- Wait for 200ms to ensure the player is logged out
+            Timer.Wait(200)
+            -- Save player data into database
+            local isSaved = self:save()
+            if not isSaved then
+                print('[ERROR] SPLAYER.LOGOUT - Failed to save player data!')
+            end
+            -- Remove player from players table
+            TPNRPServer.players[self.playerController] = nil
+        end)
     end
 
     ---Add custom method to player
@@ -253,6 +255,10 @@ function SPlayer.new(core, playerController, playerData)
         return true
     end
 
+    ---Remove Money
+    ---@param type 'cash' | 'bank' money type
+    ---@param amount number amount to remove
+    ---@return boolean status success status
     function self:removeMoney(type, amount)
         if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
             print('[ERROR] SPLAYER.REMOVE_MONEY - Invalid type!')
@@ -278,6 +284,20 @@ function SPlayer.new(core, playerController, playerData)
         -- Sync to client
         self:updatePlayerData()
         return true
+    end
+
+    ---Show notification to client
+    ---@param type 'success' | 'error' | 'warning' | 'info' notification type
+    ---@param message string notification message
+    function self:showNotification(type, message)
+        if not type or type(type) ~= 'string' or type ~= 'success' or type ~= 'error' or type ~= 'warning' or type ~= 'info' then
+            type = 'info'
+        end
+        if not message or type(message) ~= 'string' then
+            print('[ERROR] SPLAYER.SHOW_NOTIFICATION - Invalid message!')
+            return false
+        end
+        TriggerClientEvent(self.playerController, 'showClientNotification', type, message)
     end
 
     ---/********************************/
@@ -367,6 +387,39 @@ function SPlayer.new(core, playerController, playerData)
             end
             return backpack:removeItem(itemName, amount, slot)
         end
+    end
+
+    ---Get item by slot
+    ---@param slot number slot number
+    ---@return {status: boolean, message: string, item: SInventoryItemType, index: number, type: 'inventory' | 'backpack'} result of getting item by slot
+    function self:getItemBySlot(slot)
+        -- Inventory slot
+        if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            local item, index = self.inventory:getItemBySlot(slot)
+            return {
+                status = true,
+                message = 'Item found in inventory!',
+                item = item,
+                index = index,
+                type = 'inventory',
+            }
+        end
+        -- Backpack slot
+        local backpack = self.inventory:getBackpackContainer()
+        if not backpack then
+            return {
+                status = false,
+                message = 'Backpack not found!',
+            }
+        end
+        local item, index = backpack:getItemBySlot(slot)
+        return {
+            status = true,
+            message = 'Item found in backpack!',
+            item = item,
+            index = index,
+            type = 'backpack',
+        }
     end
 
     ---Check if player can add items to container

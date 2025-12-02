@@ -102,6 +102,10 @@ function SInventoryManager.new(core)
             return self:unequipItem(source, data)
         end)
 
+        RegisterCallback('givePlayerItem', function(source, data)
+            return self:givePlayerItem(source, data)
+        end)
+
         RegisterServerEvent('onCloseInventory', function(source)
             local player = self.core:getPlayerBySource(source)
             if not player then
@@ -1678,6 +1682,54 @@ function SInventoryManager.new(core)
         return {
             status = true,
             message = 'Items picked up from container!',
+        }
+    end
+
+    --- Give item to player
+    ---@param source PlayerController player controller
+    ---@param data {citizenId: string; itemName: string; amount: number; slot: number} data
+    ---@return {status: boolean; message: string} result of giving item
+    function self:givePlayerItem(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = SHARED.t('error.failedToGetPlayer'),
+            }
+        end
+        local targetPlayer = self.core:getPlayerByCitizenId(data.citizenId)
+        if not targetPlayer then
+            return {
+                status = false,
+                message = SHARED.t('error.targetPlayerNotFound'),
+            }
+        end
+        local itemInfo = player:getItemBySlot(data.slot)
+        if not itemInfo.status then
+            return {
+                status = false,
+                message = itemInfo.message,
+            }
+        end
+        local addItemResult = targetPlayer:addItem(itemInfo.item.name, data.amount, itemInfo.item.info, nil)
+        if not addItemResult.status then
+            return {
+                status = false,
+                message = addItemResult.message,
+            }
+        end
+        -- Remove item from source player
+        player:removeItem(itemInfo.item.name, data.amount, itemInfo.item.slot)
+        -- Show notification to target player
+        local messageToTargetPlayer = SHARED.t('inventory.itemReceived', { count = data.amount, item = itemInfo.item.name, player = player.playerData.name })
+        targetPlayer:showNotification('success', messageToTargetPlayer)
+        -- Show notification to source player
+        local messageToSourcePlayer = SHARED.t('inventory.itemGiven', { count = data.amount, item = itemInfo.item.name, player = targetPlayer.playerData.name })
+        player:showNotification('success', messageToSourcePlayer)
+
+        return {
+            status = true,
+            message = 'Item given to player!',
         }
     end
 

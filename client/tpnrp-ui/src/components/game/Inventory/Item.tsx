@@ -16,6 +16,8 @@ import { useDevModeStore } from "@/stores/useDevModeStore"
 import { Image } from "@/components/ui/image"
 import { toast } from "sonner"
 import { getEquipmentSlotName } from "@/lib/utils"
+import { useGameStore } from "@/stores/useGameStore"
+import type { TPlayer } from "@/types/game"
 
 const InventoryItemComponent = (props: TInventoryItemProps) => {
     const {
@@ -36,6 +38,7 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
     const rollbackTemporaryDroppedItem = useInventoryStore((state) => state.rollbackTemporaryDroppedItem)
     const setIsOpenGiveDialog = useInventoryStore((state) => state.setIsOpenGiveDialog)
     const setDialogAmountItem = useInventoryStore((state) => state.setDialogAmountItem)
+    const setPlayersNearBy = useGameStore((state) => state.setPlayersNearBy)
 
     const permission = useDevModeStore((state) => state.permission)
 
@@ -112,6 +115,15 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
         setIsOpenGiveDialog(true)
         window.hEvent('requestPlayerNearBy', {
             radius: 5 // 5m
+        }, (response: { status: boolean; message: string; players: TPlayer[] }) => {
+            console.log('[UI] requestPlayerNearBy ', JSON.stringify(response))
+            if (response.status) {
+                if (Array.isArray(response.players)) {
+                    setPlayersNearBy(response.players)
+                } else {
+                    setPlayersNearBy([])
+                }
+            }
         })
     }, [item, setDialogItem, setDialogAmountItem, setIsOpenGiveDialog])
 

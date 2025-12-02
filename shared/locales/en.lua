@@ -12,6 +12,8 @@ local en = {
         openDrop = "Open Drop",
         pickUpItem = "Pick up",
         itemNotFound = "Item not found!",
+        itemReceived = "You have received x{count} {item} from {player}!",
+        itemGiven = "You have given x{count} {item} to {player}!",
     },
     backpack = {
         full = 'Backpack is full!'
@@ -45,6 +47,7 @@ local en = {
         inventoryWeightLimitReached = "Inventory weight limit reached!",
         inventoryFull = "Inventory is full!",
         playerNotFound = "Player not found!",
+        targetPlayerNotFound = "Target player not found!",
         itemCannotBeUsed = "Item cannot be used",
         cannotAddItemsToPlayerWeightLimitReached = "Cannot add items to player! Weight limit reached!",
         cannotAddItemsToPlayerSlotLimitReached = "Cannot add items to player! Slot limit reached!",
