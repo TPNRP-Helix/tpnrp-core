@@ -287,17 +287,17 @@ function SPlayer.new(core, playerController, playerData)
     end
 
     ---Show notification to client
-    ---@param type 'success' | 'error' | 'warning' | 'info' notification type
+    ---@param notifyType 'success' | 'error' | 'warning' | 'info' notification type
     ---@param message string notification message
-    function self:showNotification(type, message)
-        if not type or type(type) ~= 'string' or type ~= 'success' or type ~= 'error' or type ~= 'warning' or type ~= 'info' then
-            type = 'info'
+    function self:showNotification(notifyType, message)
+        if not notifyType or type(notifyType) ~= 'string' then
+            notifyType = 'info'
         end
         if not message or type(message) ~= 'string' then
             print('[ERROR] SPLAYER.SHOW_NOTIFICATION - Invalid message!')
             return false
         end
-        TriggerClientEvent(self.playerController, 'showClientNotification', type, message)
+        TriggerClientEvent(self.playerController, 'showClientNotification', notifyType, message)
     end
 
     ---/********************************/

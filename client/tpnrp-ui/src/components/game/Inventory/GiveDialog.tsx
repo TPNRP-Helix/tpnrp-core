@@ -42,7 +42,7 @@ export const GiveDialog = () => {
                         {playersNearBy.map((player) => (
                             <div className="flex items-center space-x-2" key={player.citizenId}>
                                 <RadioGroupItem value={player.citizenId} id={player.citizenId} onClick={() => setSelectedPlayer(player.citizenId)} />
-                                <Label htmlFor={player.citizenId}>{player.name}</Label>
+                                <Label htmlFor={player.citizenId}>{player.name} ({player.citizenId})</Label>
                             </div>
                         ))}
                     </RadioGroup>
@@ -53,7 +53,7 @@ export const GiveDialog = () => {
                         {t('inventory.amountDialog.cancel')}
                         </Button>
                     </DialogClose>
-                    <Button type="button" onClick={onGiveAction}>
+                    <Button type="button" onClick={onGiveAction} disabled={selectedPlayer === '' || dialogAmountItem === 0 || dialogItem?.name === ''}>
                         {t('inventory.giveDialog.give')}
                     </Button>
                 </DialogFooter>

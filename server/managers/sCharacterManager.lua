@@ -161,10 +161,10 @@ function SCharacterManager.new(core)
         
         -- Delete character
         ---@param source PlayerController player controller
-        ---@param citizenId string citizen id
+        ---@param data { citizenId: string; } data
         ---@return table result
-        RegisterCallback('deleteCharacter', function(source, citizenId)
-            return onDeleteCharacter(source, citizenId)
+        RegisterCallback('deleteCharacter', function(source, data)
+            return onDeleteCharacter(source, data.citizenId)
         end)
 
         -- On Player join game
