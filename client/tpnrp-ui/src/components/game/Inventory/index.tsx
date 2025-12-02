@@ -21,6 +21,7 @@ import { FALLBACK_DEFAULT_IMAGE_PATH } from "@/constants"
 import { Image } from "@/components/ui/image"
 import { parseArrayItems } from "@/lib/utils"
 import { useShallow } from "zustand/react/shallow"
+import { GiveDialog } from "./GiveDialog"
 
 const DEFAULT_SLOT_COUNT = 5
 const DEFAULT_MAX_WEIGHT = 15000
@@ -339,6 +340,7 @@ export const Inventory = () => {
                 </DialogContent>
             </Dialog>
             <AmountDialog />
+            <GiveDialog />
             <DragOverlay dropAnimation={null}>
                 {activeDragItem?.item ? (
                     <div className="pointer-events-none select-none">

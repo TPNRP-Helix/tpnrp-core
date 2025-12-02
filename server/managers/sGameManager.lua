@@ -18,6 +18,9 @@ function SGameManager.new(core)
 
     ---Contructor function
     local function _contructor()
+        RegisterCallback('requestPlayerNearBy', function(source, data)
+            return self:requestPlayerNearBy(source, data)
+        end)
     end
 
     ---/********************************/
@@ -99,6 +102,31 @@ function SGameManager.new(core)
             status = true,
             message = 'Interactable added successfully!',
             interactableEntity = entityInteractable,
+        }
+    end
+
+    ---Request player near by
+    ---@param source PlayerController source id
+    ---@param data {radius: number} radius in meter
+    ---@return {status:boolean, message:string, players:table} returnValue 
+    function self:requestPlayerNearBy(source, data)
+        local player = self.core:getPlayerBySource(source)
+        if not player then
+            return {
+                status = false,
+                message = 'Player not found!',
+            }
+        end
+        local playerCoords = player:getCoords()
+        local playersInArea = GetPlayersInArea(playerCoords, data.radius or 5)
+        local players = {}
+        for _, playerId in pairs(playersInArea) do
+            print('playerId', playerId)
+        end
+        return {
+            status = true,
+            message = 'Players near by requested successfully!',
+            players = players,
         }
     end
 

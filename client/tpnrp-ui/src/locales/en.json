@@ -146,5 +146,7 @@
   "equipment.category.Mask": "Mask",
   "equipment.category.Accessories": "Accessories",
   "equipment.category.Gloves": "Gloves",
-  "equipment.category.Armor": "Armor"
+  "equipment.category.Armor": "Armor",
+  "inventory.giveDialog.title": "You want to give how many {item}?",
+  "inventory.giveDialog.description": "You are giving {item} with amount {amount}. Select the recipient"
 }

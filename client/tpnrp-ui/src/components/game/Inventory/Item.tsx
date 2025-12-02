@@ -34,6 +34,8 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
     const splitItem = useInventoryStore((state) => state.splitItem)
     const removeTemporaryDroppedItem = useInventoryStore((state) => state.removeTemporaryDroppedItem)
     const rollbackTemporaryDroppedItem = useInventoryStore((state) => state.rollbackTemporaryDroppedItem)
+    const setIsOpenGiveDialog = useInventoryStore((state) => state.setIsOpenGiveDialog)
+    const setDialogAmountItem = useInventoryStore((state) => state.setDialogAmountItem)
 
     const permission = useDevModeStore((state) => state.permission)
 
@@ -95,8 +97,23 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
     }, [item, slot, splitItem, t])
 
     const onClickGive = useCallback((giveType: 'half' | 'one' | 'all') => {
-        console.log('onClickGive', giveType)
-    }, [])
+        if (item === null) {
+            return
+        }
+        let amount = 1
+        if (giveType === 'half') {
+            amount = Math.floor(item.amount / 2)
+        } else if (giveType === 'all') {
+            amount = item.amount
+        }
+        // Opening give dialog
+        setDialogItem(item)
+        setDialogAmountItem(amount)
+        setIsOpenGiveDialog(true)
+        window.hEvent('requestPlayerNearBy', {
+            radius: 5 // 5m
+        })
+    }, [item, setDialogItem, setDialogAmountItem, setIsOpenGiveDialog])
 
     const onClickDrop = useCallback((dropType: 'half' | 'one' | 'all') => {
         if (item === null) {
@@ -374,6 +391,7 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
                                     <ContextMenuItem onClick={() => onClickGive('half')}><StarHalf className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.half')}</ContextMenuItem>
                                     <ContextMenuItem onClick={() => onClickGive('one')}><Star className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.one')}</ContextMenuItem>
                                     <ContextMenuItem onClick={() => onClickGive('all')}><Sparkles className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.all')}</ContextMenuItem>
+                                    {/* TODO: custom amount currently not supported yet */}
                                     <ContextMenuSeparator />
                                     <ContextMenuItem onClick={() => onOpenAmountDialog('give')}><CircleEllipsis className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.other')}</ContextMenuItem>
                                 </ContextMenuSubContent>
@@ -388,6 +406,7 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
                                     )}
                                     <ContextMenuItem onClick={() => onClickDrop('one')}><Star className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.one')}</ContextMenuItem>
                                     <ContextMenuItem onClick={() => onClickDrop('all')}><Sparkles className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.all')}</ContextMenuItem>
+                                    {/* TODO: custom amount currently not supported yet */}
                                     {item.amount > 1 && (
                                         <>
                                             <ContextMenuSeparator />

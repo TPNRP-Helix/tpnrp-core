@@ -34,6 +34,7 @@
         "EComponentMobility",
         "Rotator",
         "DeleteEntity",
-        "GetDistanceBetweenCoords"
+        "GetDistanceBetweenCoords",
+        "GetPlayersInArea"
     ]
 }
