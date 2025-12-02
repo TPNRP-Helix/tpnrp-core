@@ -102,6 +102,15 @@ function SInventoryManager.new(core)
             return self:unequipItem(source, data)
         end)
 
+        RegisterServerEvent('onCloseInventory', function(source)
+            local player = self.core:getPlayerBySource(source)
+            if not player then
+                return
+            end
+
+            player.inventory.openingContainerId = nil
+        end)
+
         -- Load container from DB and create entity
         local allContainers = DAO.container.getAll()
         -- Loop through containers
