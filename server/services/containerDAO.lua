@@ -93,9 +93,9 @@ DAO.container.get = function(containerId, containerType)
         return nil
     end
     -- Format items
-    local items = JSON.parse(inventory.items)
-    if not items then
-        items = {}
+    local items = {}
+    if inventory.items and inventory.items ~= '' then
+        items = JSON.parse(inventory.items) or {}
     end
     local formattedItems = {}
     -- Mapping base item data with the item data from the database
@@ -109,6 +109,22 @@ DAO.container.get = function(containerId, containerType)
             formattedItems[nextIndex].slot = item.slot
         end
     end
+    -- Safely parse transform and holder item from JSON (may be empty in DB)
+    local position = nil
+    if inventory.position and inventory.position ~= '' then
+        position = JSON.parse(inventory.position)
+    end
+
+    local rotation = nil
+    if inventory.rotation and inventory.rotation ~= '' then
+        rotation = JSON.parse(inventory.rotation)
+    end
+
+    local holderItem = nil
+    if inventory.holder_item and inventory.holder_item ~= '' then
+        holderItem = JSON.parse(inventory.holder_item)
+    end
+
     -- Calculate expiration time if not set (for backward compatibility)
     local timeExpired = tonumber(inventory.time_expired)
     if not timeExpired then
@@ -124,10 +140,10 @@ DAO.container.get = function(containerId, containerType)
         maxSlot = tonumber(inventory.max_slot),
         maxWeight = tonumber(inventory.max_weight),
         isDestroyOnEmpty = inventory.is_destroy_on_empty,
-        position = JSON.parse(inventory.position),
-        rotation = JSON.parse(inventory.rotation),
+        position = position,
+        rotation = rotation,
         displayModel = inventory.display_model,
-        holderItem = JSON.parse(inventory.holder_item),
+        holderItem = holderItem,
         timeExpired = timeExpired,
         containerType = inventory.type or 'container',
     }

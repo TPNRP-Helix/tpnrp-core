@@ -147,6 +147,8 @@
   "equipment.category.Accessories": "Phụ kiện",
   "equipment.category.Gloves": "Giày",
   "equipment.category.Armor": "Giáp",
+  "inventory.amountTitle": "Số lượng",
+  "inventory.giveTitle": "Cho vật phẩm",
   "inventory.giveDialog.title": "Bạn muốn cho bao nhiêu {item}?",
   "inventory.giveDialog.description": "Bạn đang cho {item} với số lượng {amount}. Chọn người nhận",
   "inventory.giveDialog.give": "Cho",

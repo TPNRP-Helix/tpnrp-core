@@ -34,7 +34,7 @@ export const GiveDialog = () => {
 
     return (
         <Dialog open={isOpenGiveDialog} onOpenChange={setIsOpenGiveDialog}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md" title={t('inventory.giveTitle')}>
                 <DialogHeader>
                     <DialogTitle>{t('inventory.giveDialog.title', { item: dialogItem?.label ?? '' })}</DialogTitle>
                     <DialogDescription>
@@ -42,18 +42,20 @@ export const GiveDialog = () => {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 p-4">
-                    <RadioGroup defaultValue={selectedPlayer}>
-                        {playersNearBy.length > 0 ? playersNearBy.map((player) => (
-                            <div className="flex items-center space-x-2" key={player.citizenId}>
-                                <RadioGroupItem value={player.citizenId} id={player.citizenId} onClick={() => setSelectedPlayer(player.citizenId)} />
-                                <Label htmlFor={player.citizenId}>{player.name} ({player.citizenId})</Label>
-                            </div>
-                        )) : (
-                            <>
-                                <Label className="text-center text-destructive">{t('inventory.giveDialog.noPlayersNearBy')}</Label>
-                            </>
-                        )}
-                    </RadioGroup>
+                    <div className="rounded-lg border bg-secondary px-2 py-4">
+                        <RadioGroup defaultValue={selectedPlayer}>
+                            {playersNearBy.length > 0 ? playersNearBy.map((player) => (
+                                <div className="flex items-center space-x-2" key={player.citizenId}>
+                                    <RadioGroupItem value={player.citizenId} id={player.citizenId} onClick={() => setSelectedPlayer(player.citizenId)} />
+                                    <Label htmlFor={player.citizenId}>{player.name} ({player.citizenId})</Label>
+                                </div>
+                            )) : (
+                                <>
+                                    <Label className="text-center text-destructive">{t('inventory.giveDialog.noPlayersNearBy')}</Label>
+                                </>
+                            )}
+                        </RadioGroup>
+                    </div>
                 </div>
                 <DialogFooter>
                     <DialogClose asChild>

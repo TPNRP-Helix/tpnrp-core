@@ -381,7 +381,7 @@ const InventoryItemComponent = (props: TInventoryItemProps) => {
                     </HoverCardContent>
                 )}
             </HoverCard>
-            {!!item && group === 'inventory' && (
+            {!!item && (group === 'inventory' || group === 'backpack') && (
                 <ContextMenuContent>
                     {item.useable && (
                         <ContextMenuItem onClick={onClickUse}><Hand className="w-4 h-4 text-muted-foreground mr-2" /> {t('inventory.use')}</ContextMenuItem>
