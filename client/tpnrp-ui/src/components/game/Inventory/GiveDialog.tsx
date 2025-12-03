@@ -6,6 +6,7 @@ import { useI18n } from "@/i18n"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { useGameStore } from "@/stores/useGameStore"
+import { toast } from "sonner"
 
 export const GiveDialog = () => {
     const { isOpenGiveDialog, setIsOpenGiveDialog, dialogItem, dialogAmountItem } = useInventoryStore()
@@ -14,7 +15,6 @@ export const GiveDialog = () => {
     const [selectedPlayer, setSelectedPlayer] = useState<string>(playersNearBy[0]?.citizenId ?? '')
     
     const onGiveAction = useCallback(() => {
-        console.log('onGiveAction')
         if (dialogItem === null || selectedPlayer === '' || dialogAmountItem === 0 || dialogItem?.name === '') {
             return
         }
@@ -24,7 +24,11 @@ export const GiveDialog = () => {
             amount: dialogAmountItem,
             slot: dialogItem.slot
         }, (response: { status: boolean; message: string; }) => {
-            console.log('[UI] givePlayerItem ', JSON.stringify(response))
+            if (response.status) {
+                setIsOpenGiveDialog(false)
+            } else {
+                toast.error(response.message)
+            }
         })
     }, [selectedPlayer, dialogItem, dialogAmountItem])
 
@@ -39,12 +43,16 @@ export const GiveDialog = () => {
                 </DialogHeader>
                 <div className="grid gap-4 p-4">
                     <RadioGroup defaultValue={selectedPlayer}>
-                        {playersNearBy.map((player) => (
+                        {playersNearBy.length > 0 ? playersNearBy.map((player) => (
                             <div className="flex items-center space-x-2" key={player.citizenId}>
                                 <RadioGroupItem value={player.citizenId} id={player.citizenId} onClick={() => setSelectedPlayer(player.citizenId)} />
                                 <Label htmlFor={player.citizenId}>{player.name} ({player.citizenId})</Label>
                             </div>
-                        ))}
+                        )) : (
+                            <>
+                                <Label className="text-center text-destructive">{t('inventory.giveDialog.noPlayersNearBy')}</Label>
+                            </>
+                        )}
                     </RadioGroup>
                 </div>
                 <DialogFooter>
@@ -53,7 +61,11 @@ export const GiveDialog = () => {
                         {t('inventory.amountDialog.cancel')}
                         </Button>
                     </DialogClose>
-                    <Button type="button" onClick={onGiveAction} disabled={selectedPlayer === '' || dialogAmountItem === 0 || dialogItem?.name === ''}>
+                    <Button
+                        type="button"
+                        onClick={onGiveAction}
+                        disabled={playersNearBy.length === 0 || selectedPlayer === '' || dialogAmountItem === 0 || dialogItem?.name === ''}
+                    >
                         {t('inventory.giveDialog.give')}
                     </Button>
                 </DialogFooter>

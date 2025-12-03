@@ -124,10 +124,14 @@ function SGameManager.new(core)
         for index, playerController in pairs(playersInArea) do
             local playerInfo = self.core:getPlayerBySource(playerController)
             if playerInfo then
-                players[#players + 1] = {
-                    citizenId = playerInfo.playerData.citizenId,
-                    name = playerInfo.playerData.name or 'Unknown'
-                }
+                local playerCitizenId = playerInfo.playerData.citizenId
+                -- Only fetch other players (Don't include player's ped)
+                if player.playerData.citizenId ~= playerCitizenId then
+                    players[#players + 1] = {
+                        citizenId = playerInfo.playerData.citizenId,
+                        name = playerInfo.playerData.name or 'Unknown'
+                    }
+                end
             end
         end
         return {

@@ -150,5 +150,6 @@
   "inventory.giveDialog.title": "Bạn muốn cho bao nhiêu {item}?",
   "inventory.giveDialog.description": "Bạn đang cho {item} với số lượng {amount}. Chọn người nhận",
   "inventory.giveDialog.give": "Cho",
-  "inventory.giveDialog.cancel": "Hủy"
+  "inventory.giveDialog.cancel": "Hủy",
+  "inventory.giveDialog.noPlayersNearBy": "Không có người chơi nào gần bên!"
 }

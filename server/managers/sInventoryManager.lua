@@ -115,8 +115,25 @@ function SInventoryManager.new(core)
             player.inventory.openingContainerId = nil
         end)
 
+        -- Load all drops 'container' into game
+        self:initContainers()
+
+        -- Load all storages 'storage' into game
+        -- TODO: storage have different interact menu
+    end
+
+    ---On shutdown
+    function self:onShutdown()
+        for _, container in pairs(self.containers) do
+            container:save()
+            container:destroy()
+        end
+    end
+
+    ---Init all containers (containerType = 'container' mostly drop item)
+    function self:initContainers()
         -- Load container from DB and create entity
-        local allContainers = DAO.container.getAll()
+        local allContainers = DAO.container.getAll('container')
         -- Loop through containers
         if allContainers and type(allContainers) == 'table' then
             for _, container in pairs(allContainers) do
@@ -204,14 +221,6 @@ function SInventoryManager.new(core)
 
                 ::nextContainer::
             end
-        end
-    end
-
-    ---On shutdown
-    function self:onShutdown()
-        for _, container in pairs(self.containers) do
-            container:save()
-            container:destroy()
         end
     end
 
