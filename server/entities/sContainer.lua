@@ -7,6 +7,7 @@ local SStorage = require('server/entities/sStorage')
 ---@field holderItem SHolderItemType|nil Holder item of container
 ---@field maxSlot number Max slot count
 ---@field maxWeight number Max weight in grams
+---@field containerType 'container' | 'storage' | nil current container type
 SContainer = {}
 SContainer.__index = SContainer
 setmetatable(SContainer, { __index = SStorage })
@@ -25,6 +26,8 @@ function SContainer.new(core, containerId, citizenId)
     self.containerId = containerId
     self.isDestroyOnEmpty = false
     self.interactableEntity = nil
+
+    self.containerType = 'container' -- 'container' (stack, box or backpack), 'storage' (storage box, chest)
     -- items
     self.items = {}
     self.holderItem = nil
@@ -66,6 +69,7 @@ function SContainer.new(core, containerId, citizenId)
         self.position = data.position or nil
         self.rotation = data.rotation or nil
         self.holderItem = data.holderItem or nil
+        self.containerType = data.containerType or 'container'
     end
 
     ---Create new container
@@ -80,11 +84,7 @@ function SContainer.new(core, containerId, citizenId)
     ---Save container
     ---@return boolean status success status
     function self:save()
-        local result = DAO.container.save(self)
-        if result then
-            return true
-        end
-        return false
+        return DAO.container.save(self)
     end
 
     --- Manually load container if require
@@ -99,6 +99,7 @@ function SContainer.new(core, containerId, citizenId)
             self.position = container.position
             self.rotation = container.rotation
             self.holderItem = container.holderItem
+            self.containerType = container.containerType or 'container'
             return true
         end
         return false
@@ -109,7 +110,7 @@ function SContainer.new(core, containerId, citizenId)
         return {
             status = true,
             message = 'Container opened!',
-            inventory = self.items,
+            items = self.items,
             capacity = {
                 weight = self.maxWeight,
                 slots = self.maxSlot,

@@ -57,7 +57,7 @@ DAO.container.save = function(container)
 
     local params = {
         container.containerId,
-        'container',
+        container.containerType or 'container',
         container.citizenId,
         container.maxSlot,
         container.maxWeight,
@@ -82,11 +82,12 @@ end
 ---Get container by containerId
 ---@param containerId string
 ---@return ResponseGetContainer|nil
-DAO.container.get = function(containerId)
-    local type = 'container'
-
+DAO.container.get = function(containerId, containerType)
+    if not containerType then
+        containerType = 'container'
+    end
     -- Query inventory items
-    local result = DAO.DB.Select('SELECT * FROM containers where container_id = ? and type= ?', { containerId, type })
+    local result = DAO.DB.Select('SELECT * FROM containers where container_id = ? and type= ?', { containerId, containerType })
     local inventory = result[1] and result[1].Columns:ToTable()
     if not inventory then
         return nil
@@ -128,13 +129,17 @@ DAO.container.get = function(containerId)
         displayModel = inventory.display_model,
         holderItem = JSON.parse(inventory.holder_item),
         timeExpired = timeExpired,
+        containerType = inventory.type or 'container',
     }
 end
 
 ---Get all containers
 ---@return table<string, ResponseGetContainer> containers
-DAO.container.getAll = function()
-    local result = DAO.Action('Select', 'SELECT * FROM containers WHERE type = ? AND position IS NOT NULL AND position != ? AND rotation IS NOT NULL AND rotation != ?', { 'container', '', '' })
+DAO.container.getAll = function(containerType)
+    if not containerType then
+        containerType = 'container'
+    end
+    local result = DAO.Action('Select', 'SELECT * FROM containers WHERE type = ? AND position IS NOT NULL AND position != ? AND rotation IS NOT NULL AND rotation != ?', { containerType, '', '' })
     if not result or #result == 0 then
         return {}
     end
@@ -172,7 +177,7 @@ DAO.container.getAll = function()
             rotation = Rotator(0, rotation.Yaw, 0),
             position = Vector(position.x, position.y, position.z),
             isDestroyOnEmpty = container.is_destroy_on_empty == 1,
-            type = container.type,
+            containerType = container.type or 'container',
             displayModel = container.display_model,
             holderItem = JSON.parse(container.holder_item),
             timeExpired = timeExpired,
@@ -186,7 +191,7 @@ end
 ---@param containerId string
 ---@return boolean success
 DAO.container.delete = function(containerId)
-    local result = DAO.DB.Execute('DELETE FROM containers WHERE container_id = ?', { containerId })
+    local result = DAO.DB.Execute('DELETE FROM containers WHERE container_id = ?;', { containerId })
     if result then
         return true
     end
