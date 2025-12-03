@@ -227,11 +227,11 @@ function SPlayer.new(core, playerController, playerData)
     end
 
     ---Add Money
-    ---@param type 'cash' | 'bank' money type
+    ---@param moneyType 'cash' | 'bank' money type
     ---@param amount number amount to add
     ---@return boolean status success status
-    function self:addMoney(type, amount)
-        if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
+    function self:addMoney(moneyType, amount)
+        if not moneyType or type(moneyType) ~= 'string' or (moneyType ~= 'cash' and moneyType ~= 'bank') then
             print('[ERROR] SPLAYER.ADD_MONEY - Invalid type!')
             return false
         end
@@ -239,15 +239,15 @@ function SPlayer.new(core, playerController, playerData)
             print('[ERROR] SPLAYER.ADD_CASH - Invalid amount!')
             return false
         end
-        if type == 'cash' then
+        if moneyType == 'cash' then
             -- Add cash to player
             self.playerData.money.cash = self.playerData.money.cash + amount
-        elseif type == 'bank' then
+        elseif moneyType == 'bank' then
             self.playerData.money.bank = self.playerData.money.bank + amount
         end
         -- Trigger mission action
         self.missionManager:triggerAction('receive', {
-            name = type,
+            name = moneyType,
             amount = amount
         })
         -- Sync to client
@@ -256,11 +256,11 @@ function SPlayer.new(core, playerController, playerData)
     end
 
     ---Remove Money
-    ---@param type 'cash' | 'bank' money type
+    ---@param moneyType 'cash' | 'bank' money type
     ---@param amount number amount to remove
     ---@return boolean status success status
-    function self:removeMoney(type, amount)
-        if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
+    function self:removeMoney(moneyType, amount)
+        if not moneyType or type(moneyType) ~= 'string' or (moneyType ~= 'cash' and moneyType ~= 'bank') then
             print('[ERROR] SPLAYER.REMOVE_MONEY - Invalid type!')
             return false
         end
@@ -268,17 +268,17 @@ function SPlayer.new(core, playerController, playerData)
             print('[ERROR] SPLAYER.REMOVE_MONEY - Invalid amount!')
             return false
         end
-        if type == 'cash' then
+        if moneyType == 'cash' then
             -- Remove cash from player
             self.playerData.money.cash = self.playerData.money.cash - amount
-        elseif type == 'bank' then
+        elseif moneyType == 'bank' then
             -- Remove bank from player
             self.playerData.money.bank = self.playerData.money.bank - amount
         end
 
         -- Trigger mission action
         self.missionManager:triggerAction('spend', {
-            name = type,
+            name = moneyType,
             amount = amount
         })
         -- Sync to client
