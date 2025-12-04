@@ -3,7 +3,7 @@
 ---@field inventory SInventory|nil
 ---@field equipment SEquipment|nil
 ---@field level SLevel|nil
----@field missionManager SMission|nil
+---@field mission SMission|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -28,7 +28,7 @@ function SPlayer.new(core, playerController, playerData)
     -- Player's equipment
     self.equipment = nil
     -- Player's missions
-    self.missionManager = nil
+    self.mission = nil
 
     -- Player's custom properties
     self.properties = {}
@@ -51,7 +51,7 @@ function SPlayer.new(core, playerController, playerData)
         -- Get player's equipment
         self.equipment = SEquipment.new(self)
         -- Get player's missions
-        self.missionManager = SMission.new(self)
+        self.mission = SMission.new(self)
         -- Get player's permission
         self.properties.permission = self.core:getPermission(self.playerController)
     end
@@ -73,7 +73,7 @@ function SPlayer.new(core, playerController, playerData)
         local isInventoriesSaved = self.inventory:save()
         local isEquipmentsSaved = self.equipment:save()
         local isLevelSaved = self.level:save()
-        local isMissionsSaved = self.missionManager:save()
+        local isMissionsSaved = self.mission:save()
         if not isSaved then
             print('[ERROR] SPLAYER.SAVE - Failed to save player!')
         end
@@ -157,6 +157,7 @@ function SPlayer.new(core, playerController, playerData)
 
     ---Logout player
     function self:logout()
+        print('[SERVER] SPLAYER.LOGOUT - Player logged out!')
         -- This will broadcast the event to all other resources in client-side
         TriggerClientEvent(self.playerController, 'TPN:client:onPlayerUnloaded')
         -- This will broadcast the event to all other resources in server-side
@@ -246,7 +247,7 @@ function SPlayer.new(core, playerController, playerData)
             self.playerData.money.bank = self.playerData.money.bank + amount
         end
         -- Trigger mission action
-        self.missionManager:triggerAction('receive', {
+        self.mission:triggerAction('receive', {
             name = moneyType,
             amount = amount
         })
@@ -277,7 +278,7 @@ function SPlayer.new(core, playerController, playerData)
         end
 
         -- Trigger mission action
-        self.missionManager:triggerAction('spend', {
+        self.mission:triggerAction('spend', {
             name = moneyType,
             amount = amount
         })
@@ -316,11 +317,21 @@ function SPlayer.new(core, playerController, playerData)
             isSync = true
         end
         
+        local function triggerAddItemMissionAction()
+            -- Trigger mission action
+            self.mission:triggerAction('add_item', {
+                name = itemName,
+                amount = amount,
+                info = info or {}
+            })
+        end
+        
         -- If slot is nil, try inventory first, then backpack if inventory is full
         if slot == nil then
             -- Try to add to inventory first
             local inventoryResult = self.inventory:addItem(itemName, amount, nil, info, isSync)
             if inventoryResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
                 return inventoryResult
             end
             
@@ -329,7 +340,11 @@ function SPlayer.new(core, playerController, playerData)
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:addItem(itemName, amount, nil, info)
+            local addToBackpackResult = backpack:addItem(itemName, amount, nil, info)
+            if addToBackpackResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
+            end
+            return addToBackpackResult
         end
         
         -- Slot is provided, convert to number if needed
@@ -339,14 +354,22 @@ function SPlayer.new(core, playerController, playerData)
         
         if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
-            return self.inventory:addItem(itemName, amount, slot, info, isSync)
+            local addToInventoryResult = self.inventory:addItem(itemName, amount, slot, info, isSync)
+            if addToInventoryResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
+            end
+            return addToInventoryResult
         else
             -- Backpack
             local backpack = self.inventory:getBackpackContainer()
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:addItem(itemName, amount, slot, info)
+            local addToBackpackResult = backpack:addItem(itemName, amount, slot, info)
+            if addToBackpackResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
+            end
+            return addToBackpackResult
         end
     end
 
@@ -360,11 +383,21 @@ function SPlayer.new(core, playerController, playerData)
         if isSync == nil then
             isSync = true
         end
+
+        local function triggerRemoveItemMissionAction()
+            -- Trigger mission action
+            self.mission:triggerAction('remove_item', {
+                name = itemName,
+                amount = amount
+            })
+        end
+
         if not slot then
             -- Remove slot from inventory first
             -- Remove slot from backpack if not exist in inventory
             local removeItemResult = self.inventory:removeItem(itemName, amount, slot, isSync)
             if removeItemResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
                 return removeItemResult
             end
             -- Failed to remove from inventory
@@ -373,19 +406,31 @@ function SPlayer.new(core, playerController, playerData)
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:removeItem(itemName, amount, slot)
+            local removeFromBackpackResult = backpack:removeItem(itemName, amount, slot)
+            if removeFromBackpackResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
+            end
+            return removeFromBackpackResult
         end
         -- Has slot
         if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
-            return self.inventory:removeItem(itemName, amount, slot)
+            local removeFromInventoryResult = self.inventory:removeItem(itemName, amount, slot)
+            if removeFromInventoryResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
+            end
+            return removeFromInventoryResult
         else
             -- Backpack
             local backpack = self.inventory:getBackpackContainer()
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:removeItem(itemName, amount, slot)
+            local removeFromBackpackResult = backpack:removeItem(itemName, amount, slot)
+            if removeFromBackpackResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
+            end
+            return removeFromBackpackResult
         end
     end
 
