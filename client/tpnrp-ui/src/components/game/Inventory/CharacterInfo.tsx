@@ -99,7 +99,11 @@ const CharacterInfoComponent = () => {
                             />
                         ))}
                     </div>
-                    <div></div>
+                    <div className="flex justify-center items-end">
+                        <div className="text-sm font-medium bg-orange-900/40 rounded p-2">
+                            Character information
+                        </div>
+                    </div>
                     <div className="flex flex-col gap-3">
                         {rightColumnItems.map((slotInfo) => (
                             <InventoryItem

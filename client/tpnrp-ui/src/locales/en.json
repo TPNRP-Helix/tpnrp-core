@@ -146,5 +146,12 @@
   "equipment.category.Mask": "Mask",
   "equipment.category.Accessories": "Accessories",
   "equipment.category.Gloves": "Gloves",
-  "equipment.category.Armor": "Armor"
+  "equipment.category.Armor": "Armor",
+  "inventory.amountTitle": "Amount",
+  "inventory.giveTitle": "Give Item",
+  "inventory.giveDialog.title": "You want to give how many {item}?",
+  "inventory.giveDialog.description": "You are giving {item} with amount {amount}. Select the recipient",
+  "inventory.giveDialog.give": "Give",
+  "inventory.giveDialog.cancel": "Cancel",
+  "inventory.giveDialog.noPlayersNearBy": "No players near by"
 }

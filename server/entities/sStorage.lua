@@ -342,7 +342,7 @@ function SStorage:removeItem(itemName, amount, slotNumber)
     -- If remaining amount is 0 or less, remove the item entirely from the slot
     if remainingAmount <= 0 then
         self:pop(targetSlot)
-        return { status = true, message = SHARED.t('inventory.removed'), slot = targetSlot }
+        return { status = true, message = SHARED.t('inventory.removed', { count = amount, item = item.name }), slot = targetSlot }
     else
         -- Update the item amount
         local targetSlotItem = self:getItemBySlot(targetSlot)

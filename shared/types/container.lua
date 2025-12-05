@@ -1,3 +1,4 @@
+
 ---@class InitContainer
 ---@field entityId string|nil
 ---@field entity unknown|nil
@@ -11,6 +12,7 @@
 ---@field rotation Rotator|nil
 ---@field containerId string|nil
 ---@field timeExpired number|nil Unix timestamp when container expires
+---@field containerType 'container' | 'storage' | nil current container type
 
 ---@class ResponseGetContainer
 ---@field id string
@@ -24,4 +26,5 @@
 ---@field displayModel string
 ---@field holderItem SHolderItemType|nil
 ---@field timeExpired number Unix timestamp when container expires
+---@field containerType 'container' | 'storage' | nil current container type
 

@@ -65,6 +65,21 @@ function TPNRPClient.new()
             -- Show Select Character UI
             self.webUI:sendEvent('setPlayerCharacters', result.maxCharacters, result.characters)
         end)
+
+        ---Show notification to client
+        ---@param type 'success' | 'error' | 'warning' | 'info' notification type
+        ---@param message string notification message
+        ---@param duration number notification duration
+        RegisterClientEvent('showClientNotification', function(type, message, duration)
+            if not duration then
+                duration = 5000
+            end
+            self:showNotification({
+                title = message,
+                type = type,
+                duration = duration,
+            })
+        end)
     end
 
     ---Bind WebUI events (Called from WebUI)
@@ -84,7 +99,7 @@ function TPNRPClient.new()
             end, data)
         end)
 
-        self.webUI:registerEventHandler('deleteCharacter', function(data)
+        self.webUI:registerEventHandler('deleteCharacter', function(data, cb)
             TriggerCallback('deleteCharacter', function(result)
                 local type = 'success'
                 if not result.status then
@@ -95,12 +110,14 @@ function TPNRPClient.new()
                     title = result.message,
                     type = type,
                 })
+                cb(result)
             end, data)
         end)
 
         -- On Player click join game
-        self.webUI:registerEventHandler('joinGame', function(data)
+        self.webUI:registerEventHandler('joinGame', function(data, cb)
             TriggerCallback('callbackOnPlayerJoinGame', function(result)
+                cb(result)
                 if not result.status then
                     self:showNotification({
                         title = SHARED.t('error.joinGameFailed'),

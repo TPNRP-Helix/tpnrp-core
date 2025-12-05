@@ -83,11 +83,11 @@ end
 DAO.player.delete = function(citizenId)
     -- Begin transaction
     DAO.DB.Execute('BEGIN TRANSACTION;')
-    local result = DAO.DB.Execute([[DELETE FROM players WHERE citizen_id = ?
-        DELETE FROM levels WHERE citizen_id = ?
-        DELETE FROM inventories WHERE citizen_id = ?
-        DELETE FROM equipments WHERE citizen_id = ?
-        DELETE FROM player_missions WHERE citizen_id = ?
+    local result = DAO.DB.Execute([[DELETE FROM players WHERE citizen_id = ?;
+        DELETE FROM levels WHERE citizen_id = ?;
+        DELETE FROM inventories WHERE citizen_id = ?;
+        DELETE FROM equipments WHERE citizen_id = ?;
+        DELETE FROM player_missions WHERE citizen_id = ?;
     ]], { citizenId, citizenId, citizenId, citizenId, citizenId })
     if result then
         DAO.DB.Execute('COMMIT;')

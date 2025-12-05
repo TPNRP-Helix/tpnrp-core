@@ -21,6 +21,7 @@ import { FALLBACK_DEFAULT_IMAGE_PATH } from "@/constants"
 import { Image } from "@/components/ui/image"
 import { parseArrayItems } from "@/lib/utils"
 import { useShallow } from "zustand/react/shallow"
+import { GiveDialog } from "./GiveDialog"
 
 const DEFAULT_SLOT_COUNT = 5
 const DEFAULT_MAX_WEIGHT = 15000
@@ -206,10 +207,12 @@ export const Inventory = () => {
             // Filter out items that are in the backpack to prevent duplicates
             // Main inventory should only contain items with slots <= DEFAULT_SLOT_COUNT
             const filteredInventoryItems = parsedItems.filter((item) => item.slot <= DEFAULT_SLOT_COUNT)
+            console.log('[UI] inventory', JSON.stringify(filteredInventoryItems))
             setInventoryItems(filteredInventoryItems)
             // Backpack
             if (backpack) {
                 const parsedBackpackItems = parseArrayItems(backpack.items)
+                console.log('[UI] backpack', JSON.stringify(parsedBackpackItems))
                 setBackpackItems(parsedBackpackItems)
                 setSlotCount(backpack.slotCount === 0 ? DEFAULT_SLOT_COUNT : backpack.slotCount)
                 setTotalWeight(backpack.maxWeight === 0 ? DEFAULT_MAX_WEIGHT : backpack.maxWeight)
@@ -220,6 +223,7 @@ export const Inventory = () => {
             // Opening container
             if (openingContainer) {
                 const parsedOpeningContainerItems = parseArrayItems(openingContainer.items)
+                console.log('[UI] container', JSON.stringify(parsedOpeningContainerItems))
                 setOtherItems(parsedOpeningContainerItems)
                 setOtherItemsId(openingContainer.id)
                 setOtherItemsType('container')
@@ -339,6 +343,7 @@ export const Inventory = () => {
                 </DialogContent>
             </Dialog>
             <AmountDialog />
+            <GiveDialog />
             <DragOverlay dropAnimation={null}>
                 {activeDragItem?.item ? (
                     <div className="pointer-events-none select-none">

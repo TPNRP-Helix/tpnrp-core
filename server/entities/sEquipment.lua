@@ -26,6 +26,8 @@ function SEquipment.new(player)
         local equipment = DAO.equipment.get(self.player.playerData.citizenId)
         if equipment then
             self.items = equipment
+            print('[SERVER] player ', self.player.playerData.citizenId)
+            print('[SERVER] equipment', JSON.stringify(equipment))
             local bagItem = self:getItemByClothType(EEquipmentClothType.Bag)
             if bagItem then
                 -- Load backpack's container
@@ -160,6 +162,7 @@ function SEquipment.new(player)
             local containerId = item.info.containerId
             -- Init container
             self.core.inventoryManager:initContainer(containerId, self.player.playerData.citizenId)
+            print('[SERVER] On Equip backpack container ' .. containerId)
         end
         -- call client for sync (This mean equip cloth success)
         self:sync() -- Sync equipment
@@ -218,13 +221,14 @@ function SEquipment.new(player)
         
         -- Unequip item from slot (only after confirming we have space)
         self:pop(clothItemType)
-
+        local previousSlot = item.slot
         item.slot = emptySlotNumber
         local addResult = container:addItem(item.name, 1, item.slot, item.info)
 
         if not addResult.status then
             print(('[ERROR] sEquipment.unequipItem: Failed to add item %s to inventory!'):format(item.name))
             -- Restore item to equipment since we failed to add it anywhere
+            item.slot = previousSlot -- IMPORTANT: Restore item to previous slot
             self:updateItem(item, clothItemType)
             return { status = false, message = addResult.message or SHARED.t('inventory.full') }
         end

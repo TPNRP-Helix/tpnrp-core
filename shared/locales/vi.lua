@@ -12,6 +12,8 @@ local vi = {
         openDrop = "Mở",
         pickUpItem = "Nhặt",
         itemNotFound = "Không tìm thấy vật phẩm!",
+        itemReceived = "Bạn đã nhận x{count} {item} từ {player}!",
+        itemGiven = "Bạn đã cho x{count} {item} cho {player}!",
     },
     backpack = {
         full = 'Túi đồ đã đầy!',
@@ -45,6 +47,7 @@ local vi = {
         inventoryWeightLimitReached = "Túi đồ đã đầy trọng lượng!",
         inventoryFull = "Túi đồ đã đầy!",
         playerNotFound = "Không tìm thấy nhân vật!",
+        targetPlayerNotFound = "Không tìm thấy nhân vật!",
         itemCannotBeUsed = "Vật phẩm không thể sử dụng!",
         cannotAddItemsToPlayerWeightLimitReached = "Không thể thêm vật phẩm vào túi! Trọng lượng đã đầy!",
         cannotAddItemsToPlayerSlotLimitReached = "Không thể thêm vật phẩm vào túi! Số lượng đã đầy!",
