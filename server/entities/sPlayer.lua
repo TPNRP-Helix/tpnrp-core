@@ -164,13 +164,14 @@ function SPlayer.new(core, playerController, playerData)
         TriggerLocalServerEvent('TPN:server:onPlayerUnloaded', self.playerController)
 
         Timer.CreateThread(function()
-            -- Wait for 200ms to ensure the player is logged out
-            Timer.Wait(200)
             -- Save player data into database
             local isSaved = self:save()
             if not isSaved then
                 print('[ERROR] SPLAYER.LOGOUT - Failed to save player data!')
             end
+            print('[SERVER] SPLAYER.LOGOUT - Player logged out!')
+            -- Wait for 200ms to ensure the player is logged out
+            Timer.Wait(200)
             -- Remove player from players table
             TPNRPServer.players[self.playerController] = nil
         end)
