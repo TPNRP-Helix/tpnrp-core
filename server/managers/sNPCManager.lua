@@ -41,7 +41,7 @@ function SNPCManager.new(core)
                 message = SHARED.t('error.invalidData')
             }
         end
-        return player.missionManager:takeMission(data.missionName)
+        return player.mission:takeMission(data.missionName)
     end
 
     function self:findMissionByNPCName(npcName)
@@ -103,8 +103,8 @@ function SNPCManager.new(core)
     ---@param npcName string
     ---@return TMissionData|nil missionData, TMissionEntity|nil missionEntity
     function self:getPlayerMissionByNPC(player, npcName)
-        if not player or not player.missionManager then return nil, nil end
-        local missionEntity = player.missionManager:getCurrentActiveMission()
+        if not player or not player.mission then return nil, nil end
+        local missionEntity = player.mission:getCurrentActiveMission()
         if not missionEntity then return nil, nil end
         local missionData = SHARED.missions[missionEntity.id]
         if missionData and missionData.assignedNPC == npcName then
@@ -193,8 +193,8 @@ function SNPCManager.new(core)
         local isResolved = option.completesMission or false
 
         local updateStatus = false
-        if player.missionManager then
-            updateStatus = player.missionManager:triggerAction('talk_npc', {
+        if player.mission then
+            updateStatus = player.mission:triggerAction('talk_npc', {
                 npcName = npcName,
                 dialogNode = nextNodeId,
                 optionId = option.id,

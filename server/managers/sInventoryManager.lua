@@ -1557,7 +1557,7 @@ function SInventoryManager.new(core)
                 end
             end
 
-            player.missionManager:triggerAction('use', {
+            player.mission:triggerAction('use', {
                 item = data.itemName,
                 slot = data.slot,
                 amount = 1,
