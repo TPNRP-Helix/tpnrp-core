@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Dialog, DialogContent, DialogDescription, DialogFooter } from "@/components/ui/dialog"
-import { useWebUIMessage } from "@/hooks/use-hevent"
 import { useCreateCharacterStore } from "@/stores/useCreateCharacterStore"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { useCallback, lazy, Suspense, useState } from "react"
@@ -67,32 +66,6 @@ export const CreateCharacter = () => {
     const [isShowConfirmDeleteCharacter, setIsShowConfirmDeleteCharacter] = useState(false)
     const { toggleHud, setIsInGame } = useGameStore()
 
-    useWebUIMessage<[TCreateCharacterResponse]>('onCreateCharacterSuccess', ([playerData]) => {
-        // Set preview character info
-        setPlayerCharacters([...playerCharacters, {
-            name: playerData?.name ?? '',
-            citizenId: playerData?.citizenId ?? 'ERR',
-            level: playerData?.level ?? 1,
-            money: playerData?.money?.cash ?? 0,
-            gender: playerData?.characterInfo?.gender ?? 'male',
-        }])
-        // Hide create character dialog
-        setShowCreateCharacter(false)
-        // Show Select Character Sheet
-        setShowSelectCharacter(true)
-    })
-
-    useWebUIMessage('joinGameSuccess', () => {
-        // Hide Select Character
-        setShowSelectCharacter(false)
-        // Hide Create Character Dialog
-        setShowCreateCharacter(false)
-        // Enable main HUD
-        toggleHud()
-        // Enable in-game Guide 
-        setIsInGame(true)
-    })
-
     const onClickCreateCharacter = useCallback(() => {
         setShowSelectCharacter(false)
         setShowCreateCharacter(true)
@@ -123,6 +96,19 @@ export const CreateCharacter = () => {
             lastName,
             gender,
             dateOfBirth,
+        }, (playerData: TCreateCharacterResponse) => {
+            // Set preview character info
+            setPlayerCharacters([...playerCharacters, {
+                name: playerData?.name ?? '',
+                citizenId: playerData?.citizenId ?? 'ERR',
+                level: playerData?.level ?? 1,
+                money: playerData?.money?.cash ?? 0,
+                gender: playerData?.characterInfo?.gender ?? 'male',
+            }])
+            // Hide create character dialog
+            setShowCreateCharacter(false)
+            // Show Select Character Sheet
+            setShowSelectCharacter(true)
         })
     }, [firstName, lastName, dateOfBirth, gender, isSubmitting])
 
@@ -137,7 +123,18 @@ export const CreateCharacter = () => {
             // Enable in-game Guide 
             setIsInGame(true)
         }
-        window.hEvent('joinGame', { citizenId: selectedCitizenId })
+        window.hEvent('joinGame', { citizenId: selectedCitizenId }, (response: { status: boolean; message: string; }) => {
+            if (response.status) {
+                // Hide Select Character
+                setShowSelectCharacter(false)
+                // Hide Create Character Dialog
+                setShowCreateCharacter(false)
+                // Enable main HUD
+                toggleHud()
+                // Enable in-game Guide 
+                setIsInGame(true)
+            }
+        })
     }, [selectedCitizenId])
 
     const onClickDeleteCharacter = useCallback(() => {
@@ -147,7 +144,16 @@ export const CreateCharacter = () => {
         }
         setIsShowConfirmDeleteCharacter(false)
         setSelectedCitizenId('')
-        window.hEvent('deleteCharacter', { citizenId: selectedCitizenId })
+        window.hEvent('deleteCharacter', { citizenId: selectedCitizenId }, (response: { status: boolean; message: string; }) => {
+            if (response.status) {
+                // Remove character from player characters
+                setPlayerCharacters(playerCharacters.filter((character) => character.citizenId !== selectedCitizenId))
+                // Hide confirm delete character dialog
+                setIsShowConfirmDeleteCharacter(false)
+                // Clear selected citizen id
+                setSelectedCitizenId('')
+            }
+        })
     }, [selectedCitizenId])
     
     return (

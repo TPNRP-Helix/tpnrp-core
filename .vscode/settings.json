@@ -9,7 +9,6 @@
         "GetPlayerPawn",
         "GetEntityCoords",
         "GetEntityRotation",
-        "Wait",
         "RegisterServerEvent",
         "WebUI",
         "Timer",
@@ -34,6 +33,7 @@
         "EComponentMobility",
         "Rotator",
         "DeleteEntity",
-        "GetDistanceBetweenCoords"
+        "GetDistanceBetweenCoords",
+        "GetPlayersInArea"
     ]
 }

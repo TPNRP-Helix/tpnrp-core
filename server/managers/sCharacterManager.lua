@@ -88,7 +88,7 @@ function SCharacterManager.new(core)
                 message = SHARED.t('error.failedToGetLicense'),
             }
         end
-        local result = DAO.player.deleteCharacter(license, citizenId)
+        local result = DAO.player.delete(citizenId)
         if not result then
             print('[ERROR] TPNRPServer.bindCallbackEvents - Failed to delete character!')
             return {
@@ -149,6 +149,7 @@ function SCharacterManager.new(core)
         }
     end
 
+    ---Bind callback events
     function self:bindCallbackEvents()
         -- Create character
         ---@param source PlayerController player controller
@@ -160,10 +161,10 @@ function SCharacterManager.new(core)
         
         -- Delete character
         ---@param source PlayerController player controller
-        ---@param citizenId string citizen id
+        ---@param data { citizenId: string; } data
         ---@return table result
-        RegisterCallback('deleteCharacter', function(source, citizenId)
-            return onDeleteCharacter(source, citizenId)
+        RegisterCallback('deleteCharacter', function(source, data)
+            return onDeleteCharacter(source, data.citizenId)
         end)
 
         -- On Player join game

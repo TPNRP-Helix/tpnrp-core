@@ -12,3 +12,8 @@ export type TCharacter = {
     money: number
     gender: 'male' | 'female'
 }
+
+export type TPlayer = {
+    name: string
+    citizenId: string
+}

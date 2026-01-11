@@ -31,9 +31,15 @@ DAO.equipment.save = function(equipment)
         ON CONFLICT(citizen_id) DO UPDATE SET
             items = excluded.items
     ]]
+    -- Safely handle empty equipment: store as an empty JSON array instead of "{}" or nil
+    local itemsJson = '[]'
+    if formattedItems and next(formattedItems) ~= nil then
+        itemsJson = JSON.stringify(formattedItems)
+    end
+
     local params = {
         citizen_id,
-        JSON.stringify(formattedItems),
+        itemsJson,
     }
     local result = DAO.DB.Execute(sql, params)
     if result then
@@ -57,7 +63,10 @@ DAO.equipment.get = function(citizenId)
         return nil
     end
     -- Format items
-    local items = JSON.parse(equipment.items)
+    local items = {}
+    if equipment.items and equipment.items ~= '' then
+        items = JSON.parse(equipment.items)
+    end
     local formattedItems = {}
     -- Mapping base item data with the item data from the database
     for _, item in pairs(items) do

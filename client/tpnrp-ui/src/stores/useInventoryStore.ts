@@ -23,6 +23,7 @@ type InventoryState = {
   otherItemsSlotCount: number
   otherItemsId: string
   isOpenAmountDialog: boolean
+  isOpenGiveDialog: boolean
   amountDialogType: 'give' | 'drop'
   dialogItem: TInventoryItem | null
   inventoryItems: TInventoryItem[]
@@ -35,6 +36,8 @@ type InventoryState = {
   learnedCraftingRecipes: string[]
   selectCharacterTab: 'equipment' | 'skills' | 'stats'
   temporaryDroppedItems: TInventoryItem[]
+  dialogAmountItem: number
+  setIsOpenGiveDialog: (value: boolean) => void
   setBackpackItems: (backpackItems: TInventoryItem[]) => void
   setTemporaryDroppedItem: (items: TInventoryItem) => void
   removeTemporaryDroppedItem: (item: TItemData) => void
@@ -65,6 +68,7 @@ type InventoryState = {
   // Items
   splitItem: (itemSlot: number, options?: SplitItemOptions) => void
   onCloseInventory: () => void
+  setDialogAmountItem: (value: number) => void
 }
 
 const calculateInventoryWeight = (items: TInventoryItem[]) =>
@@ -73,6 +77,7 @@ const calculateInventoryWeight = (items: TInventoryItem[]) =>
 export const useInventoryStore = create<InventoryState>((set, get) => ({
   isOpenInventory: false,
   isOpenAmountDialog: false,
+  isOpenGiveDialog: false,
   amountDialogType: 'drop',
   dialogItem: null,
   inventoryItems: [],
@@ -89,6 +94,8 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
   learnedCraftingRecipes: [],
   selectCharacterTab: 'equipment',
   temporaryDroppedItems: [],
+  dialogAmountItem: 0,
+  setIsOpenGiveDialog: (value: boolean) => set({ isOpenGiveDialog: value }),
   setBackpackItems: (backpackItems: TInventoryItem[]) => {
     set(() => {
       return { backpackItems: backpackItems }
@@ -361,5 +368,6 @@ export const useInventoryStore = create<InventoryState>((set, get) => ({
       otherItemsSlotCount: 0,
       otherItemsId: ''
     })
-  }
+  },
+  setDialogAmountItem: (value: number) => set({ dialogAmountItem: value })
 }))

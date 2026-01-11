@@ -37,7 +37,7 @@ export const HUD = () => {
   })
 
   useWebUIMessage<[number, number]>('setBasicNeeds', ([hunger, thirst]) => {
-    console.log('setBasicNeeds', hunger, thirst)
+    console.log('[UI] setBasicNeeds', hunger, thirst)
     setBasicNeeds({ hunger, thirst })
   })
 
@@ -154,7 +154,7 @@ export const HUD = () => {
                     className="text-xs! h-5 min-w-5 rounded-full px-1 font-mono tabular-nums absolute -top-1 -right-1"
                     variant={value <= LIMIT_DESTRUCTIVE_COLOR ? 'destructive' : 'secondary'}
                   >
-                    {value}
+                    {Math.round(value)}
                   </Badge>
                 )}
               </div>

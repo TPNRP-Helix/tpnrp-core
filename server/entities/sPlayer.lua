@@ -3,7 +3,7 @@
 ---@field inventory SInventory|nil
 ---@field equipment SEquipment|nil
 ---@field level SLevel|nil
----@field missionManager SMission|nil
+---@field mission SMission|nil
 SPlayer = {}
 SPlayer.__index = SPlayer
 
@@ -28,7 +28,7 @@ function SPlayer.new(core, playerController, playerData)
     -- Player's equipment
     self.equipment = nil
     -- Player's missions
-    self.missionManager = nil
+    self.mission = nil
 
     -- Player's custom properties
     self.properties = {}
@@ -51,7 +51,7 @@ function SPlayer.new(core, playerController, playerData)
         -- Get player's equipment
         self.equipment = SEquipment.new(self)
         -- Get player's missions
-        self.missionManager = SMission.new(self)
+        self.mission = SMission.new(self)
         -- Get player's permission
         self.properties.permission = self.core:getPermission(self.playerController)
     end
@@ -73,7 +73,7 @@ function SPlayer.new(core, playerController, playerData)
         local isInventoriesSaved = self.inventory:save()
         local isEquipmentsSaved = self.equipment:save()
         local isLevelSaved = self.level:save()
-        local isMissionsSaved = self.missionManager:save()
+        local isMissionsSaved = self.mission:save()
         if not isSaved then
             print('[ERROR] SPLAYER.SAVE - Failed to save player!')
         end
@@ -157,20 +157,24 @@ function SPlayer.new(core, playerController, playerData)
 
     ---Logout player
     function self:logout()
+        print('[SERVER] SPLAYER.LOGOUT - Player logged out!')
         -- This will broadcast the event to all other resources in client-side
         TriggerClientEvent(self.playerController, 'TPN:client:onPlayerUnloaded')
         -- This will broadcast the event to all other resources in server-side
         TriggerLocalServerEvent('TPN:server:onPlayerUnloaded', self.playerController)
 
-        -- Wait for 200ms to ensure the player is logged out
-        Wait(200)
-        -- Save player data into database
-        local isSaved = self:save()
-        if not isSaved then
-            print('[ERROR] SPLAYER.LOGOUT - Failed to save player data!')
-        end
-        -- Remove player from players table
-        TPNRPServer.players[self.playerController] = nil
+        Timer.CreateThread(function()
+            -- Save player data into database
+            local isSaved = self:save()
+            if not isSaved then
+                print('[ERROR] SPLAYER.LOGOUT - Failed to save player data!')
+            end
+            print('[SERVER] SPLAYER.LOGOUT - Player logged out!')
+            -- Wait for 200ms to ensure the player is logged out
+            Timer.Wait(200)
+            -- Remove player from players table
+            TPNRPServer.players[self.playerController] = nil
+        end)
     end
 
     ---Add custom method to player
@@ -225,11 +229,11 @@ function SPlayer.new(core, playerController, playerData)
     end
 
     ---Add Money
-    ---@param type 'cash' | 'bank' money type
+    ---@param moneyType 'cash' | 'bank' money type
     ---@param amount number amount to add
     ---@return boolean status success status
-    function self:addMoney(type, amount)
-        if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
+    function self:addMoney(moneyType, amount)
+        if not moneyType or type(moneyType) ~= 'string' or (moneyType ~= 'cash' and moneyType ~= 'bank') then
             print('[ERROR] SPLAYER.ADD_MONEY - Invalid type!')
             return false
         end
@@ -237,15 +241,15 @@ function SPlayer.new(core, playerController, playerData)
             print('[ERROR] SPLAYER.ADD_CASH - Invalid amount!')
             return false
         end
-        if type == 'cash' then
+        if moneyType == 'cash' then
             -- Add cash to player
             self.playerData.money.cash = self.playerData.money.cash + amount
-        elseif type == 'bank' then
+        elseif moneyType == 'bank' then
             self.playerData.money.bank = self.playerData.money.bank + amount
         end
         -- Trigger mission action
-        self.missionManager:triggerAction('receive', {
-            name = type,
+        self.mission:triggerAction('receive', {
+            name = moneyType,
             amount = amount
         })
         -- Sync to client
@@ -253,8 +257,12 @@ function SPlayer.new(core, playerController, playerData)
         return true
     end
 
-    function self:removeMoney(type, amount)
-        if not type or type(type) ~= 'string' or type ~= 'cash' or type ~= 'bank' then
+    ---Remove Money
+    ---@param moneyType 'cash' | 'bank' money type
+    ---@param amount number amount to remove
+    ---@return boolean status success status
+    function self:removeMoney(moneyType, amount)
+        if not moneyType or type(moneyType) ~= 'string' or (moneyType ~= 'cash' and moneyType ~= 'bank') then
             print('[ERROR] SPLAYER.REMOVE_MONEY - Invalid type!')
             return false
         end
@@ -262,22 +270,36 @@ function SPlayer.new(core, playerController, playerData)
             print('[ERROR] SPLAYER.REMOVE_MONEY - Invalid amount!')
             return false
         end
-        if type == 'cash' then
+        if moneyType == 'cash' then
             -- Remove cash from player
             self.playerData.money.cash = self.playerData.money.cash - amount
-        elseif type == 'bank' then
+        elseif moneyType == 'bank' then
             -- Remove bank from player
             self.playerData.money.bank = self.playerData.money.bank - amount
         end
 
         -- Trigger mission action
-        self.missionManager:triggerAction('spend', {
-            name = type,
+        self.mission:triggerAction('spend', {
+            name = moneyType,
             amount = amount
         })
         -- Sync to client
         self:updatePlayerData()
         return true
+    end
+
+    ---Show notification to client
+    ---@param notifyType 'success' | 'error' | 'warning' | 'info' notification type
+    ---@param message string notification message
+    function self:showNotification(notifyType, message)
+        if not notifyType or type(notifyType) ~= 'string' then
+            notifyType = 'info'
+        end
+        if not message or type(message) ~= 'string' then
+            print('[ERROR] SPLAYER.SHOW_NOTIFICATION - Invalid message!')
+            return false
+        end
+        TriggerClientEvent(self.playerController, 'showClientNotification', notifyType, message)
     end
 
     ---/********************************/
@@ -296,11 +318,21 @@ function SPlayer.new(core, playerController, playerData)
             isSync = true
         end
         
+        local function triggerAddItemMissionAction()
+            -- Trigger mission action
+            self.mission:triggerAction('add_item', {
+                name = itemName,
+                amount = amount,
+                info = info or {}
+            })
+        end
+        
         -- If slot is nil, try inventory first, then backpack if inventory is full
         if slot == nil then
             -- Try to add to inventory first
             local inventoryResult = self.inventory:addItem(itemName, amount, nil, info, isSync)
             if inventoryResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
                 return inventoryResult
             end
             
@@ -309,7 +341,11 @@ function SPlayer.new(core, playerController, playerData)
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:addItem(itemName, amount, nil, info)
+            local addToBackpackResult = backpack:addItem(itemName, amount, nil, info)
+            if addToBackpackResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
+            end
+            return addToBackpackResult
         end
         
         -- Slot is provided, convert to number if needed
@@ -319,14 +355,22 @@ function SPlayer.new(core, playerController, playerData)
         
         if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
-            return self.inventory:addItem(itemName, amount, slot, info, isSync)
+            local addToInventoryResult = self.inventory:addItem(itemName, amount, slot, info, isSync)
+            if addToInventoryResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
+            end
+            return addToInventoryResult
         else
             -- Backpack
             local backpack = self.inventory:getBackpackContainer()
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:addItem(itemName, amount, slot, info)
+            local addToBackpackResult = backpack:addItem(itemName, amount, slot, info)
+            if addToBackpackResult.status then
+                triggerAddItemMissionAction() -- Tell mission that item added
+            end
+            return addToBackpackResult
         end
     end
 
@@ -340,11 +384,21 @@ function SPlayer.new(core, playerController, playerData)
         if isSync == nil then
             isSync = true
         end
+
+        local function triggerRemoveItemMissionAction()
+            -- Trigger mission action
+            self.mission:triggerAction('remove_item', {
+                name = itemName,
+                amount = amount
+            })
+        end
+
         if not slot then
             -- Remove slot from inventory first
             -- Remove slot from backpack if not exist in inventory
             local removeItemResult = self.inventory:removeItem(itemName, amount, slot, isSync)
             if removeItemResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
                 return removeItemResult
             end
             -- Failed to remove from inventory
@@ -353,20 +407,65 @@ function SPlayer.new(core, playerController, playerData)
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:removeItem(itemName, amount, slot)
+            local removeFromBackpackResult = backpack:removeItem(itemName, amount, slot)
+            if removeFromBackpackResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
+            end
+            return removeFromBackpackResult
         end
         -- Has slot
         if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
             -- Inventory
-            return self.inventory:removeItem(itemName, amount, slot)
+            local removeFromInventoryResult = self.inventory:removeItem(itemName, amount, slot)
+            if removeFromInventoryResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
+            end
+            return removeFromInventoryResult
         else
             -- Backpack
             local backpack = self.inventory:getBackpackContainer()
             if not backpack then
                 return {status = false, message = 'Backpack not found!'}
             end
-            return backpack:removeItem(itemName, amount, slot)
+            local removeFromBackpackResult = backpack:removeItem(itemName, amount, slot)
+            if removeFromBackpackResult.status then
+                triggerRemoveItemMissionAction() -- Tell mission that item removed
+            end
+            return removeFromBackpackResult
         end
+    end
+
+    ---Get item by slot
+    ---@param slot number slot number
+    ---@return {status: boolean, message: string, item: SInventoryItemType, index: number, type: 'inventory' | 'backpack'} result of getting item by slot
+    function self:getItemBySlot(slot)
+        -- Inventory slot
+        if slot <= SHARED.CONFIG.INVENTORY_CAPACITY.SLOTS then
+            local item, index = self.inventory:getItemBySlot(slot)
+            return {
+                status = true,
+                message = 'Item found in inventory!',
+                item = item,
+                index = index,
+                type = 'inventory',
+            }
+        end
+        -- Backpack slot
+        local backpack = self.inventory:getBackpackContainer()
+        if not backpack then
+            return {
+                status = false,
+                message = 'Backpack not found!',
+            }
+        end
+        local item, index = backpack:getItemBySlot(slot)
+        return {
+            status = true,
+            message = 'Item found in backpack!',
+            item = item,
+            index = index,
+            type = 'backpack',
+        }
     end
 
     ---Check if player can add items to container

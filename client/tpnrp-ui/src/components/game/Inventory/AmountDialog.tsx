@@ -19,14 +19,14 @@ export const AmountDialog = () => {
 
     return (
         <Dialog open={isOpenAmountDialog} onOpenChange={setIsOpenAmountDialog}>
-            <DialogContent className="max-w-md">
+            <DialogContent className="max-w-md" title={t('inventory.amountTitle')}>
                 <DialogHeader>
                     <DialogTitle>{t('inventory.amountDialog.title', { type: amountDialogType === 'give' ? 'give' : 'drop', item: dialogItem?.label ?? '' })}</DialogTitle>
                     <DialogDescription>
                         {t('inventory.amountDialog.description', { amount: dialogItem?.amount ?? 0 })}
                     </DialogDescription>
                 </DialogHeader>
-                <div className="grid gap-4 py-4">
+                <div className="grid gap-4 p-4">
                     <div className="grid grid-cols-3 items-center gap-4">
                         <Label htmlFor="amount_quantity" className="text-right">{t('inventory.amountDialog.quantity')}</Label>
                         <Input

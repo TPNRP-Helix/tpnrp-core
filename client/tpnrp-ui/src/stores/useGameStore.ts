@@ -1,3 +1,4 @@
+import type { TPlayer } from "@/types/game"
 import type { TCraftingRecipe } from "@/types/inventory"
 import { create } from "zustand"
 
@@ -14,6 +15,8 @@ type GameState = {
   loadingText: string
   isInGame: boolean
   craftingRecipes: TCraftingRecipe[]
+  playersNearBy: TPlayer[]
+  setPlayersNearBy: (players: TPlayer[]) => void
   setCraftingRecipes: (recipes: TCraftingRecipe[]) => void
   setIsInGame: (value: boolean) => void
   setShowLoading: (value: boolean) => void
@@ -36,6 +39,8 @@ export const useGameStore = create<GameState>((set) => ({
   loadingText: 'Loading...',
   isInGame: false,
   craftingRecipes: [],
+  playersNearBy: [],
+  setPlayersNearBy: (players: TPlayer[]) => set({ playersNearBy: players }),
   setCraftingRecipes: (recipes: TCraftingRecipe[]) => set({ craftingRecipes: recipes }),
   setIsInGame: (value: boolean) => set({ isInGame: value }),
   setShowLoading: (value: boolean) => set({ isShowLoading: value }),

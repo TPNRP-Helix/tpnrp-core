@@ -106,6 +106,18 @@ function CInventory.new(player)
                 cb(result)
             end, data)
         end)
+
+        self.core.webUI:registerEventHandler('requestPlayerNearBy', function(data, cb)
+            TriggerCallback('requestPlayerNearBy', function(result)
+                cb(result)
+            end, data)
+        end)
+
+        self.core.webUI:registerEventHandler('givePlayerItem', function(data, cb)
+            TriggerCallback('givePlayerItem', function(result)
+                cb(result)
+            end, data)
+        end)
     end
 
     ---/********************************/
